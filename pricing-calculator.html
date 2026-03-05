@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScaleLogix AI — Pricing Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0E0E12;--primary:#16161C;--accent:#C49A7C;--accent-light:#D4AD94;--accent-dark:#A67B5B;
+  --surface:#1A1A22;--surface2:#202028;--border:#2A2A34;--border-light:#35354A;
+  --text:#E8E4E0;--text-dim:#908C96;--white:#FAFAF8;
+  --green:#5CC98E;--red:#E87070;--silver:#A8A4B0;
+  --radius:10px;--radius-lg:14px;
+  --shadow:0 4px 24px rgba(0,0,0,.3);
+}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+.app{max-width:1440px;margin:0 auto;padding:20px 24px}
+
+/* Header */
+header{text-align:center;padding:28px 0 20px;position:relative}
+.header-inner{display:flex;align-items:center;justify-content:center;gap:16px}
+.brand-logo{width:48px;height:48px;object-fit:contain}
+header h1{font-size:1.5rem;color:var(--white);letter-spacing:3px;font-weight:300}
+header h1 span{color:var(--accent);font-weight:600}
+header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5px;font-weight:300}
+.header-line{width:80px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);margin:12px auto 0}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;margin-bottom:20px;background:var(--primary);border-radius:var(--radius);padding:4px;border:1px solid var(--border)}
+.tab-btn{flex:1;padding:10px 16px;background:transparent;border:none;color:var(--text-dim);font-size:.82rem;cursor:pointer;border-radius:calc(var(--radius) - 2px);transition:all .25s ease;white-space:nowrap;font-family:inherit;font-weight:500;letter-spacing:.3px}
+.tab-btn:hover{color:var(--text);background:var(--surface)}
+.tab-btn.active{color:var(--white);background:var(--accent-dark);font-weight:600;box-shadow:0 2px 12px rgba(196,154,124,.25)}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Summary Bar */
+.summary-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;background:linear-gradient(135deg,var(--primary),var(--surface));border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:18px;box-shadow:var(--shadow)}
+.summary-item{text-align:center;padding:4px 0}
+.summary-item .label{font-size:.65rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:4px;font-weight:500}
+.summary-item .value{font-size:1.15rem;font-weight:700;color:var(--white)}
+.summary-item .value.gold{color:var(--accent)}
+.summary-item .value.green{color:var(--green)}
+.summary-item .value.red{color:var(--red)}
+
+/* Cards & Inputs */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card h3{color:var(--accent);font-size:.88rem;margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;font-weight:500}
+.field input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:9px 14px;color:var(--white);font-size:.92rem;width:100%;font-family:inherit;transition:border-color .2s}
+.field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(196,154,124,.12)}
+.field .hint{font-size:.68rem;color:var(--text-dim);font-weight:300}
+
+/* Results grid */
+.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:18px}
+.result-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;transition:border-color .2s}
+.result-box:hover{border-color:var(--border-light)}
+.result-box .rlabel{font-size:.62rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-dim);margin-bottom:5px;font-weight:500}
+.result-box .rvalue{font-size:1.05rem;font-weight:700;color:var(--white)}
+.result-box.floor-warn{border-color:var(--red);background:rgba(232,112,112,.06)}
+.result-box.floor-warn .rvalue{color:var(--red)}
+
+/* Capability Table */
+.cap-table{width:100%;border-collapse:collapse}
+.cap-table th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-dim);padding:10px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;font-weight:600}
+.cap-table td{padding:9px 12px;border-bottom:1px solid rgba(42,42,52,.6);font-size:.83rem;vertical-align:middle}
+.cap-table tr:hover td{background:rgba(196,154,124,.04)}
+.cap-table .cb{width:32px}
+.cap-table input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.63rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.badge.simple{background:rgba(92,201,142,.12);color:var(--green)}
+.badge.medium{background:rgba(196,154,124,.15);color:var(--accent)}
+.badge.complex{background:rgba(232,112,112,.12);color:var(--red)}
+.cat-header td{background:var(--primary) !important;font-weight:700;color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;padding:12px}
+
+/* Bottom summary */
+.bottom-summary{position:sticky;bottom:0;background:linear-gradient(135deg,var(--primary),var(--surface));border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;box-shadow:0 -4px 24px rgba(0,0,0,.3)}
+
+/* Package Cards */
+.pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.pkg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
+.pkg-card:hover{transform:translateY(-2px);border-color:var(--border-light)}
+.pkg-card.featured{border-color:var(--accent);box-shadow:0 4px 32px rgba(196,154,124,.15)}
+.pkg-card.featured::before{content:'MOST POPULAR';position:absolute;top:14px;right:-28px;background:var(--accent);color:var(--bg);font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
+.pkg-card .pkg-name{font-size:1.15rem;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:.5px}
+.pkg-card .pkg-discount{font-size:.78rem;color:var(--accent);margin-bottom:18px;font-weight:500}
+.pkg-card .pkg-prices{margin:18px 0}
+.pkg-card .price-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(42,42,52,.4);font-size:.83rem}
+.pkg-card .price-row .plabel{color:var(--text-dim)}
+.pkg-card .price-row .pval{font-weight:600;color:var(--white)}
+.pkg-card .price-row .pval.strike{text-decoration:line-through;color:var(--text-dim);font-weight:400}
+.pkg-card .price-row .pval.gold{color:var(--accent)}
+.pkg-card .price-row .pval.green{color:var(--green)}
+.pkg-items{max-height:220px;overflow-y:auto;margin-top:14px;padding-right:4px}
+.pkg-items::-webkit-scrollbar{width:4px}
+.pkg-items::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.pkg-items li{font-size:.76rem;color:var(--text-dim);padding:3px 0;list-style:none;transition:color .15s}
+.pkg-items li::before{content:''; display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:middle}
+.pkg-items li:hover{color:var(--text)}
+
+/* Toggle */
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.toggle-row label{font-size:.8rem;color:var(--text-dim);font-weight:500}
+.toggle{position:relative;width:44px;height:24px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle .slider{position:absolute;inset:0;background:var(--border);border-radius:12px;transition:.3s}
+.toggle .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:var(--white);border-radius:50%;transition:.3s}
+.toggle input:checked+.slider{background:var(--accent)}
+.toggle input:checked+.slider::before{transform:translateX(20px)}
+
+/* Insurance columns */
+.ins-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.ins-col{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow)}
+.ins-col h3{color:var(--accent);font-size:.88rem;margin-bottom:18px;text-align:center;letter-spacing:.5px;font-weight:600}
+.ins-col .ins-items{margin-bottom:18px}
+.ins-col .ins-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(42,42,52,.4);font-size:.8rem}
+.ins-col .ins-item input[type="checkbox"]{width:14px;height:14px;accent-color:var(--accent);cursor:pointer}
+.ins-col .ins-item .iname{flex:1;color:var(--text)}
+.ins-col .ins-item .ihours{color:var(--text-dim);font-size:.68rem;white-space:nowrap}
+.ins-totals .price-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(42,42,52,.4);font-size:.83rem}
+.ins-totals .price-row .plabel{color:var(--text-dim)}
+.ins-totals .price-row .pval{font-weight:600;color:var(--white)}
+.ins-totals .price-row .pval.gold{color:var(--accent)}
+.ins-totals .price-row .pval.green{color:var(--green)}
+.savings-banner{background:rgba(92,201,142,.08);border:1px solid rgba(92,201,142,.2);border-radius:var(--radius);padding:14px;text-align:center;margin-top:14px}
+.savings-banner .slabel{font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.savings-banner .sval{font-size:1.15rem;font-weight:700;color:var(--green)}
+
+.scroll-wrap{max-height:65vh;overflow-y:auto}
+.scroll-wrap::-webkit-scrollbar{width:6px}
+.scroll-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Presentation mode polish */
+::selection{background:rgba(196,154,124,.3);color:var(--white)}
+input[type="number"]::-webkit-inner-spin-button{opacity:.5}
+
+@media(max-width:768px){
+  .app{padding:10px}
+  .summary-bar{grid-template-columns:repeat(2,1fr);gap:8px;padding:14px}
+  .summary-item .value{font-size:1rem}
+  .tab-btn{padding:8px 10px;font-size:.75rem}
+  .tabs{flex-wrap:wrap}
+  .pkg-grid{grid-template-columns:1fr}
+  .ins-grid{grid-template-columns:1fr}
+  .header-inner{flex-direction:column;gap:8px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="header-inner">
+    <img src="brand/5.png" alt="ScaleLogix AI" class="brand-logo">
+    <h1>SCALE<span>LOGIX</span> AI</h1>
+  </div>
+  <p>Wholesale Pricing Calculator Dashboard</p>
+  <div class="header-line"></div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="tab1">Single Item</button>
+  <button class="tab-btn" data-tab="tab2">Custom Build</button>
+  <button class="tab-btn" data-tab="tab3">Pre-Built Packages</button>
+  <button class="tab-btn" data-tab="tab4">Insurance Offers</button>
+</div>
+
+<!-- ===== TAB 1 — SINGLE ITEM ===== -->
+<div id="tab1" class="tab-content active">
+  <div class="summary-bar" id="t1-summary"></div>
+  <div class="card">
+    <h3>Global Variables</h3>
+    <div class="input-grid">
+      <div class="field">
+        <label>r — Blended Rate ($/hr)</label>
+        <input type="number" id="cfg-r" value="87.50" step="0.50" min="0">
+      </div>
+      <div class="field">
+        <label>Gross Margin %</label>
+        <input type="number" id="cfg-margin-pct" value="50" step="1" min="1" max="99">
+        <span class="hint">Target gross margin — auto-sets mu</span>
+      </div>
+      <div class="field">
+        <label>mu — Margin Multiplier</label>
+        <input type="number" id="cfg-mu" value="2.0" step="0.1" min="1">
+        <span class="hint">mu = 1 / (1 - margin%)</span>
+      </div>
+      <div class="field">
+        <label>phi — Client Fee Multiplier</label>
+        <input type="number" id="cfg-phi" value="1.20" step="0.05" min="1">
+        <span class="hint">1.20 = 20% on top of wholesale</span>
+      </div>
+      <div class="field">
+        <label>lambda — Hard Floor Multiplier</label>
+        <input type="number" id="cfg-lambda" value="0.75" step="0.05" min="0" max="1">
+        <span class="hint">0.75 = 33% absolute margin minimum</span>
+      </div>
+      <div class="field">
+        <label>ds — Secondary Bundle Discount</label>
+        <input type="number" id="cfg-ds" value="0.15" step="0.01" min="0" max="1">
+        <span class="hint">15% discount on secondary solution</span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Single Item Calculator</h3>
+    <div class="input-grid">
+      <div class="field">
+        <label>h_b — Build Hours</label>
+        <input type="number" id="t1-hb" value="10" step="1" min="0">
+      </div>
+      <div class="field">
+        <label>h_m — Monthly Hours</label>
+        <input type="number" id="t1-hm" value="4" step="1" min="0">
+      </div>
+    </div>
+    <div class="results-grid" id="t1-results"></div>
+  </div>
+</div>
+
+<!-- ===== TAB 2 — CUSTOM BUILD ===== -->
+<div id="tab2" class="tab-content">
+  <div class="summary-bar" id="t2-summary"></div>
+  <div class="card">
+    <h3>Pick &amp; Choose Capabilities</h3>
+    <div class="scroll-wrap">
+      <table class="cap-table" id="t2-table">
+        <thead>
+          <tr>
+            <th class="cb"></th>
+            <th>Capability</th>
+            <th>Tier</th>
+            <th>Build Hrs</th>
+            <th>Mo. Hrs</th>
+            <th>W Setup</th>
+            <th>W Monthly</th>
+          </tr>
+        </thead>
+        <tbody id="t2-body"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="bottom-summary" id="t2-bottom"></div>
+</div>
+
+<!-- ===== TAB 3 — PRE-BUILT PACKAGES ===== -->
+<div id="tab3" class="tab-content">
+  <div class="summary-bar" id="t3-summary"></div>
+  <div class="toggle-row">
+    <label>Wholesale</label>
+    <label class="toggle"><input type="checkbox" id="t3-view-toggle"><span class="slider"></span></label>
+    <label>Client Price</label>
+  </div>
+  <div class="pkg-grid" id="t3-packages"></div>
+</div>
+
+<!-- ===== TAB 4 — INSURANCE ===== -->
+<div id="tab4" class="tab-content">
+  <div class="summary-bar" id="t4-summary"></div>
+  <div class="ins-grid" id="t4-grid"></div>
+</div>
+</div>
+
+<script>
+// ========== CONFIG ==========
+const CFG = {
+  get r(){ return parseFloat(document.getElementById('cfg-r').value) || 87.50 },
+  get mu(){ return parseFloat(document.getElementById('cfg-mu').value) || 2.0 },
+  get phi(){ return parseFloat(document.getElementById('cfg-phi').value) || 1.20 },
+  get lambda(){ return parseFloat(document.getElementById('cfg-lambda').value) || 0.75 },
+  get ds(){ return parseFloat(document.getElementById('cfg-ds').value) || 0.15 },
+};
+
+// ========== HELPERS ==========
+function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US') }
+function roundSetup(v){ return Math.round(v / 50) * 50 }
+function roundMonthly(v){ return Math.round(v / 25) * 25 }
+function wholesaleSetup(hb){ return hb * CFG.r * CFG.mu }
+function wholesaleMonthly(hm){ return hm * CFG.r * CFG.mu }
+function clientPrice(w){ return w * CFG.phi }
+function hardFloor(w){ return w * CFG.lambda }
+function marginPct(client, cost){ return cost === 0 ? 0 : ((client - cost) / client * 100) }
+
+function tierDiscount(n){
+  if(n <= 2) return 0;
+  if(n <= 4) return 0.05;
+  if(n <= 7) return 0.10;
+  if(n <= 11) return 0.15;
+  return 0.20;
+}
+
+// ========== CAPABILITY DATA ==========
+const CAPABILITIES = [
+  { cat: "Lead Capture & Instant Response", items: [
+    { name: "AI voice agent inbound calls 24/7", tier: "complex", hb: 16, hm: 6 },
+    { name: "Missed-call text-back", tier: "simple", hb: 5, hm: 3 },
+    { name: "Website chat widget with SMS follow-up", tier: "medium", hb: 10, hm: 4 },
+    { name: "AI chatbot for websites and listings", tier: "medium", hb: 10, hm: 4 },
+    { name: "After-hours inquiry handling", tier: "simple", hb: 5, hm: 3 },
+    { name: "Instant lead response <2 min", tier: "simple", hb: 5, hm: 3 },
+    { name: "Quote request handling automation", tier: "medium", hb: 10, hm: 4 },
+  ]},
+  { cat: "AI-Powered Outreach", items: [
+    { name: "AI cold email outreach campaigns", tier: "complex", hb: 16, hm: 6 },
+    { name: "AI personalized message generation", tier: "medium", hb: 10, hm: 4 },
+    { name: "Automated LinkedIn outreach sequences", tier: "complex", hb: 16, hm: 6 },
+    { name: "Lead list building & enrichment", tier: "medium", hb: 10, hm: 4 },
+    { name: "Multi-channel outbound campaigns", tier: "complex", hb: 16, hm: 6 },
+    { name: "AI reply handling & conversation routing", tier: "medium", hb: 10, hm: 4 },
+    { name: "Outreach performance analytics", tier: "medium", hb: 10, hm: 4 },
+  ]},
+  { cat: "Appointment Booking & Scheduling", items: [
+    { name: "Automated appointment booking system", tier: "complex", hb: 16, hm: 6 },
+    { name: "Calendar + CRM integration", tier: "medium", hb: 10, hm: 4 },
+    { name: "Smart appointment confirmations", tier: "simple", hb: 5, hm: 3 },
+    { name: "AI scheduling optimization", tier: "medium", hb: 10, hm: 4 },
+    { name: "Consultation booking automation", tier: "medium", hb: 10, hm: 4 },
+    { name: "Automatic rebooking workflows", tier: "simple", hb: 5, hm: 3 },
+  ]},
+  { cat: "CRM Pipelines & Infrastructure", items: [
+    { name: "CRM setup and configuration", tier: "complex", hb: 16, hm: 6 },
+    { name: "Custom pipeline creation", tier: "medium", hb: 10, hm: 4 },
+    { name: "Lead tracking and status automation", tier: "medium", hb: 10, hm: 4 },
+    { name: "CRM + calendar integration", tier: "simple", hb: 5, hm: 3 },
+    { name: "Multi-location CRM coordination", tier: "complex", hb: 16, hm: 6 },
+    { name: "White-label client portal setup", tier: "complex", hb: 16, hm: 6 },
+  ]},
+  { cat: "Lead Qualification & Scoring", items: [
+    { name: "AI lead qualification workflows", tier: "medium", hb: 10, hm: 4 },
+    { name: "Paid-ad lead filtering", tier: "medium", hb: 10, hm: 4 },
+    { name: "Lead scoring and prioritization", tier: "medium", hb: 10, hm: 4 },
+    { name: "Client segmentation logic", tier: "medium", hb: 10, hm: 4 },
+    { name: "Client health scoring", tier: "complex", hb: 16, hm: 6 },
+  ]},
+  { cat: "Follow-Up Nurture & Conversion", items: [
+    { name: "Email nurture sequences", tier: "simple", hb: 5, hm: 3 },
+    { name: "SMS nurture sequences", tier: "simple", hb: 5, hm: 3 },
+    { name: "Voice + SMS + email multi-channel campaigns", tier: "complex", hb: 16, hm: 6 },
+    { name: "Smart estimate follow-up", tier: "medium", hb: 10, hm: 4 },
+    { name: "Quote follow-up sequences", tier: "medium", hb: 10, hm: 4 },
+    { name: "Lost quote recovery", tier: "medium", hb: 10, hm: 4 },
+    { name: "No-show prevention", tier: "simple", hb: 5, hm: 3 },
+    { name: "Appointment reminder automation", tier: "simple", hb: 5, hm: 3 },
+  ]},
+  { cat: "Reviews Referrals & Reputation", items: [
+    { name: "Review request automation", tier: "simple", hb: 5, hm: 3 },
+    { name: "Review generation workflows", tier: "simple", hb: 5, hm: 3 },
+    { name: "Referral request automation", tier: "simple", hb: 5, hm: 3 },
+    { name: "Systematic referral engines", tier: "medium", hb: 10, hm: 4 },
+  ]},
+  { cat: "Client & Customer Operations", items: [
+    { name: "Digital intake form automation", tier: "simple", hb: 5, hm: 3 },
+    { name: "Smart onboarding workflows", tier: "medium", hb: 10, hm: 4 },
+    { name: "Maintenance ticket automation", tier: "medium", hb: 10, hm: 4 },
+    { name: "Issue resolution workflows", tier: "medium", hb: 10, hm: 4 },
+    { name: "Pre-consultation education sequences", tier: "simple", hb: 5, hm: 3 },
+  ]},
+  { cat: "Retention Reactivation & LTV", items: [
+    { name: "Customer reactivation campaigns", tier: "medium", hb: 10, hm: 4 },
+    { name: "Renewal reminder automation", tier: "simple", hb: 5, hm: 3 },
+    { name: "Churn prediction systems", tier: "complex", hb: 16, hm: 6 },
+    { name: "Churn prevention automation", tier: "medium", hb: 10, hm: 4 },
+    { name: "Upsell automation", tier: "medium", hb: 10, hm: 4 },
+    { name: "Cross-sell automation", tier: "medium", hb: 10, hm: 4 },
+    { name: "Lifetime value optimization", tier: "complex", hb: 16, hm: 6 },
+  ]},
+  { cat: "Analytics Dashboards & Intelligence", items: [
+    { name: "Monthly performance reporting", tier: "medium", hb: 10, hm: 4 },
+    { name: "Real-time dashboards", tier: "complex", hb: 16, hm: 6 },
+    { name: "Revenue forecasting dashboards", tier: "complex", hb: 16, hm: 6 },
+    { name: "Multi-location performance dashboards", tier: "complex", hb: 16, hm: 6 },
+    { name: "Predictive analytics & forecasting", tier: "complex", hb: 16, hm: 6 },
+  ]},
+  { cat: "Content & Communication Automation", items: [
+    { name: "AI-generated email content", tier: "simple", hb: 5, hm: 3 },
+    { name: "AI-generated SMS content", tier: "simple", hb: 5, hm: 3 },
+    { name: "AI-generated social content", tier: "medium", hb: 10, hm: 4 },
+    { name: "AI-generated newsletters", tier: "medium", hb: 10, hm: 4 },
+    { name: "Pre-sale education workflows", tier: "simple", hb: 5, hm: 3 },
+  ]},
+  { cat: "AI Productivity & Internal Operations", items: [
+    { name: "AI meeting summaries", tier: "simple", hb: 5, hm: 3 },
+    { name: "Automated action-item extraction", tier: "simple", hb: 5, hm: 3 },
+    { name: "Internal task automation", tier: "medium", hb: 10, hm: 4 },
+  ]},
+  { cat: "Compliance & Secure Workflows", items: [
+    { name: "Compliance-friendly workflow design", tier: "medium", hb: 10, hm: 4 },
+    { name: "HIPAA-compliant automation design", tier: "complex", hb: 16, hm: 6 },
+    { name: "Secure data handling workflows", tier: "medium", hb: 10, hm: 4 },
+  ]},
+  { cat: "Custom Engineering & Integrations", items: [
+    { name: "Custom software integrations", tier: "complex", hb: 16, hm: 6 },
+    { name: "Custom automation logic builds", tier: "complex", hb: 16, hm: 6 },
+    { name: "API-based workflow automation", tier: "complex", hb: 16, hm: 6 },
+  ]},
+  { cat: "Training Support & Optimization", items: [
+    { name: "Team onboarding and training", tier: "medium", hb: 10, hm: 0 },
+    { name: "System training documentation", tier: "simple", hb: 5, hm: 0 },
+    { name: "Ongoing system optimization", tier: "simple", hb: 0, hm: 3 },
+    { name: "Weekly optimization sessions", tier: "simple", hb: 0, hm: 3 },
+    { name: "Dedicated manager support", tier: "medium", hb: 0, hm: 4 },
+    { name: "Priority Slack and email support", tier: "simple", hb: 0, hm: 3 },
+  ]},
+];
+
+// ========== INSURANCE DATA ==========
+const INSURANCE_CORE = [
+  { name: "Speed-to-lead automation (web forms, email, SMS)", hb: 8, hm: 4 },
+  { name: "Automated intake & routing to producer / service team", hb: 10, hm: 4 },
+  { name: "Follow-up sequences (multi-touch, no fallthrough)", hb: 10, hm: 4 },
+  { name: "After-hours / overflow voice agent (optional add-on)", hb: 16, hm: 6 },
+  { name: "Service request triage (COIs, endorsements, renewals)", hb: 8, hm: 3 },
+  { name: "CRM setup + pipeline configuration", hb: 12, hm: 3 },
+  { name: "Owner visibility dashboard (response speed, follow-up)", hb: 12, hm: 4 },
+  { name: "Onboarding, training & documentation", hb: 8, hm: 0 },
+  { name: "Ongoing optimization + priority support", hb: 0, hm: 6 },
+];
+
+const INSURANCE_SECONDARY = [
+  { name: "High-intent lead sourcing setup & vendor integration", hb: 10, hm: 3 },
+  { name: "Demand intelligence for ads & outreach", hb: 10, hm: 4 },
+  { name: "Lead ROI clarity dashboard (source to conversion)", hb: 14, hm: 4 },
+  { name: "Missed-opportunity reactivation campaigns", hb: 8, hm: 4 },
+  { name: "Owner-level performance dashboards", hb: 12, hm: 4 },
+  { name: "Safe scaling optimization workflows", hb: 8, hm: 3 },
+];
+
+// ========== PRE-BUILT PACKAGES ==========
+const PACKAGES = [
+  {
+    name: "Starter",
+    discount: 0.20,
+    items: [
+      "Missed-call text-back",
+      "After-hours inquiry handling",
+      "Instant lead response <2 min",
+      "Smart appointment confirmations",
+      "Email nurture sequences",
+      "SMS nurture sequences",
+      "No-show prevention",
+      "Appointment reminder automation",
+      "Review request automation",
+      "Digital intake form automation",
+      "AI personalized message generation",
+      "Outreach performance analytics",
+    ]
+  },
+  {
+    name: "Growth",
+    discount: 0.25,
+    featured: true,
+    items: [
+      "AI voice agent inbound calls 24/7",
+      "Website chat widget with SMS follow-up",
+      "Quote request handling automation",
+      "AI cold email outreach campaigns",
+      "AI personalized message generation",
+      "Lead list building & enrichment",
+      "AI reply handling & conversation routing",
+      "Outreach performance analytics",
+      "Automated appointment booking system",
+      "Calendar + CRM integration",
+      "AI scheduling optimization",
+      "CRM setup and configuration",
+      "Custom pipeline creation",
+      "Lead tracking and status automation",
+      "AI lead qualification workflows",
+      "Paid-ad lead filtering",
+      "Email nurture sequences",
+      "SMS nurture sequences",
+      "Smart estimate follow-up",
+      "Quote follow-up sequences",
+      "No-show prevention",
+      "Appointment reminder automation",
+      "Review request automation",
+      "Review generation workflows",
+      "Referral request automation",
+      "Smart onboarding workflows",
+      "Renewal reminder automation",
+      "Monthly performance reporting",
+      "Team onboarding and training",
+      "Ongoing system optimization",
+    ]
+  },
+  {
+    name: "Scale",
+    discount: 0.30,
+    items: [
+      "AI voice agent inbound calls 24/7",
+      "Missed-call text-back",
+      "Website chat widget with SMS follow-up",
+      "AI chatbot for websites and listings",
+      "After-hours inquiry handling",
+      "Instant lead response <2 min",
+      "Quote request handling automation",
+      "AI cold email outreach campaigns",
+      "AI personalized message generation",
+      "Automated LinkedIn outreach sequences",
+      "Lead list building & enrichment",
+      "Multi-channel outbound campaigns",
+      "AI reply handling & conversation routing",
+      "Outreach performance analytics",
+      "Automated appointment booking system",
+      "Calendar + CRM integration",
+      "Smart appointment confirmations",
+      "AI scheduling optimization",
+      "Consultation booking automation",
+      "Automatic rebooking workflows",
+      "CRM setup and configuration",
+      "Custom pipeline creation",
+      "Lead tracking and status automation",
+      "CRM + calendar integration",
+      "Multi-location CRM coordination",
+      "AI lead qualification workflows",
+      "Paid-ad lead filtering",
+      "Lead scoring and prioritization",
+      "Client segmentation logic",
+      "Client health scoring",
+      "Email nurture sequences",
+      "SMS nurture sequences",
+      "Voice + SMS + email multi-channel campaigns",
+      "Smart estimate follow-up",
+      "Quote follow-up sequences",
+      "Lost quote recovery",
+      "No-show prevention",
+      "Appointment reminder automation",
+      "Review request automation",
+      "Review generation workflows",
+      "Referral request automation",
+      "Systematic referral engines",
+      "Digital intake form automation",
+      "Smart onboarding workflows",
+      "Maintenance ticket automation",
+      "Issue resolution workflows",
+      "Customer reactivation campaigns",
+      "Renewal reminder automation",
+      "Churn prediction systems",
+      "Churn prevention automation",
+      "Upsell automation",
+      "Cross-sell automation",
+      "Lifetime value optimization",
+      "Monthly performance reporting",
+      "Real-time dashboards",
+      "Revenue forecasting dashboards",
+      "Multi-location performance dashboards",
+      "Predictive analytics & forecasting",
+      "AI-generated email content",
+      "AI-generated SMS content",
+      "AI-generated social content",
+      "AI-generated newsletters",
+      "Team onboarding and training",
+      "System training documentation",
+      "Ongoing system optimization",
+      "Weekly optimization sessions",
+      "Dedicated manager support",
+      "Priority Slack and email support",
+    ]
+  }
+];
+
+// Build capability lookup
+const capLookup = {};
+CAPABILITIES.forEach(cat => cat.items.forEach(item => { capLookup[item.name] = item; }));
+
+// ========== TAB NAVIGATION ==========
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ========== TAB 1 — SINGLE ITEM ==========
+function renderTab1(){
+  const hb = parseFloat(document.getElementById('t1-hb').value) || 0;
+  const hm = parseFloat(document.getElementById('t1-hm').value) || 0;
+
+  const wSetupRaw = wholesaleSetup(hb);
+  const wMonthlyRaw = wholesaleMonthly(hm);
+  const wSetup = roundSetup(wSetupRaw);
+  const wMonthly = roundMonthly(wMonthlyRaw);
+  const cSetup = roundSetup(clientPrice(wSetupRaw));
+  const cMonthly = roundMonthly(clientPrice(wMonthlyRaw));
+  const fSetup = roundSetup(hardFloor(wSetupRaw));
+  const fMonthly = roundMonthly(hardFloor(wMonthlyRaw));
+  const cost = hb * CFG.r + hm * CFG.r;
+  const revenue = wSetup + wMonthly;
+  const mgn = revenue > 0 ? ((revenue - cost) / revenue * 100) : 0;
+
+  document.getElementById('t1-summary').innerHTML = `
+    <div class="summary-item"><div class="label">Wholesale Setup</div><div class="value">${fmt(wSetup)}</div></div>
+    <div class="summary-item"><div class="label">Wholesale Monthly</div><div class="value">${fmt(wMonthly)}</div></div>
+    <div class="summary-item"><div class="label">Client Setup</div><div class="value gold">${fmt(cSetup)}</div></div>
+    <div class="summary-item"><div class="label">Client Monthly</div><div class="value gold">${fmt(cMonthly)}</div></div>
+    <div class="summary-item"><div class="label">Margin %</div><div class="value green">${mgn.toFixed(1)}%</div></div>
+  `;
+
+  const floorWarnS = cSetup < fSetup ? ' floor-warn' : '';
+  const floorWarnM = cMonthly < fMonthly ? ' floor-warn' : '';
+
+  document.getElementById('t1-results').innerHTML = `
+    <div class="result-box"><div class="rlabel">Wholesale Setup</div><div class="rvalue">${fmt(wSetup)}</div></div>
+    <div class="result-box"><div class="rlabel">Wholesale Monthly</div><div class="rvalue">${fmt(wMonthly)}</div></div>
+    <div class="result-box"><div class="rlabel">Client Setup</div><div class="rvalue" style="color:var(--accent)">${fmt(cSetup)}</div></div>
+    <div class="result-box"><div class="rlabel">Client Monthly</div><div class="rvalue" style="color:var(--accent)">${fmt(cMonthly)}</div></div>
+    <div class="result-box${floorWarnS}"><div class="rlabel">Hard Floor Setup</div><div class="rvalue">${fmt(fSetup)}</div></div>
+    <div class="result-box${floorWarnM}"><div class="rlabel">Hard Floor Monthly</div><div class="rvalue">${fmt(fMonthly)}</div></div>
+    <div class="result-box"><div class="rlabel">Gross Margin %</div><div class="rvalue" style="color:var(--green)">${mgn.toFixed(1)}%</div></div>
+    <div class="result-box"><div class="rlabel">Quick Est. (h_b x $210)</div><div class="rvalue">${fmt(hb * 210)}</div></div>
+  `;
+}
+
+// ========== TAB 2 — CUSTOM BUILD ==========
+let t2Checkboxes = [];
+
+function buildTab2Table(){
+  const tbody = document.getElementById('t2-body');
+  let html = '';
+  let idx = 0;
+  CAPABILITIES.forEach(cat => {
+    html += `<tr class="cat-header"><td colspan="7">${cat.cat}</td></tr>`;
+    cat.items.forEach(item => {
+      const ws = roundSetup(wholesaleSetup(item.hb));
+      const wm = roundMonthly(wholesaleMonthly(item.hm));
+      html += `<tr>
+        <td class="cb"><input type="checkbox" data-idx="${idx}" class="t2-cb"></td>
+        <td>${item.name}</td>
+        <td><span class="badge ${item.tier}">${item.tier}</span></td>
+        <td>${item.hb}</td>
+        <td>${item.hm}</td>
+        <td>${fmt(ws)}</td>
+        <td>${fmt(wm)}</td>
+      </tr>`;
+      idx++;
+    });
+  });
+  tbody.innerHTML = html;
+  t2Checkboxes = document.querySelectorAll('.t2-cb');
+  t2Checkboxes.forEach(cb => cb.addEventListener('change', renderTab2));
+}
+
+function getAllItems(){
+  const items = [];
+  CAPABILITIES.forEach(cat => cat.items.forEach(item => items.push(item)));
+  return items;
+}
+
+function renderTab2(){
+  const allItems = getAllItems();
+  let selected = [];
+  t2Checkboxes.forEach(cb => { if(cb.checked) selected.push(allItems[parseInt(cb.dataset.idx)]); });
+
+  const n = selected.length;
+  const dn = tierDiscount(n);
+  let sumWs = 0, sumWm = 0;
+  selected.forEach(item => {
+    sumWs += wholesaleSetup(item.hb);
+    sumWm += wholesaleMonthly(item.hm);
+  });
+
+  const fullWs = roundSetup(sumWs);
+  const fullWm = roundMonthly(sumWm);
+  const discWs = roundSetup(sumWs * (1 - dn));
+  const discWm = roundMonthly(sumWm * (1 - dn));
+  const cWs = roundSetup(clientPrice(sumWs * (1 - dn)));
+  const cWm = roundMonthly(clientPrice(sumWm * (1 - dn)));
+  const fWs = roundSetup(hardFloor(sumWs * (1 - dn)));
+  const fWm = roundMonthly(hardFloor(sumWm * (1 - dn)));
+  const savingsS = fullWs - discWs;
+  const savingsM = fullWm - discWm;
+
+  document.getElementById('t2-summary').innerHTML = `
+    <div class="summary-item"><div class="label">Items Selected</div><div class="value">${n}</div></div>
+    <div class="summary-item"><div class="label">Tier Discount</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
+    <div class="summary-item"><div class="label">Wholesale Setup</div><div class="value">${fmt(discWs)}</div></div>
+    <div class="summary-item"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
+    <div class="summary-item"><div class="label">Client Setup</div><div class="value gold">${fmt(cWs)}</div></div>
+    <div class="summary-item"><div class="label">Client Monthly</div><div class="value gold">${fmt(cWm)}</div></div>
+  `;
+
+  document.getElementById('t2-bottom').innerHTML = `
+    <div class="summary-item"><div class="label">Items</div><div class="value">${n}</div></div>
+    <div class="summary-item"><div class="label">Tier Discount</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
+    <div class="summary-item"><div class="label">W. Setup Total</div><div class="value">${fmt(discWs)}</div></div>
+    <div class="summary-item"><div class="label">W. Monthly Total</div><div class="value">${fmt(discWm)}</div></div>
+    <div class="summary-item"><div class="label">Client Total Setup</div><div class="value gold">${fmt(cWs)}</div></div>
+    <div class="summary-item"><div class="label">Hard Floor Setup</div><div class="value${cWs < fWs ? ' red' : ''}">${fmt(fWs)}</div></div>
+    <div class="summary-item"><div class="label">Setup Savings</div><div class="value green">${fmt(savingsS)}</div></div>
+    <div class="summary-item"><div class="label">Monthly Savings</div><div class="value green">${fmt(savingsM)}</div></div>
+  `;
+
+  // Update table cells with current CFG
+  const rows = document.querySelectorAll('#t2-body tr:not(.cat-header)');
+  let ri = 0;
+  CAPABILITIES.forEach(cat => {
+    cat.items.forEach(item => {
+      if(rows[ri]){
+        const cells = rows[ri].querySelectorAll('td');
+        cells[5].textContent = fmt(roundSetup(wholesaleSetup(item.hb)));
+        cells[6].textContent = fmt(roundMonthly(wholesaleMonthly(item.hm)));
+      }
+      ri++;
+    });
+  });
+}
+
+// ========== TAB 3 — PACKAGES ==========
+function renderTab3(){
+  const showClient = document.getElementById('t3-view-toggle').checked;
+  const container = document.getElementById('t3-packages');
+  let html = '';
+  let bestSavingsSetup = 0;
+
+  PACKAGES.forEach(pkg => {
+    let sumWs = 0, sumWm = 0;
+    const resolvedItems = [];
+    pkg.items.forEach(name => {
+      const item = capLookup[name];
+      if(item){
+        sumWs += wholesaleSetup(item.hb);
+        sumWm += wholesaleMonthly(item.hm);
+        resolvedItems.push(name);
+      }
+    });
+
+    const dp = pkg.discount;
+    const fullSetup = roundSetup(sumWs);
+    const fullMonthly = roundMonthly(sumWm);
+    const wSetup = roundSetup(sumWs * (1 - dp));
+    const wMonthly = roundMonthly(sumWm * (1 - dp));
+    const cSetup = roundSetup(clientPrice(sumWs * (1 - dp)));
+    const cMonthly = roundMonthly(clientPrice(sumWm * (1 - dp)));
+    const savingsSetup = fullSetup - wSetup;
+    const savingsMonthly = fullMonthly - wMonthly;
+
+    if(savingsSetup > bestSavingsSetup) bestSavingsSetup = savingsSetup;
+
+    const dispSetup = showClient ? cSetup : wSetup;
+    const dispMonthly = showClient ? cMonthly : wMonthly;
+    const dispFullSetup = showClient ? roundSetup(clientPrice(sumWs)) : fullSetup;
+    const dispFullMonthly = showClient ? roundMonthly(clientPrice(sumWm)) : fullMonthly;
+    const dispSavingsSetup = dispFullSetup - dispSetup;
+    const dispSavingsMonthly = dispFullMonthly - dispMonthly;
+    const label = showClient ? 'Client' : 'Wholesale';
+
+    html += `
+    <div class="pkg-card${pkg.featured ? ' featured' : ''}">
+      <div class="pkg-name">${pkg.name}</div>
+      <div class="pkg-discount">${(dp*100).toFixed(0)}% Package Discount · ${resolvedItems.length} capabilities</div>
+      <div class="pkg-prices">
+        <div class="price-row"><span class="plabel">Full ${label} Setup</span><span class="pval strike">${fmt(dispFullSetup)}</span></div>
+        <div class="price-row"><span class="plabel">${label} Setup</span><span class="pval gold">${fmt(dispSetup)}</span></div>
+        <div class="price-row"><span class="plabel">Full ${label} Monthly</span><span class="pval strike">${fmt(dispFullMonthly)}</span></div>
+        <div class="price-row"><span class="plabel">${label} Monthly</span><span class="pval gold">${fmt(dispMonthly)}</span></div>
+        <div class="price-row"><span class="plabel">Setup Savings</span><span class="pval green">${fmt(dispSavingsSetup)}</span></div>
+        <div class="price-row"><span class="plabel">Monthly Savings</span><span class="pval green">${fmt(dispSavingsMonthly)}</span></div>
+      </div>
+      <ul class="pkg-items">${resolvedItems.map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Summary bar
+  const pkg0 = PACKAGES[0], pkg2 = PACKAGES[2];
+  let s0ws=0,s0wm=0,s2ws=0,s2wm=0;
+  pkg0.items.forEach(n=>{ const i=capLookup[n]; if(i){s0ws+=wholesaleSetup(i.hb);s0wm+=wholesaleMonthly(i.hm);} });
+  pkg2.items.forEach(n=>{ const i=capLookup[n]; if(i){s2ws+=wholesaleSetup(i.hb);s2wm+=wholesaleMonthly(i.hm);} });
+
+  const starterW = roundSetup(s0ws*(1-pkg0.discount));
+  const scaleW = roundSetup(s2ws*(1-pkg2.discount));
+  const starterC = roundSetup(clientPrice(s0ws*(1-pkg0.discount)));
+  const scaleC = roundSetup(clientPrice(s2ws*(1-pkg2.discount)));
+
+  document.getElementById('t3-summary').innerHTML = `
+    <div class="summary-item"><div class="label">Starter Setup (W)</div><div class="value">${fmt(starterW)}</div></div>
+    <div class="summary-item"><div class="label">Scale Setup (W)</div><div class="value">${fmt(scaleW)}</div></div>
+    <div class="summary-item"><div class="label">Starter Client</div><div class="value gold">${fmt(starterC)}</div></div>
+    <div class="summary-item"><div class="label">Scale Client</div><div class="value gold">${fmt(scaleC)}</div></div>
+    <div class="summary-item"><div class="label">View</div><div class="value">${showClient ? 'Client' : 'Wholesale'}</div></div>
+  `;
+}
+
+document.getElementById('t3-view-toggle').addEventListener('change', renderTab3);
+
+// ========== TAB 4 — INSURANCE ==========
+let insCoreCbs = [], insSecCbs = [];
+
+function buildTab4(){
+  const grid = document.getElementById('t4-grid');
+  // Core column
+  let coreHtml = `<div class="ins-col"><h3>Core Solution</h3><div class="ins-items">`;
+  INSURANCE_CORE.forEach((item, i) => {
+    coreHtml += `<div class="ins-item">
+      <input type="checkbox" class="ins-core-cb" data-idx="${i}" checked>
+      <span class="iname">${item.name}</span>
+      <span class="ihours">${item.hb}b / ${item.hm}m</span>
+    </div>`;
+  });
+  coreHtml += `</div><div class="ins-totals" id="ins-core-totals"></div></div>`;
+
+  // Secondary column
+  let secHtml = `<div class="ins-col"><h3>Secondary Solution</h3><div class="ins-items">`;
+  INSURANCE_SECONDARY.forEach((item, i) => {
+    secHtml += `<div class="ins-item">
+      <input type="checkbox" class="ins-sec-cb" data-idx="${i}" checked>
+      <span class="iname">${item.name}</span>
+      <span class="ihours">${item.hb}b / ${item.hm}m</span>
+    </div>`;
+  });
+  secHtml += `</div><div class="ins-totals" id="ins-sec-totals"></div></div>`;
+
+  // Combo column
+  let comboHtml = `<div class="ins-col"><h3>Core + Secondary Bundle</h3><div class="ins-totals" id="ins-combo-totals"></div></div>`;
+
+  grid.innerHTML = coreHtml + secHtml + comboHtml;
+
+  insCoreCbs = document.querySelectorAll('.ins-core-cb');
+  insSecCbs = document.querySelectorAll('.ins-sec-cb');
+  insCoreCbs.forEach(cb => cb.addEventListener('change', renderTab4));
+  insSecCbs.forEach(cb => cb.addEventListener('change', renderTab4));
+}
+
+function renderTab4(){
+  // Core totals
+  let coreHb = 0, coreHm = 0;
+  insCoreCbs.forEach(cb => {
+    if(cb.checked){
+      const item = INSURANCE_CORE[parseInt(cb.dataset.idx)];
+      coreHb += item.hb;
+      coreHm += item.hm;
+    }
+  });
+  const coreWs = roundSetup(wholesaleSetup(coreHb));
+  const coreWm = roundMonthly(wholesaleMonthly(coreHm));
+  const coreCs = roundSetup(clientPrice(wholesaleSetup(coreHb)));
+  const coreCm = roundMonthly(clientPrice(wholesaleMonthly(coreHm)));
+
+  document.getElementById('ins-core-totals').innerHTML = `
+    <div class="price-row"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(coreWs)}</span></div>
+    <div class="price-row"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(coreWm)}</span></div>
+    <div class="price-row"><span class="plabel">Client Setup</span><span class="pval gold">${fmt(coreCs)}</span></div>
+    <div class="price-row"><span class="plabel">Client Monthly</span><span class="pval gold">${fmt(coreCm)}</span></div>
+  `;
+
+  // Secondary totals
+  let secHb = 0, secHm = 0;
+  insSecCbs.forEach(cb => {
+    if(cb.checked){
+      const item = INSURANCE_SECONDARY[parseInt(cb.dataset.idx)];
+      secHb += item.hb;
+      secHm += item.hm;
+    }
+  });
+  const secWsRaw = wholesaleSetup(secHb);
+  const secWmRaw = wholesaleMonthly(secHm);
+  const secWs = roundSetup(secWsRaw);
+  const secWm = roundMonthly(secWmRaw);
+  const secCs = roundSetup(clientPrice(secWsRaw));
+  const secCm = roundMonthly(clientPrice(secWmRaw));
+
+  document.getElementById('ins-sec-totals').innerHTML = `
+    <div class="price-row"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(secWs)}</span></div>
+    <div class="price-row"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(secWm)}</span></div>
+    <div class="price-row"><span class="plabel">Client Setup</span><span class="pval gold">${fmt(secCs)}</span></div>
+    <div class="price-row"><span class="plabel">Client Monthly</span><span class="pval gold">${fmt(secCm)}</span></div>
+  `;
+
+  // Combo: Core full + Secondary discounted
+  const ds = CFG.ds;
+  const comboWsRaw = wholesaleSetup(coreHb) + wholesaleSetup(secHb) * (1 - ds);
+  const comboWmRaw = wholesaleMonthly(coreHm) + wholesaleMonthly(secHm) * (1 - ds);
+  const comboWs = roundSetup(comboWsRaw);
+  const comboWm = roundMonthly(comboWmRaw);
+  const comboCs = roundSetup(clientPrice(comboWsRaw));
+  const comboCm = roundMonthly(clientPrice(comboWmRaw));
+  const bundleSavingsSetup = roundSetup(wholesaleSetup(secHb) * ds);
+  const bundleSavingsMonthly = roundMonthly(wholesaleMonthly(secHm) * ds);
+  const floorWs = roundSetup(hardFloor(comboWsRaw));
+  const floorWm = roundMonthly(hardFloor(comboWmRaw));
+
+  const hasCore = coreHb > 0 || coreHm > 0;
+  const hasSec = secHb > 0 || secHm > 0;
+
+  let comboHtml = `
+    <div class="price-row"><span class="plabel">Combo Wholesale Setup</span><span class="pval">${fmt(comboWs)}</span></div>
+    <div class="price-row"><span class="plabel">Combo Wholesale Monthly</span><span class="pval">${fmt(comboWm)}</span></div>
+    <div class="price-row"><span class="plabel">Combo Client Setup</span><span class="pval gold">${fmt(comboCs)}</span></div>
+    <div class="price-row"><span class="plabel">Combo Client Monthly</span><span class="pval gold">${fmt(comboCm)}</span></div>
+    <div class="price-row"><span class="plabel">Hard Floor Setup</span><span class="pval${comboCs < floorWs ? ' red' : ''}">${fmt(floorWs)}</span></div>
+    <div class="price-row"><span class="plabel">Hard Floor Monthly</span><span class="pval${comboCm < floorWm ? ' red' : ''}">${fmt(floorWm)}</span></div>
+  `;
+
+  if(hasCore && hasSec){
+    comboHtml += `
+    <div style="margin-top:12px" class="savings-banner">
+      <div class="slabel">Bundle Savings (${(ds*100).toFixed(0)}% off Secondary)</div>
+      <div class="sval">${fmt(bundleSavingsSetup)} setup · ${fmt(bundleSavingsMonthly)}/mo</div>
+    </div>`;
+  }
+
+  document.getElementById('ins-combo-totals').innerHTML = comboHtml;
+
+  // Summary bar
+  document.getElementById('t4-summary').innerHTML = `
+    <div class="summary-item"><div class="label">Core W. Setup</div><div class="value">${fmt(coreWs)}</div></div>
+    <div class="summary-item"><div class="label">Secondary W. Setup</div><div class="value">${fmt(secWs)}</div></div>
+    <div class="summary-item"><div class="label">Combo W. Setup</div><div class="value gold">${fmt(comboWs)}</div></div>
+    <div class="summary-item"><div class="label">Combo Client Setup</div><div class="value gold">${fmt(comboCs)}</div></div>
+    <div class="summary-item"><div class="label">Bundle Savings</div><div class="value green">${fmt(bundleSavingsSetup)}</div></div>
+  `;
+}
+
+// ========== GLOBAL UPDATE ==========
+function updateAll(){
+  renderTab1();
+  renderTab2();
+  renderTab3();
+  renderTab4();
+}
+
+// Margin % <-> mu bidirectional sync
+const marginPctInput = document.getElementById('cfg-margin-pct');
+const muInput = document.getElementById('cfg-mu');
+
+marginPctInput.addEventListener('input', () => {
+  const pct = parseFloat(marginPctInput.value);
+  if(pct > 0 && pct < 100){
+    muInput.value = (1 / (1 - pct / 100)).toFixed(2);
+  }
+  updateAll();
+});
+
+muInput.addEventListener('input', () => {
+  const mu = parseFloat(muInput.value);
+  if(mu > 1){
+    marginPctInput.value = ((1 - 1 / mu) * 100).toFixed(0);
+  }
+  updateAll();
+});
+
+// Listen to config changes
+['cfg-r','cfg-phi','cfg-lambda','cfg-ds'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateAll);
+});
+['t1-hb','t1-hm'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderTab1);
+});
+
+// ========== INIT ==========
+buildTab2Table();
+buildTab4();
+updateAll();
+</script>
+</body>
+</html>
