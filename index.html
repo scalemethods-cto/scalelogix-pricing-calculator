@@ -5,16 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ScaleLogix AI — Pricing Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0E0E12;--primary:#16161C;--accent:#C49A7C;--accent-light:#D4AD94;--accent-dark:#A67B5B;
-  --surface:#1A1A22;--surface2:#202028;--border:#2A2A34;--border-light:#35354A;
-  --text:#E8E4E0;--text-dim:#908C96;--white:#FAFAF8;
+  --bg:#0D1118;--primary:#141C28;--accent:#BB8575;--accent-light:#CC9988;--accent-dark:#A06B5A;
+  --purple:#7966A2;--purple-dark:#5C4A85;--purple-light:#9A8BC0;
+  --surface:#192231;--surface2:#1E2A3C;--border:#263245;--border-light:#344860;
+  --text:#E4E0DC;--text-dim:#8A8696;--white:#F8F6F4;
   --green:#5CC98E;--red:#E87070;--silver:#A8A4B0;
   --radius:10px;--radius-lg:14px;
-  --shadow:0 4px 24px rgba(0,0,0,.3);
+  --shadow:0 4px 28px rgba(0,0,0,.45);
 }
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
 .app{max-width:1440px;margin:0 auto;padding:20px 24px}
@@ -22,17 +23,17 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 /* Header */
 header{text-align:center;padding:28px 0 20px;position:relative}
 .header-inner{display:flex;align-items:center;justify-content:center;gap:16px}
-.brand-logo{width:48px;height:48px;object-fit:contain}
+.brand-logo{height:80px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
 header h1{font-size:1.5rem;color:var(--white);letter-spacing:3px;font-weight:300}
 header h1 span{color:var(--accent);font-weight:600}
 header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5px;font-weight:300}
-.header-line{width:80px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);margin:12px auto 0}
+.header-line{width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--purple),var(--accent),transparent);margin:12px auto 0}
 
 /* Tabs */
 .tabs{display:flex;gap:2px;margin-bottom:20px;background:var(--primary);border-radius:var(--radius);padding:4px;border:1px solid var(--border)}
 .tab-btn{flex:1;padding:10px 16px;background:transparent;border:none;color:var(--text-dim);font-size:.82rem;cursor:pointer;border-radius:calc(var(--radius) - 2px);transition:all .25s ease;white-space:nowrap;font-family:inherit;font-weight:500;letter-spacing:.3px}
 .tab-btn:hover{color:var(--text);background:var(--surface)}
-.tab-btn.active{color:var(--white);background:var(--accent-dark);font-weight:600;box-shadow:0 2px 12px rgba(196,154,124,.25)}
+.tab-btn.active{color:var(--white);background:linear-gradient(135deg,var(--purple-dark),var(--purple));font-weight:600;box-shadow:0 2px 12px rgba(121,102,162,.3)}
 .tab-content{display:none}
 .tab-content.active{display:block;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -85,8 +86,8 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
 .pkg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
 .pkg-card:hover{transform:translateY(-2px);border-color:var(--border-light)}
-.pkg-card.featured{border-color:var(--accent);box-shadow:0 4px 32px rgba(196,154,124,.15)}
-.pkg-card.featured::before{content:'MOST POPULAR';position:absolute;top:14px;right:-28px;background:var(--accent);color:var(--bg);font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
+.pkg-card.featured{border-color:var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.2)}
+.pkg-card.featured::before{content:'MOST POPULAR';position:absolute;top:14px;right:-28px;background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:var(--white);font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
 .pkg-card .pkg-name{font-size:1.15rem;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:.5px}
 .pkg-card .pkg-discount{font-size:.78rem;color:var(--accent);margin-bottom:18px;font-weight:500}
 .pkg-card .pkg-prices{margin:18px 0}
@@ -130,6 +131,12 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .savings-banner{background:rgba(92,201,142,.08);border:1px solid rgba(92,201,142,.2);border-radius:var(--radius);padding:14px;text-align:center;margin-top:14px}
 .savings-banner .slabel{font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
 .savings-banner .sval{font-size:1.15rem;font-weight:700;color:var(--green)}
+.efficiency-banner{background:rgba(121,102,162,.08);border:1px solid rgba(121,102,162,.22);border-radius:var(--radius);padding:14px;text-align:center;margin-top:14px}
+.efficiency-banner .slabel{font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.efficiency-banner .sval{font-size:1.1rem;font-weight:700;color:var(--purple-light)}
+.ins-col.featured{border-color:var(--purple);box-shadow:0 4px 28px rgba(121,102,162,.2);position:relative;overflow:hidden}
+.ins-col.featured h3{color:var(--purple-light)}
+.ins-col.featured::before{content:'RECOMMENDED';position:absolute;top:0;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:var(--white);font-size:.58rem;font-weight:700;letter-spacing:1px;padding:3px 20px;border-radius:0 0 8px 8px}
 
 .scroll-wrap{max-height:65vh;overflow-y:auto}
 .scroll-wrap::-webkit-scrollbar{width:6px}
@@ -155,8 +162,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 <div class="app">
 <header>
   <div class="header-inner">
-    <img src="brand/5.png" alt="ScaleLogix AI" class="brand-logo">
-    <h1>SCALE<span>LOGIX</span> AI</h1>
+    <img src="brand/4-removebg-preview.png" alt="ScaleLogix AI" class="brand-logo">
   </div>
   <p>Wholesale Pricing Calculator Dashboard</p>
   <div class="header-line"></div>
@@ -166,7 +172,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
   <button class="tab-btn active" data-tab="tab1">Single Item</button>
   <button class="tab-btn" data-tab="tab2">Custom Build</button>
   <button class="tab-btn" data-tab="tab3">Pre-Built Packages</button>
-  <button class="tab-btn" data-tab="tab4">Insurance Offers</button>
+  <button class="tab-btn" data-tab="tab4">Offers</button>
 </div>
 
 <!-- ===== TAB 1 — SINGLE ITEM ===== -->
@@ -200,9 +206,9 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
         <span class="hint">0.75 = 33% absolute margin minimum</span>
       </div>
       <div class="field">
-        <label>ds — Secondary Bundle Discount</label>
+        <label>ds — Plus Bundle Discount</label>
         <input type="number" id="cfg-ds" value="0.15" step="0.01" min="0" max="1">
-        <span class="hint">15% discount on secondary solution</span>
+        <span class="hint">15% discount on Plus when bundled with Core</span>
       </div>
     </div>
   </div>
@@ -250,6 +256,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 <!-- ===== TAB 3 — PRE-BUILT PACKAGES ===== -->
 <div id="tab3" class="tab-content">
   <div class="summary-bar" id="t3-summary"></div>
+  <p style="font-size:.75rem;color:var(--text-dim);margin-bottom:14px;letter-spacing:.3px;">General-industry preset packages — for non-insurance verticals or custom scoping reference.</p>
   <div class="toggle-row">
     <label>Wholesale</label>
     <label class="toggle"><input type="checkbox" id="t3-view-toggle"><span class="slider"></span></label>
@@ -274,6 +281,12 @@ const CFG = {
   get lambda(){ return parseFloat(document.getElementById('cfg-lambda').value) || 0.75 },
   get ds(){ return parseFloat(document.getElementById('cfg-ds').value) || 0.15 },
 };
+
+// ========== BUNDLE PRICING LOGIC ==========
+// Core Package: implementing all automations together yields ~40% faster fulfillment vs individually.
+// We pass 15% of wholesale back to the client as a bundle discount (keeping remaining savings as margin).
+const CORE_BUNDLE_EFFICIENCY = 0.40; // 40% faster when all Core items implemented together
+const CORE_BUNDLE_DISCOUNT   = 0.15; // ~15% discount passed to client from efficiency savings
 
 // ========== HELPERS ==========
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US') }
@@ -795,7 +808,7 @@ let insCoreCbs = [], insSecCbs = [];
 function buildTab4(){
   const grid = document.getElementById('t4-grid');
   // Core column
-  let coreHtml = `<div class="ins-col"><h3>Core Solution</h3><div class="ins-items">`;
+  let coreHtml = `<div class="ins-col"><h3>Core Package</h3><div class="ins-items">`;
   INSURANCE_CORE.forEach((item, i) => {
     coreHtml += `<div class="ins-item">
       <input type="checkbox" class="ins-core-cb" data-idx="${i}" checked>
@@ -806,7 +819,7 @@ function buildTab4(){
   coreHtml += `</div><div class="ins-totals" id="ins-core-totals"></div></div>`;
 
   // Secondary column
-  let secHtml = `<div class="ins-col"><h3>Secondary Solution</h3><div class="ins-items">`;
+  let secHtml = `<div class="ins-col"><h3>Plus Package</h3><div class="ins-items">`;
   INSURANCE_SECONDARY.forEach((item, i) => {
     secHtml += `<div class="ins-item">
       <input type="checkbox" class="ins-sec-cb" data-idx="${i}" checked>
@@ -817,7 +830,7 @@ function buildTab4(){
   secHtml += `</div><div class="ins-totals" id="ins-sec-totals"></div></div>`;
 
   // Combo column
-  let comboHtml = `<div class="ins-col"><h3>Core + Secondary Bundle</h3><div class="ins-totals" id="ins-combo-totals"></div></div>`;
+  let comboHtml = `<div class="ins-col featured"><h3>Core + Plus Bundle</h3><div class="ins-totals" id="ins-combo-totals"></div></div>`;
 
   grid.innerHTML = coreHtml + secHtml + comboHtml;
 
@@ -828,28 +841,44 @@ function buildTab4(){
 }
 
 function renderTab4(){
-  // Core totals
-  let coreHb = 0, coreHm = 0;
+  // Core totals — apply efficiency bundle discount when ALL Core items are selected
+  let coreHb = 0, coreHm = 0, coreChecked = 0;
   insCoreCbs.forEach(cb => {
     if(cb.checked){
       const item = INSURANCE_CORE[parseInt(cb.dataset.idx)];
       coreHb += item.hb;
       coreHm += item.hm;
+      coreChecked++;
     }
   });
-  const coreWs = roundSetup(wholesaleSetup(coreHb));
-  const coreWm = roundMonthly(wholesaleMonthly(coreHm));
-  const coreCs = roundSetup(clientPrice(wholesaleSetup(coreHb)));
-  const coreCm = roundMonthly(clientPrice(wholesaleMonthly(coreHm)));
 
-  document.getElementById('ins-core-totals').innerHTML = `
+  const isFullCore = coreChecked === INSURANCE_CORE.length;
+  const coreBundleDisc = isFullCore ? CORE_BUNDLE_DISCOUNT : 0;
+  const coreWsBase = wholesaleSetup(coreHb);
+  const coreWmBase = wholesaleMonthly(coreHm);
+  const coreWs = roundSetup(coreWsBase * (1 - coreBundleDisc));
+  const coreWm = roundMonthly(coreWmBase * (1 - coreBundleDisc));
+  const coreCs = roundSetup(clientPrice(coreWsBase * (1 - coreBundleDisc)));
+  const coreCm = roundMonthly(clientPrice(coreWmBase * (1 - coreBundleDisc)));
+  const coreEffSavingsS = isFullCore ? roundSetup(coreWsBase * coreBundleDisc) : 0;
+  const coreEffSavingsM = isFullCore ? roundMonthly(coreWmBase * coreBundleDisc) : 0;
+
+  let coreTotalsHtml = `
     <div class="price-row"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(coreWs)}</span></div>
     <div class="price-row"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(coreWm)}</span></div>
     <div class="price-row"><span class="plabel">Client Setup</span><span class="pval gold">${fmt(coreCs)}</span></div>
     <div class="price-row"><span class="plabel">Client Monthly</span><span class="pval gold">${fmt(coreCm)}</span></div>
   `;
+  if(isFullCore){
+    coreTotalsHtml += `
+    <div class="efficiency-banner">
+      <div class="slabel">Bundle Efficiency — ~${(CORE_BUNDLE_EFFICIENCY*100).toFixed(0)}% faster fulfillment · ${(coreBundleDisc*100).toFixed(0)}% discount applied</div>
+      <div class="sval">${fmt(coreEffSavingsS)} setup · ${fmt(coreEffSavingsM)}/mo saved</div>
+    </div>`;
+  }
+  document.getElementById('ins-core-totals').innerHTML = coreTotalsHtml;
 
-  // Secondary totals
+  // Plus totals
   let secHb = 0, secHm = 0;
   insSecCbs.forEach(cb => {
     if(cb.checked){
@@ -872,16 +901,18 @@ function renderTab4(){
     <div class="price-row"><span class="plabel">Client Monthly</span><span class="pval gold">${fmt(secCm)}</span></div>
   `;
 
-  // Combo: Core full + Secondary discounted
+  // Combo: Core (with efficiency discount if full bundle) + Plus with 15% bundle discount
   const ds = CFG.ds;
-  const comboWsRaw = wholesaleSetup(coreHb) + wholesaleSetup(secHb) * (1 - ds);
-  const comboWmRaw = wholesaleMonthly(coreHm) + wholesaleMonthly(secHm) * (1 - ds);
+  const comboWsRaw = coreWsBase * (1 - coreBundleDisc) + wholesaleSetup(secHb) * (1 - ds);
+  const comboWmRaw = coreWmBase * (1 - coreBundleDisc) + wholesaleMonthly(secHm) * (1 - ds);
   const comboWs = roundSetup(comboWsRaw);
   const comboWm = roundMonthly(comboWmRaw);
   const comboCs = roundSetup(clientPrice(comboWsRaw));
   const comboCm = roundMonthly(clientPrice(comboWmRaw));
-  const bundleSavingsSetup = roundSetup(wholesaleSetup(secHb) * ds);
-  const bundleSavingsMonthly = roundMonthly(wholesaleMonthly(secHm) * ds);
+  const plusSavingsSetup = roundSetup(wholesaleSetup(secHb) * ds);
+  const plusSavingsMonthly = roundMonthly(wholesaleMonthly(secHm) * ds);
+  const totalBundleSavingsSetup = plusSavingsSetup + coreEffSavingsS;
+  const totalBundleSavingsMonthly = plusSavingsMonthly + coreEffSavingsM;
   const floorWs = roundSetup(hardFloor(comboWsRaw));
   const floorWm = roundMonthly(hardFloor(comboWmRaw));
 
@@ -898,10 +929,11 @@ function renderTab4(){
   `;
 
   if(hasCore && hasSec){
+    const coreTag = isFullCore ? ` + Core ${(coreBundleDisc*100).toFixed(0)}% efficiency` : '';
     comboHtml += `
     <div style="margin-top:12px" class="savings-banner">
-      <div class="slabel">Bundle Savings (${(ds*100).toFixed(0)}% off Secondary)</div>
-      <div class="sval">${fmt(bundleSavingsSetup)} setup · ${fmt(bundleSavingsMonthly)}/mo</div>
+      <div class="slabel">${(ds*100).toFixed(0)}% off Plus${coreTag} — total bundle savings</div>
+      <div class="sval">${fmt(totalBundleSavingsSetup)} setup · ${fmt(totalBundleSavingsMonthly)}/mo</div>
     </div>`;
   }
 
@@ -910,10 +942,10 @@ function renderTab4(){
   // Summary bar
   document.getElementById('t4-summary').innerHTML = `
     <div class="summary-item"><div class="label">Core W. Setup</div><div class="value">${fmt(coreWs)}</div></div>
-    <div class="summary-item"><div class="label">Secondary W. Setup</div><div class="value">${fmt(secWs)}</div></div>
+    <div class="summary-item"><div class="label">Plus W. Setup</div><div class="value">${fmt(secWs)}</div></div>
     <div class="summary-item"><div class="label">Combo W. Setup</div><div class="value gold">${fmt(comboWs)}</div></div>
     <div class="summary-item"><div class="label">Combo Client Setup</div><div class="value gold">${fmt(comboCs)}</div></div>
-    <div class="summary-item"><div class="label">Bundle Savings</div><div class="value green">${fmt(bundleSavingsSetup)}</div></div>
+    <div class="summary-item"><div class="label">Total Bundle Savings</div><div class="value green">${fmt(totalBundleSavingsSetup)}</div></div>
   `;
 }
 
