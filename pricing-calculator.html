@@ -9,13 +9,13 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0D1118;--primary:#141C28;--accent:#BB8575;--accent-light:#CC9988;--accent-dark:#A06B5A;
-  --purple:#7966A2;--purple-dark:#5C4A85;--purple-light:#9A8BC0;
-  --surface:#192231;--surface2:#1E2A3C;--border:#263245;--border-light:#344860;
-  --text:#E4E0DC;--text-dim:#8A8696;--white:#F8F6F4;
-  --green:#5CC98E;--red:#E87070;--silver:#A8A4B0;
+  --bg:#F7F5F2;--primary:#EDEAE6;--accent:#BB8575;--accent-light:#CC9988;--accent-dark:#A06B5A;
+  --purple:#7966A2;--purple-dark:#5C4A85;--purple-light:#6A58A0;
+  --surface:#FFFFFF;--surface2:#F2EEE9;--border:#DDD8D0;--border-light:#C8C2BA;
+  --text:#2A2420;--text-dim:#8A7E74;--white:#1A1510;
+  --green:#1E8A50;--red:#C04040;--silver:#706868;
   --radius:10px;--radius-lg:14px;
-  --shadow:0 4px 28px rgba(0,0,0,.45);
+  --shadow:0 4px 16px rgba(0,0,0,.08);
 }
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
 .app{max-width:1440px;margin:0 auto;padding:20px 24px}
@@ -33,7 +33,7 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .tabs{display:flex;gap:2px;margin-bottom:20px;background:var(--primary);border-radius:var(--radius);padding:4px;border:1px solid var(--border)}
 .tab-btn{flex:1;padding:10px 16px;background:transparent;border:none;color:var(--text-dim);font-size:.82rem;cursor:pointer;border-radius:calc(var(--radius) - 2px);transition:all .25s ease;white-space:nowrap;font-family:inherit;font-weight:500;letter-spacing:.3px}
 .tab-btn:hover{color:var(--text);background:var(--surface)}
-.tab-btn.active{color:var(--white);background:linear-gradient(135deg,var(--purple-dark),var(--purple));font-weight:600;box-shadow:0 2px 12px rgba(121,102,162,.3)}
+.tab-btn.active{color:#FFFFFF;background:linear-gradient(135deg,var(--purple-dark),var(--purple));font-weight:600;box-shadow:0 2px 12px rgba(121,102,162,.3)}
 .tab-content{display:none}
 .tab-content.active{display:block;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -87,7 +87,7 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .pkg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
 .pkg-card:hover{transform:translateY(-2px);border-color:var(--border-light)}
 .pkg-card.featured{border-color:var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.2)}
-.pkg-card.featured::before{content:'MOST POPULAR';position:absolute;top:14px;right:-28px;background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:var(--white);font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
+.pkg-card.featured::before{content:'MOST POPULAR';position:absolute;top:14px;right:-28px;background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#FFFFFF;font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
 .pkg-card .pkg-name{font-size:1.15rem;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:.5px}
 .pkg-card .pkg-discount{font-size:.78rem;color:var(--accent);margin-bottom:18px;font-weight:500}
 .pkg-card .pkg-prices{margin:18px 0}
@@ -136,7 +136,7 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .efficiency-banner .sval{font-size:1.1rem;font-weight:700;color:var(--purple-light)}
 .ins-col.featured{border-color:var(--purple);box-shadow:0 4px 28px rgba(121,102,162,.2);position:relative;overflow:hidden}
 .ins-col.featured h3{color:var(--purple-light)}
-.ins-col.featured::before{content:'RECOMMENDED';position:absolute;top:0;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:var(--white);font-size:.58rem;font-weight:700;letter-spacing:1px;padding:3px 20px;border-radius:0 0 8px 8px}
+.ins-col.featured::before{content:'RECOMMENDED';position:absolute;top:0;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#FFFFFF;font-size:.58rem;font-weight:700;letter-spacing:1px;padding:3px 20px;border-radius:0 0 8px 8px}
 
 .scroll-wrap{max-height:65vh;overflow-y:auto}
 .scroll-wrap::-webkit-scrollbar{width:6px}
