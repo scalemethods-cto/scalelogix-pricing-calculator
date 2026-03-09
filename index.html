@@ -85,7 +85,7 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .pkg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
 .pkg-card:hover{transform:translateY(-2px);border-color:var(--border-light)}
 .pkg-card.featured{border-color:var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.2)}
-.pkg-card.featured::before{content:'MOST POPULAR';position:absolute;top:14px;right:-28px;background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#FFFFFF;font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
+.pkg-card.featured::before{content:'BEST VALUE';position:absolute;top:14px;right:-28px;background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#FFFFFF;font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
 .pkg-card .pkg-name{font-size:1.15rem;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:.5px}
 .pkg-card .pkg-discount{font-size:.78rem;color:var(--accent);margin-bottom:18px;font-weight:500}
 .pkg-card .pkg-prices{margin:18px 0}
@@ -120,29 +120,20 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .toggle input:checked+.slider{background:var(--purple)}
 .toggle input:checked+.slider::before{transform:translateX(20px)}
 
-/* Insurance columns */
-.ins-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
-.ins-col{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow)}
-.ins-col h3{color:var(--purple);font-size:.88rem;margin-bottom:18px;text-align:center;letter-spacing:.5px;font-weight:600}
-.ins-col .ins-items{margin-bottom:18px}
-.ins-col .ins-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(42,42,52,.4);font-size:.8rem}
-.ins-col .ins-item input[type="checkbox"]{width:14px;height:14px;accent-color:var(--purple);cursor:pointer}
-.ins-col .ins-item .iname{flex:1;color:var(--text)}
-.ins-col .ins-item .ihours{color:var(--text-dim);font-size:.68rem;white-space:nowrap}
-.ins-totals .price-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(42,42,52,.4);font-size:.83rem}
-.ins-totals .price-row .plabel{color:var(--text-dim)}
-.ins-totals .price-row .pval{font-weight:600;color:var(--white)}
-.ins-totals .price-row .pval.gold{color:var(--purple)}
-.ins-totals .price-row .pval.green{color:var(--green)}
+/* Offers tab — feature list inside pkg-cards */
+.ins-items-list{max-height:260px;overflow-y:auto;margin:14px 0;padding-right:4px}
+.ins-items-list::-webkit-scrollbar{width:4px}
+.ins-items-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.ins-items-list .ins-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(42,42,52,.12);font-size:.78rem}
+.ins-items-list .ins-item input[type="checkbox"]{width:14px;height:14px;accent-color:var(--purple);cursor:pointer;flex-shrink:0}
+.ins-items-list .ins-item .iname{flex:1;color:var(--text)}
+.ins-items-list .ins-item .ihours{color:var(--text-dim);font-size:.68rem;white-space:nowrap}
 .savings-banner{background:rgba(92,201,142,.08);border:1px solid rgba(92,201,142,.2);border-radius:var(--radius);padding:14px;text-align:center;margin-top:14px}
 .savings-banner .slabel{font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
 .savings-banner .sval{font-size:1.15rem;font-weight:700;color:var(--green)}
 .efficiency-banner{background:rgba(121,102,162,.08);border:1px solid rgba(121,102,162,.22);border-radius:var(--radius);padding:14px;text-align:center;margin-top:14px}
 .efficiency-banner .slabel{font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
 .efficiency-banner .sval{font-size:1.1rem;font-weight:700;color:var(--purple-light)}
-.ins-col.featured{border-color:var(--purple);box-shadow:0 4px 28px rgba(121,102,162,.2);position:relative;overflow:hidden}
-.ins-col.featured h3{color:var(--purple-light)}
-.ins-col.featured::before{content:'RECOMMENDED';position:absolute;top:0;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#FFFFFF;font-size:.58rem;font-weight:700;letter-spacing:1px;padding:3px 20px;border-radius:0 0 8px 8px}
 
 .scroll-wrap{max-height:65vh;overflow-y:auto}
 .scroll-wrap::-webkit-scrollbar{width:6px}
@@ -177,7 +168,6 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 <div class="tabs">
   <button class="tab-btn active" data-tab="tab1">Single Item</button>
   <button class="tab-btn" data-tab="tab2">Custom Build</button>
-  <button class="tab-btn" data-tab="tab3">Pre-Built Packages</button>
   <button class="tab-btn" data-tab="tab4">Offers</button>
 </div>
 
@@ -262,22 +252,10 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
   <div class="bottom-summary" id="t2-bottom"></div>
 </div>
 
-<!-- ===== TAB 3 — PRE-BUILT PACKAGES ===== -->
-<div id="tab3" class="tab-content">
-  <div class="summary-bar" id="t3-summary"></div>
-  <p style="font-size:.75rem;color:var(--text-dim);margin-bottom:14px;letter-spacing:.3px;">General-industry preset packages — for non-insurance verticals or custom scoping reference.</p>
-  <div class="toggle-row">
-    <label>Wholesale</label>
-    <label class="toggle"><input type="checkbox" id="t3-view-toggle"><span class="slider"></span></label>
-    <label>Client Price</label>
-  </div>
-  <div class="pkg-grid" id="t3-packages"></div>
-</div>
-
-<!-- ===== TAB 4 — INSURANCE ===== -->
+<!-- ===== TAB 4 — OFFERS ===== -->
 <div id="tab4" class="tab-content">
   <div class="summary-bar" id="t4-summary"></div>
-  <div class="ins-grid" id="t4-grid"></div>
+  <div class="pkg-grid" id="t4-grid"></div>
 </div>
 </div>
 
@@ -448,143 +426,6 @@ const INSURANCE_SECONDARY = [
   { name: "Owner-level performance dashboards", hb: 12, hm: 4 },
   { name: "Safe scaling optimization workflows", hb: 8, hm: 3 },
 ];
-
-// ========== PRE-BUILT PACKAGES ==========
-const PACKAGES = [
-  {
-    name: "Starter",
-    discount: 0.20,
-    items: [
-      "Missed-call text-back",
-      "After-hours inquiry handling",
-      "Instant lead response <2 min",
-      "Smart appointment confirmations",
-      "Email nurture sequences",
-      "SMS nurture sequences",
-      "No-show prevention",
-      "Appointment reminder automation",
-      "Review request automation",
-      "Digital intake form automation",
-      "AI personalized message generation",
-      "Outreach performance analytics",
-    ]
-  },
-  {
-    name: "Growth",
-    discount: 0.25,
-    featured: true,
-    items: [
-      "AI voice agent inbound calls 24/7",
-      "Website chat widget with SMS follow-up",
-      "Quote request handling automation",
-      "AI cold email outreach campaigns",
-      "AI personalized message generation",
-      "Lead list building & enrichment",
-      "AI reply handling & conversation routing",
-      "Outreach performance analytics",
-      "Automated appointment booking system",
-      "Calendar + CRM integration",
-      "AI scheduling optimization",
-      "CRM setup and configuration",
-      "Custom pipeline creation",
-      "Lead tracking and status automation",
-      "AI lead qualification workflows",
-      "Paid-ad lead filtering",
-      "Email nurture sequences",
-      "SMS nurture sequences",
-      "Smart estimate follow-up",
-      "Quote follow-up sequences",
-      "No-show prevention",
-      "Appointment reminder automation",
-      "Review request automation",
-      "Review generation workflows",
-      "Referral request automation",
-      "Smart onboarding workflows",
-      "Renewal reminder automation",
-      "Monthly performance reporting",
-      "Team onboarding and training",
-      "Ongoing system optimization",
-    ]
-  },
-  {
-    name: "Scale",
-    discount: 0.30,
-    items: [
-      "AI voice agent inbound calls 24/7",
-      "Missed-call text-back",
-      "Website chat widget with SMS follow-up",
-      "AI chatbot for websites and listings",
-      "After-hours inquiry handling",
-      "Instant lead response <2 min",
-      "Quote request handling automation",
-      "AI cold email outreach campaigns",
-      "AI personalized message generation",
-      "Automated LinkedIn outreach sequences",
-      "Lead list building & enrichment",
-      "Multi-channel outbound campaigns",
-      "AI reply handling & conversation routing",
-      "Outreach performance analytics",
-      "Automated appointment booking system",
-      "Calendar + CRM integration",
-      "Smart appointment confirmations",
-      "AI scheduling optimization",
-      "Consultation booking automation",
-      "Automatic rebooking workflows",
-      "CRM setup and configuration",
-      "Custom pipeline creation",
-      "Lead tracking and status automation",
-      "CRM + calendar integration",
-      "Multi-location CRM coordination",
-      "AI lead qualification workflows",
-      "Paid-ad lead filtering",
-      "Lead scoring and prioritization",
-      "Client segmentation logic",
-      "Client health scoring",
-      "Email nurture sequences",
-      "SMS nurture sequences",
-      "Voice + SMS + email multi-channel campaigns",
-      "Smart estimate follow-up",
-      "Quote follow-up sequences",
-      "Lost quote recovery",
-      "No-show prevention",
-      "Appointment reminder automation",
-      "Review request automation",
-      "Review generation workflows",
-      "Referral request automation",
-      "Systematic referral engines",
-      "Digital intake form automation",
-      "Smart onboarding workflows",
-      "Maintenance ticket automation",
-      "Issue resolution workflows",
-      "Customer reactivation campaigns",
-      "Renewal reminder automation",
-      "Churn prediction systems",
-      "Churn prevention automation",
-      "Upsell automation",
-      "Cross-sell automation",
-      "Lifetime value optimization",
-      "Monthly performance reporting",
-      "Real-time dashboards",
-      "Revenue forecasting dashboards",
-      "Multi-location performance dashboards",
-      "Predictive analytics & forecasting",
-      "AI-generated email content",
-      "AI-generated SMS content",
-      "AI-generated social content",
-      "AI-generated newsletters",
-      "Team onboarding and training",
-      "System training documentation",
-      "Ongoing system optimization",
-      "Weekly optimization sessions",
-      "Dedicated manager support",
-      "Priority Slack and email support",
-    ]
-  }
-];
-
-// Build capability lookup
-const capLookup = {};
-CAPABILITIES.forEach(cat => cat.items.forEach(item => { capLookup[item.name] = item; }));
 
 // ========== TAB NAVIGATION ==========
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -796,39 +637,45 @@ function renderTab3(){
   `;
 }
 
-document.getElementById('t3-view-toggle').addEventListener('change', renderTab3);
-
-// ========== TAB 4 — INSURANCE ==========
+// ========== TAB 4 — OFFERS ==========
 let insCoreCbs = [], insSecCbs = [];
 
 function buildTab4(){
   const grid = document.getElementById('t4-grid');
-  // Core column
-  let coreHtml = `<div class="ins-col"><h3>Core Package</h3><div class="ins-items">`;
-  INSURANCE_CORE.forEach((item, i) => {
-    coreHtml += `<div class="ins-item">
+
+  const coreItems = INSURANCE_CORE.map((item, i) => `
+    <div class="ins-item">
       <input type="checkbox" class="ins-core-cb" data-idx="${i}" checked>
       <span class="iname">${item.name}</span>
       <span class="ihours">${item.hb}b / ${item.hm}m</span>
-    </div>`;
-  });
-  coreHtml += `</div><div class="ins-totals" id="ins-core-totals"></div></div>`;
+    </div>`).join('');
 
-  // Secondary column
-  let secHtml = `<div class="ins-col"><h3>Plus Package</h3><div class="ins-items">`;
-  INSURANCE_SECONDARY.forEach((item, i) => {
-    secHtml += `<div class="ins-item">
+  const secItems = INSURANCE_SECONDARY.map((item, i) => `
+    <div class="ins-item">
       <input type="checkbox" class="ins-sec-cb" data-idx="${i}" checked>
       <span class="iname">${item.name}</span>
       <span class="ihours">${item.hb}b / ${item.hm}m</span>
-    </div>`;
-  });
-  secHtml += `</div><div class="ins-totals" id="ins-sec-totals"></div></div>`;
+    </div>`).join('');
 
-  // Combo column
-  let comboHtml = `<div class="ins-col featured"><h3>Core + Plus Bundle</h3><div class="ins-totals" id="ins-combo-totals"></div></div>`;
-
-  grid.innerHTML = coreHtml + secHtml + comboHtml;
+  grid.innerHTML = `
+    <div class="pkg-card">
+      <div class="pkg-name">Core</div>
+      <div class="pkg-discount" id="core-meta">${(CORE_BUNDLE_DISCOUNT*100).toFixed(0)}% Bundle Discount · ${INSURANCE_CORE.length} capabilities</div>
+      <div class="ins-items-list">${coreItems}</div>
+      <div class="pkg-prices" id="ins-core-totals"></div>
+    </div>
+    <div class="pkg-card">
+      <div class="pkg-name">Plus</div>
+      <div class="pkg-discount" id="plus-meta">${INSURANCE_SECONDARY.length} capabilities</div>
+      <div class="ins-items-list">${secItems}</div>
+      <div class="pkg-prices" id="ins-sec-totals"></div>
+    </div>
+    <div class="pkg-card featured">
+      <div class="pkg-name">Core + Plus Bundle</div>
+      <div class="pkg-discount" id="bundle-meta">${INSURANCE_CORE.length + INSURANCE_SECONDARY.length} capabilities total</div>
+      <div class="pkg-prices" id="ins-combo-totals"></div>
+    </div>
+  `;
 
   insCoreCbs = document.querySelectorAll('.ins-core-cb');
   insSecCbs = document.querySelectorAll('.ins-sec-cb');
@@ -859,6 +706,11 @@ function renderTab4(){
   const coreEffSavingsS = isFullCore ? roundSetup(coreWsBase * coreBundleDisc) : 0;
   const coreEffSavingsM = isFullCore ? roundMonthly(coreWmBase * coreBundleDisc) : 0;
 
+  // Update Core meta line
+  document.getElementById('core-meta').textContent = isFullCore
+    ? `${(CORE_BUNDLE_DISCOUNT*100).toFixed(0)}% Bundle Discount · ${coreChecked} capabilities`
+    : `${coreChecked} capabilities`;
+
   let coreTotalsHtml = `
     <div class="price-row"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(coreWs)}</span></div>
     <div class="price-row"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(coreWm)}</span></div>
@@ -875,12 +727,13 @@ function renderTab4(){
   document.getElementById('ins-core-totals').innerHTML = coreTotalsHtml;
 
   // Plus totals
-  let secHb = 0, secHm = 0;
+  let secHb = 0, secHm = 0, secChecked = 0;
   insSecCbs.forEach(cb => {
     if(cb.checked){
       const item = INSURANCE_SECONDARY[parseInt(cb.dataset.idx)];
       secHb += item.hb;
       secHm += item.hm;
+      secChecked++;
     }
   });
   const secWsRaw = wholesaleSetup(secHb);
@@ -890,6 +743,9 @@ function renderTab4(){
   const secCs = roundSetup(clientPrice(secWsRaw));
   const secCm = roundMonthly(clientPrice(secWmRaw));
 
+  // Update Plus meta line
+  document.getElementById('plus-meta').textContent = `${secChecked} capabilities`;
+
   document.getElementById('ins-sec-totals').innerHTML = `
     <div class="price-row"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(secWs)}</span></div>
     <div class="price-row"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(secWm)}</span></div>
@@ -897,7 +753,7 @@ function renderTab4(){
     <div class="price-row"><span class="plabel">Client Monthly</span><span class="pval gold">${fmt(secCm)}</span></div>
   `;
 
-  // Combo: Core (with efficiency discount if full bundle) + Plus with 15% bundle discount
+  // Combo: Core (with efficiency discount if full bundle) + Plus with ds% bundle discount
   const ds = CFG.ds;
   const comboWsRaw = coreWsBase * (1 - coreBundleDisc) + wholesaleSetup(secHb) * (1 - ds);
   const comboWmRaw = coreWmBase * (1 - coreBundleDisc) + wholesaleMonthly(secHm) * (1 - ds);
@@ -910,6 +766,9 @@ function renderTab4(){
   const totalBundleSavingsSetup = plusSavingsSetup + coreEffSavingsS;
   const totalBundleSavingsMonthly = plusSavingsMonthly + coreEffSavingsM;
 
+  // Update Bundle meta line
+  document.getElementById('bundle-meta').textContent = `${coreChecked + secChecked} capabilities total`;
+
   const hasCore = coreHb > 0 || coreHm > 0;
   const hasSec = secHb > 0 || secHm > 0;
 
@@ -919,16 +778,14 @@ function renderTab4(){
     <div class="price-row"><span class="plabel">Combo Client Setup</span><span class="pval gold">${fmt(comboCs)}</span></div>
     <div class="price-row"><span class="plabel">Combo Client Monthly</span><span class="pval gold">${fmt(comboCm)}</span></div>
   `;
-
   if(hasCore && hasSec){
     const coreTag = isFullCore ? ` + Core ${(coreBundleDisc*100).toFixed(0)}% efficiency` : '';
     comboHtml += `
-    <div style="margin-top:12px" class="savings-banner">
+    <div class="savings-banner">
       <div class="slabel">${(ds*100).toFixed(0)}% off Plus${coreTag} — total bundle savings</div>
       <div class="sval">${fmt(totalBundleSavingsSetup)} setup · ${fmt(totalBundleSavingsMonthly)}/mo</div>
     </div>`;
   }
-
   document.getElementById('ins-combo-totals').innerHTML = comboHtml;
 
   // Summary bar
@@ -945,7 +802,6 @@ function renderTab4(){
 function updateAll(){
   renderTab1();
   renderTab2();
-  renderTab3();
   renderTab4();
 }
 
