@@ -43,7 +43,7 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .summary-item{text-align:center;padding:4px 0}
 .summary-item .label{font-size:.65rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:4px;font-weight:500}
 .summary-item .value{font-size:1.15rem;font-weight:700;color:var(--white)}
-.summary-item .value.gold{color:var(--accent)}
+.summary-item .value.gold{color:var(--purple)}
 .summary-item .value.green{color:var(--green)}
 .summary-item .value.red{color:var(--red)}
 
@@ -95,7 +95,7 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .pkg-card .price-row .plabel{color:var(--text-dim)}
 .pkg-card .price-row .pval{font-weight:600;color:var(--white)}
 .pkg-card .price-row .pval.strike{text-decoration:line-through;color:var(--text-dim);font-weight:400}
-.pkg-card .price-row .pval.gold{color:var(--accent)}
+.pkg-card .price-row .pval.gold{color:var(--purple)}
 .pkg-card .price-row .pval.green{color:var(--green)}
 .pkg-items{max-height:220px;overflow-y:auto;margin-top:14px;padding-right:4px}
 .pkg-items::-webkit-scrollbar{width:4px}
@@ -126,7 +126,7 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .ins-totals .price-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(42,42,52,.4);font-size:.83rem}
 .ins-totals .price-row .plabel{color:var(--text-dim)}
 .ins-totals .price-row .pval{font-weight:600;color:var(--white)}
-.ins-totals .price-row .pval.gold{color:var(--accent)}
+.ins-totals .price-row .pval.gold{color:var(--purple)}
 .ins-totals .price-row .pval.green{color:var(--green)}
 .savings-banner{background:rgba(92,201,142,.08);border:1px solid rgba(92,201,142,.2);border-radius:var(--radius);padding:14px;text-align:center;margin-top:14px}
 .savings-banner .slabel{font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
@@ -620,8 +620,8 @@ function renderTab1(){
   document.getElementById('t1-results').innerHTML = `
     <div class="result-box"><div class="rlabel">Wholesale Setup</div><div class="rvalue">${fmt(wSetup)}</div></div>
     <div class="result-box"><div class="rlabel">Wholesale Monthly</div><div class="rvalue">${fmt(wMonthly)}</div></div>
-    <div class="result-box"><div class="rlabel">Client Setup</div><div class="rvalue" style="color:var(--accent)">${fmt(cSetup)}</div></div>
-    <div class="result-box"><div class="rlabel">Client Monthly</div><div class="rvalue" style="color:var(--accent)">${fmt(cMonthly)}</div></div>
+    <div class="result-box"><div class="rlabel">Client Setup</div><div class="rvalue" style="color:var(--purple)">${fmt(cSetup)}</div></div>
+    <div class="result-box"><div class="rlabel">Client Monthly</div><div class="rvalue" style="color:var(--purple)">${fmt(cMonthly)}</div></div>
     <div class="result-box${floorWarnS}"><div class="rlabel">Hard Floor Setup</div><div class="rvalue">${fmt(fSetup)}</div></div>
     <div class="result-box${floorWarnM}"><div class="rlabel">Hard Floor Monthly</div><div class="rvalue">${fmt(fMonthly)}</div></div>
     <div class="result-box"><div class="rlabel">Gross Margin %</div><div class="rvalue" style="color:var(--green)">${mgn.toFixed(1)}%</div></div>
