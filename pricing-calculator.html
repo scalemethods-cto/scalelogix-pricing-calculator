@@ -148,6 +148,10 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 body.client-mode .view-toggle-btn{background:var(--surface);color:var(--purple);border:1.5px solid var(--purple)}
 .logout-btn{position:fixed;top:18px;right:22px;z-index:200;background:transparent;color:var(--text-dim);border:1px solid var(--border);border-radius:20px;padding:8px 16px;font-size:.72rem;font-weight:500;cursor:pointer;letter-spacing:.3px;transition:all .2s;font-family:inherit}
 .logout-btn:hover{background:var(--primary);color:var(--text);border-color:var(--border-light)}
+/* View mode tag */
+.view-tag{position:fixed;top:18px;left:22px;z-index:200;border-radius:20px;padding:8px 16px;font-size:.72rem;font-weight:600;letter-spacing:.4px;font-family:'Inter',system-ui,sans-serif;pointer-events:none}
+.view-tag.sales{background:rgba(92,74,133,.12);color:var(--purple-dark);border:1px solid rgba(92,74,133,.25)}
+.view-tag.client{background:rgba(187,133,117,.12);color:var(--accent-dark);border:1px solid rgba(187,133,117,.3)}
 body.client-mode .sales-only{display:none!important}
 .client-only{display:none!important}
 body.client-mode .client-only{display:block!important}
@@ -207,6 +211,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
   <div class="header-line"></div>
 </header>
 
+<div class="view-tag sales" id="view-tag">Sales View</div>
 <button class="view-toggle-btn" id="view-toggle" onclick="toggleView()">Client View</button>
 <button class="logout-btn" onclick="logout()">Log Out</button>
 
@@ -330,12 +335,24 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 const SALES_PW  = '8CN8eAAnrQrXk1nB';    // Full access + internal pricing visible
 const CLIENT_PW = 'client2025';   // Client view only — no internal data
 
+function setViewTag(mode){
+  const tag = document.getElementById('view-tag');
+  if(mode === 'client'){
+    tag.textContent = 'Client View';
+    tag.className = 'view-tag client';
+  } else {
+    tag.textContent = 'Sales View';
+    tag.className = 'view-tag sales';
+  }
+}
+
 function checkPw(){
   const val = document.getElementById('pw-input').value.trim();
   const errEl = document.getElementById('pw-error');
   if(val === SALES_PW){
     sessionStorage.setItem('sl-mode','sales');
     document.getElementById('pw-gate').classList.add('hidden');
+    setViewTag('sales');
     errEl.style.display = 'none';
   } else if(val === CLIENT_PW){
     sessionStorage.setItem('sl-mode','client');
@@ -343,6 +360,7 @@ function checkPw(){
     document.body.classList.add('client-mode');
     document.getElementById('view-toggle').style.display = 'none';
     document.querySelector('[data-tab="tab4"]').click();
+    setViewTag('client');
     errEl.style.display = 'none';
   } else {
     errEl.style.display = 'block';
@@ -356,11 +374,12 @@ function checkPw(){
   const mode = sessionStorage.getItem('sl-mode');
   if(mode === 'sales'){
     document.getElementById('pw-gate').classList.add('hidden');
+    setViewTag('sales');
   } else if(mode === 'client'){
     document.getElementById('pw-gate').classList.add('hidden');
     document.body.classList.add('client-mode');
     document.getElementById('view-toggle').style.display = 'none';
-    // Navigate to Offers tab after DOM is ready
+    setViewTag('client');
     window.addEventListener('DOMContentLoaded', () => {
       document.querySelector('[data-tab="tab4"]').click();
     });
@@ -838,6 +857,7 @@ function logout(){
   document.body.classList.remove('client-mode');
   document.getElementById('view-toggle').style.display = '';
   document.getElementById('view-toggle').textContent = 'Client View';
+  setViewTag('sales');
   document.getElementById('pw-input').value = '';
   document.getElementById('pw-error').style.display = 'none';
   document.getElementById('pw-gate').classList.remove('hidden');
@@ -849,6 +869,7 @@ function toggleView(){
   const isClient = document.body.classList.toggle('client-mode');
   const btn = document.getElementById('view-toggle');
   btn.textContent = isClient ? '← Sales View' : 'Client View';
+  setViewTag(isClient ? 'client' : 'sales');
   if(isClient){
     const tab4btn = document.querySelector('[data-tab="tab4"]');
     if(tab4btn && !tab4btn.classList.contains('active')) tab4btn.click();
