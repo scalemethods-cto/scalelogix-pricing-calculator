@@ -142,10 +142,12 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .scroll-wrap::-webkit-scrollbar{width:6px}
 .scroll-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-/* View toggle button */
-.view-toggle-btn{position:fixed;top:18px;right:22px;z-index:200;background:var(--purple);color:#fff;border:none;border-radius:20px;padding:8px 18px;font-size:.74rem;font-weight:600;cursor:pointer;letter-spacing:.4px;box-shadow:0 2px 14px rgba(92,74,133,.35);transition:all .2s;font-family:inherit}
+/* Top-right action buttons */
+.view-toggle-btn{position:fixed;top:18px;right:110px;z-index:200;background:var(--purple);color:#fff;border:none;border-radius:20px;padding:8px 18px;font-size:.74rem;font-weight:600;cursor:pointer;letter-spacing:.4px;box-shadow:0 2px 14px rgba(92,74,133,.35);transition:all .2s;font-family:inherit}
 .view-toggle-btn:hover{background:var(--purple-dark);box-shadow:0 4px 18px rgba(92,74,133,.45)}
 body.client-mode .view-toggle-btn{background:var(--surface);color:var(--purple);border:1.5px solid var(--purple)}
+.logout-btn{position:fixed;top:18px;right:22px;z-index:200;background:transparent;color:var(--text-dim);border:1px solid var(--border);border-radius:20px;padding:8px 16px;font-size:.72rem;font-weight:500;cursor:pointer;letter-spacing:.3px;transition:all .2s;font-family:inherit}
+.logout-btn:hover{background:var(--primary);color:var(--text);border-color:var(--border-light)}
 body.client-mode .sales-only{display:none!important}
 .client-only{display:none!important}
 body.client-mode .client-only{display:block!important}
@@ -206,6 +208,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 </header>
 
 <button class="view-toggle-btn" id="view-toggle" onclick="toggleView()">Client View</button>
+<button class="logout-btn" onclick="logout()">Lock</button>
 
 <div class="tabs">
   <button class="tab-btn active" data-tab="tab1">Single Item</button>
@@ -827,6 +830,18 @@ function renderTab4(){
     <div class="summary-item"><div class="label">Bundle Client Monthly</div><div class="value gold">${fmt(comboCm)}</div></div>
     <div class="summary-item"><div class="label">Total Bundle Savings</div><div class="value green">${fmt(totalBundleSavingsSetup)}</div></div>
   `;
+}
+
+// ========== LOGOUT ==========
+function logout(){
+  sessionStorage.removeItem('sl-mode');
+  document.body.classList.remove('client-mode');
+  document.getElementById('view-toggle').style.display = '';
+  document.getElementById('view-toggle').textContent = 'Client View';
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-error').style.display = 'none';
+  document.getElementById('pw-gate').classList.remove('hidden');
+  document.getElementById('pw-input').focus();
 }
 
 // ========== CLIENT / SALES VIEW TOGGLE ==========
