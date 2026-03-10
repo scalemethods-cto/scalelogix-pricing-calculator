@@ -147,7 +147,8 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .view-toggle-btn:hover{background:var(--purple-dark);box-shadow:0 4px 18px rgba(92,74,133,.45)}
 body.client-mode .view-toggle-btn{background:var(--surface);color:var(--purple);border:1.5px solid var(--purple)}
 body.client-mode .sales-only{display:none!important}
-body.client-mode .tab-btn[data-tab="tab1"],body.client-mode .tab-btn[data-tab="tab2"]{display:none!important}
+.client-only{display:none!important}
+body.client-mode .client-only{display:block!important}
 
 /* Presentation mode polish */
 ::selection{background:rgba(196,154,124,.3);color:var(--white)}
@@ -186,7 +187,9 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 <!-- ===== TAB 1 — SINGLE ITEM ===== -->
 <div id="tab1" class="tab-content active">
   <div class="summary-bar" id="t1-summary"></div>
-  <div class="card">
+
+  <!-- SALES ONLY: internal pricing config -->
+  <div class="card sales-only">
     <h3>Pricing Setup</h3>
     <div class="pricing-flow">
       <div class="pf-step"><div class="pf-num">1</div><div class="pf-label">Dev Cost</div><div class="pf-sub">Hours × Rate</div></div>
@@ -223,16 +226,34 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
       </div>
     </div>
   </div>
+
+  <!-- CLIENT ONLY: process explanation -->
+  <div class="card client-only">
+    <h3>How We Build Your Automations</h3>
+    <div class="pricing-flow" style="margin-bottom:14px">
+      <div class="pf-step"><div class="pf-num">1</div><div class="pf-label">Discovery</div><div class="pf-sub">Map your workflows</div></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-step"><div class="pf-num">2</div><div class="pf-label">Build</div><div class="pf-sub">One-time setup</div></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-step"><div class="pf-num">3</div><div class="pf-label">Deploy</div><div class="pf-sub">Go live + training</div></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-step"><div class="pf-num">4</div><div class="pf-label">Optimize</div><div class="pf-sub">Monthly support</div></div>
+    </div>
+    <p style="font-size:.82rem;color:var(--text-dim);line-height:1.75">Each automation is priced by <strong style="color:var(--text)">setup complexity</strong> (build hours, one-time) and <strong style="color:var(--text)">monthly support</strong> (ongoing optimization &amp; management). Adjust the hours below to scope your investment.</p>
+  </div>
+
   <div class="card">
-    <h3>Single Item Calculator</h3>
+    <h3>Automation Scope Calculator</h3>
     <div class="input-grid">
       <div class="field">
-        <label>h_b — Build Hours</label>
+        <label>Build Hours <span class="sales-only" style="font-weight:400">(one-time)</span></label>
         <input type="number" id="t1-hb" value="10" step="1" min="0">
+        <span class="hint client-only">Hours to build &amp; integrate the automation</span>
       </div>
       <div class="field">
-        <label>h_m — Monthly Hours</label>
+        <label>Monthly Hours <span class="sales-only" style="font-weight:400">(support)</span></label>
         <input type="number" id="t1-hm" value="4" step="1" min="0">
+        <span class="hint client-only">Hours per month for optimization &amp; support</span>
       </div>
     </div>
     <div class="results-grid" id="t1-results"></div>
@@ -253,8 +274,8 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
             <th>Tier</th>
             <th>Build Hrs</th>
             <th>Mo. Hrs</th>
-            <th>W Setup</th>
-            <th>W Monthly</th>
+            <th class="sales-only">W Setup</th>
+            <th class="sales-only">W Monthly</th>
           </tr>
         </thead>
         <tbody id="t2-body"></tbody>
@@ -465,19 +486,19 @@ function renderTab1(){
   const mgn = revenue > 0 ? ((revenue - cost) / revenue * 100) : 0;
 
   document.getElementById('t1-summary').innerHTML = `
-    <div class="summary-item"><div class="label">Wholesale Setup</div><div class="value">${fmt(wSetup)}</div></div>
-    <div class="summary-item"><div class="label">Wholesale Monthly</div><div class="value">${fmt(wMonthly)}</div></div>
-    <div class="summary-item"><div class="label">Client Setup</div><div class="value gold">${fmt(cSetup)}</div></div>
-    <div class="summary-item"><div class="label">Client Monthly</div><div class="value gold">${fmt(cMonthly)}</div></div>
-    <div class="summary-item"><div class="label">Margin %</div><div class="value green">${mgn.toFixed(1)}%</div></div>
+    <div class="summary-item sales-only"><div class="label">Wholesale Setup</div><div class="value">${fmt(wSetup)}</div></div>
+    <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(wMonthly)}</div></div>
+    <div class="summary-item"><div class="label">Setup Investment</div><div class="value gold">${fmt(cSetup)}</div></div>
+    <div class="summary-item"><div class="label">Monthly Investment</div><div class="value gold">${fmt(cMonthly)}</div></div>
+    <div class="summary-item sales-only"><div class="label">Margin %</div><div class="value green">${mgn.toFixed(1)}%</div></div>
   `;
 
   document.getElementById('t1-results').innerHTML = `
-    <div class="result-box"><div class="rlabel">Wholesale Setup</div><div class="rvalue">${fmt(wSetup)}</div></div>
-    <div class="result-box"><div class="rlabel">Wholesale Monthly</div><div class="rvalue">${fmt(wMonthly)}</div></div>
-    <div class="result-box"><div class="rlabel">Client Setup</div><div class="rvalue" style="color:var(--purple)">${fmt(cSetup)}</div></div>
-    <div class="result-box"><div class="rlabel">Client Monthly</div><div class="rvalue" style="color:var(--purple)">${fmt(cMonthly)}</div></div>
-    <div class="result-box"><div class="rlabel">Gross Margin %</div><div class="rvalue" style="color:var(--green)">${mgn.toFixed(1)}%</div></div>
+    <div class="result-box sales-only"><div class="rlabel">Wholesale Setup</div><div class="rvalue">${fmt(wSetup)}</div></div>
+    <div class="result-box sales-only"><div class="rlabel">Wholesale Monthly</div><div class="rvalue">${fmt(wMonthly)}</div></div>
+    <div class="result-box"><div class="rlabel">Setup Investment</div><div class="rvalue" style="color:var(--purple)">${fmt(cSetup)}</div></div>
+    <div class="result-box"><div class="rlabel">Monthly Investment</div><div class="rvalue" style="color:var(--purple)">${fmt(cMonthly)}</div></div>
+    <div class="result-box sales-only"><div class="rlabel">Gross Margin %</div><div class="rvalue" style="color:var(--green)">${mgn.toFixed(1)}%</div></div>
   `;
 }
 
@@ -499,8 +520,8 @@ function buildTab2Table(){
         <td><span class="badge ${item.tier}">${item.tier}</span></td>
         <td>${item.hb}</td>
         <td>${item.hm}</td>
-        <td>${fmt(ws)}</td>
-        <td>${fmt(wm)}</td>
+        <td class="sales-only">${fmt(ws)}</td>
+        <td class="sales-only">${fmt(wm)}</td>
       </tr>`;
       idx++;
     });
@@ -540,19 +561,19 @@ function renderTab2(){
 
   document.getElementById('t2-summary').innerHTML = `
     <div class="summary-item"><div class="label">Items Selected</div><div class="value">${n}</div></div>
-    <div class="summary-item"><div class="label">Tier Discount</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
-    <div class="summary-item"><div class="label">Wholesale Setup</div><div class="value">${fmt(discWs)}</div></div>
-    <div class="summary-item"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
-    <div class="summary-item"><div class="label">Client Setup</div><div class="value gold">${fmt(cWs)}</div></div>
-    <div class="summary-item"><div class="label">Client Monthly</div><div class="value gold">${fmt(cWm)}</div></div>
+    <div class="summary-item"><div class="label">Volume Discount</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
+    <div class="summary-item sales-only"><div class="label">Wholesale Setup</div><div class="value">${fmt(discWs)}</div></div>
+    <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
+    <div class="summary-item"><div class="label">Setup Investment</div><div class="value gold">${fmt(cWs)}</div></div>
+    <div class="summary-item"><div class="label">Monthly Investment</div><div class="value gold">${fmt(cWm)}</div></div>
   `;
 
   document.getElementById('t2-bottom').innerHTML = `
     <div class="summary-item"><div class="label">Items</div><div class="value">${n}</div></div>
-    <div class="summary-item"><div class="label">Tier Discount</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
-    <div class="summary-item"><div class="label">W. Setup Total</div><div class="value">${fmt(discWs)}</div></div>
-    <div class="summary-item"><div class="label">W. Monthly Total</div><div class="value">${fmt(discWm)}</div></div>
-    <div class="summary-item"><div class="label">Client Total Setup</div><div class="value gold">${fmt(cWs)}</div></div>
+    <div class="summary-item"><div class="label">Volume Discount</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
+    <div class="summary-item sales-only"><div class="label">W. Setup Total</div><div class="value">${fmt(discWs)}</div></div>
+    <div class="summary-item sales-only"><div class="label">W. Monthly Total</div><div class="value">${fmt(discWm)}</div></div>
+    <div class="summary-item"><div class="label">Total Setup Investment</div><div class="value gold">${fmt(cWs)}</div></div>
     <div class="summary-item"><div class="label">Setup Savings</div><div class="value green">${fmt(savingsS)}</div></div>
     <div class="summary-item"><div class="label">Monthly Savings</div><div class="value green">${fmt(savingsM)}</div></div>
   `;
