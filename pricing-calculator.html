@@ -82,12 +82,15 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 
 /* Package Cards */
 .pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
-.pkg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
+.pkg-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--border-light);border-radius:var(--radius-lg);padding:26px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
 .pkg-card:hover{transform:translateY(-2px);border-color:var(--border-light)}
-.pkg-card.featured{border-color:var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.2)}
+.pkg-card.featured{border-color:var(--purple);border-top:3px solid var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.2)}
 .pkg-card.featured::before{content:'BEST VALUE';position:absolute;top:14px;right:-28px;background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#FFFFFF;font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
-.pkg-card .pkg-name{font-size:1.15rem;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:.5px}
-.pkg-card .pkg-discount{font-size:.78rem;color:var(--accent);margin-bottom:18px;font-weight:500}
+.pkg-card .pkg-name{font-size:1.35rem;font-weight:800;color:var(--text);margin-bottom:5px;letter-spacing:-.2px}
+.pkg-card.featured .pkg-name{color:var(--purple-dark)}
+.pkg-card .pkg-subtitle{font-size:.76rem;color:var(--text-dim);margin-bottom:14px;line-height:1.55;font-weight:400}
+.pkg-card.featured .pkg-subtitle{color:var(--text-slate)}
+.pkg-card .pkg-discount{display:inline-block;font-size:.72rem;color:var(--accent);font-weight:600;background:rgba(187,133,117,.08);border:1px solid rgba(187,133,117,.2);border-radius:20px;padding:3px 12px;margin-bottom:14px}
 .pkg-card .pkg-prices{margin:18px 0}
 .pkg-card .price-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(42,42,52,.4);font-size:.83rem}
 .pkg-card .price-row .plabel{color:var(--text-dim)}
@@ -560,83 +563,6 @@ function renderTab2(){
   });
 }
 
-// ========== TAB 3 — PACKAGES ==========
-function renderTab3(){
-  const showClient = document.getElementById('t3-view-toggle').checked;
-  const container = document.getElementById('t3-packages');
-  let html = '';
-  let bestSavingsSetup = 0;
-
-  PACKAGES.forEach(pkg => {
-    let sumWs = 0, sumWm = 0;
-    const resolvedItems = [];
-    pkg.items.forEach(name => {
-      const item = capLookup[name];
-      if(item){
-        sumWs += wholesaleSetup(item.hb);
-        sumWm += wholesaleMonthly(item.hm);
-        resolvedItems.push(name);
-      }
-    });
-
-    const dp = pkg.discount;
-    const fullSetup = roundSetup(sumWs);
-    const fullMonthly = roundMonthly(sumWm);
-    const wSetup = roundSetup(sumWs * (1 - dp));
-    const wMonthly = roundMonthly(sumWm * (1 - dp));
-    const cSetup = roundSetup(clientPrice(sumWs * (1 - dp)));
-    const cMonthly = roundMonthly(clientPrice(sumWm * (1 - dp)));
-    const savingsSetup = fullSetup - wSetup;
-    const savingsMonthly = fullMonthly - wMonthly;
-
-    if(savingsSetup > bestSavingsSetup) bestSavingsSetup = savingsSetup;
-
-    const dispSetup = showClient ? cSetup : wSetup;
-    const dispMonthly = showClient ? cMonthly : wMonthly;
-    const dispFullSetup = showClient ? roundSetup(clientPrice(sumWs)) : fullSetup;
-    const dispFullMonthly = showClient ? roundMonthly(clientPrice(sumWm)) : fullMonthly;
-    const dispSavingsSetup = dispFullSetup - dispSetup;
-    const dispSavingsMonthly = dispFullMonthly - dispMonthly;
-    const label = showClient ? 'Client' : 'Wholesale';
-
-    html += `
-    <div class="pkg-card${pkg.featured ? ' featured' : ''}">
-      <div class="pkg-name">${pkg.name}</div>
-      <div class="pkg-discount">${(dp*100).toFixed(0)}% Package Discount · ${resolvedItems.length} capabilities</div>
-      <div class="pkg-prices">
-        <div class="price-row"><span class="plabel">Full ${label} Setup</span><span class="pval strike">${fmt(dispFullSetup)}</span></div>
-        <div class="price-row"><span class="plabel">${label} Setup</span><span class="pval gold">${fmt(dispSetup)}</span></div>
-        <div class="price-row"><span class="plabel">Full ${label} Monthly</span><span class="pval strike">${fmt(dispFullMonthly)}</span></div>
-        <div class="price-row"><span class="plabel">${label} Monthly</span><span class="pval gold">${fmt(dispMonthly)}</span></div>
-        <div class="price-row"><span class="plabel">Setup Savings</span><span class="pval green">${fmt(dispSavingsSetup)}</span></div>
-        <div class="price-row"><span class="plabel">Monthly Savings</span><span class="pval green">${fmt(dispSavingsMonthly)}</span></div>
-      </div>
-      <ul class="pkg-items">${resolvedItems.map(i => `<li>${i}</li>`).join('')}</ul>
-    </div>`;
-  });
-
-  container.innerHTML = html;
-
-  // Summary bar
-  const pkg0 = PACKAGES[0], pkg2 = PACKAGES[2];
-  let s0ws=0,s0wm=0,s2ws=0,s2wm=0;
-  pkg0.items.forEach(n=>{ const i=capLookup[n]; if(i){s0ws+=wholesaleSetup(i.hb);s0wm+=wholesaleMonthly(i.hm);} });
-  pkg2.items.forEach(n=>{ const i=capLookup[n]; if(i){s2ws+=wholesaleSetup(i.hb);s2wm+=wholesaleMonthly(i.hm);} });
-
-  const starterW = roundSetup(s0ws*(1-pkg0.discount));
-  const scaleW = roundSetup(s2ws*(1-pkg2.discount));
-  const starterC = roundSetup(clientPrice(s0ws*(1-pkg0.discount)));
-  const scaleC = roundSetup(clientPrice(s2ws*(1-pkg2.discount)));
-
-  document.getElementById('t3-summary').innerHTML = `
-    <div class="summary-item"><div class="label">Starter Setup (W)</div><div class="value">${fmt(starterW)}</div></div>
-    <div class="summary-item"><div class="label">Scale Setup (W)</div><div class="value">${fmt(scaleW)}</div></div>
-    <div class="summary-item"><div class="label">Starter Client</div><div class="value gold">${fmt(starterC)}</div></div>
-    <div class="summary-item"><div class="label">Scale Client</div><div class="value gold">${fmt(scaleC)}</div></div>
-    <div class="summary-item"><div class="label">View</div><div class="value">${showClient ? 'Client' : 'Wholesale'}</div></div>
-  `;
-}
-
 // ========== TAB 4 — OFFERS ==========
 let insCoreCbs = [], insSecCbs = [];
 
@@ -660,19 +586,22 @@ function buildTab4(){
   grid.innerHTML = `
     <div class="pkg-card">
       <div class="pkg-name">Core</div>
-      <div class="pkg-discount" id="core-meta">${(CORE_BUNDLE_DISCOUNT*100).toFixed(0)}% Bundle Discount · ${INSURANCE_CORE.length} capabilities</div>
+      <div class="pkg-subtitle">The operational foundation — automates your entire client pipeline from first contact to ongoing support</div>
+      <div class="pkg-discount" id="core-meta">${(CORE_BUNDLE_DISCOUNT*100).toFixed(0)}% Bundle Discount · ${INSURANCE_CORE.length} automations</div>
       <div class="ins-items-list">${coreItems}</div>
       <div class="pkg-prices" id="ins-core-totals"></div>
     </div>
     <div class="pkg-card">
       <div class="pkg-name">Plus</div>
-      <div class="pkg-discount" id="plus-meta">${INSURANCE_SECONDARY.length} capabilities</div>
+      <div class="pkg-subtitle">The growth intelligence layer — advanced revenue systems that stack on top of Core to accelerate growth</div>
+      <div class="pkg-discount" id="plus-meta">${INSURANCE_SECONDARY.length} advanced add-ons</div>
       <div class="ins-items-list">${secItems}</div>
       <div class="pkg-prices" id="ins-sec-totals"></div>
     </div>
     <div class="pkg-card featured">
       <div class="pkg-name">Core + Plus Bundle</div>
-      <div class="pkg-discount" id="bundle-meta">${INSURANCE_CORE.length + INSURANCE_SECONDARY.length} capabilities total</div>
+      <div class="pkg-subtitle">The complete AI system — full-stack operations and growth intelligence from Day 1</div>
+      <div class="pkg-discount" id="bundle-meta">${INSURANCE_CORE.length + INSURANCE_SECONDARY.length} automations included</div>
       <div class="pkg-prices" id="ins-combo-totals"></div>
     </div>
   `;
@@ -708,8 +637,8 @@ function renderTab4(){
 
   // Update Core meta line
   document.getElementById('core-meta').textContent = isFullCore
-    ? `${(CORE_BUNDLE_DISCOUNT*100).toFixed(0)}% Bundle Discount · ${coreChecked} capabilities`
-    : `${coreChecked} capabilities`;
+    ? `${(CORE_BUNDLE_DISCOUNT*100).toFixed(0)}% Bundle Discount · ${coreChecked} automations`
+    : `${coreChecked} automations`;
 
   let coreTotalsHtml = `
     <div class="price-row"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(coreWs)}</span></div>
@@ -744,7 +673,7 @@ function renderTab4(){
   const secCm = roundMonthly(clientPrice(secWmRaw));
 
   // Update Plus meta line
-  document.getElementById('plus-meta').textContent = `${secChecked} capabilities`;
+  document.getElementById('plus-meta').textContent = `${secChecked} advanced add-ons`;
 
   document.getElementById('ins-sec-totals').innerHTML = `
     <div class="price-row"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(secWs)}</span></div>
@@ -767,7 +696,7 @@ function renderTab4(){
   const totalBundleSavingsMonthly = plusSavingsMonthly + coreEffSavingsM;
 
   // Update Bundle meta line
-  document.getElementById('bundle-meta').textContent = `${coreChecked + secChecked} capabilities total`;
+  document.getElementById('bundle-meta').textContent = `${coreChecked + secChecked} automations included`;
 
   const hasCore = coreHb > 0 || coreHm > 0;
   const hasSec = secHb > 0 || secHm > 0;
