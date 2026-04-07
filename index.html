@@ -218,6 +218,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 <div class="tabs">
   <button class="tab-btn active" data-tab="tab1">Single Item</button>
   <button class="tab-btn" data-tab="tab2">Custom Build</button>
+  <button class="tab-btn" data-tab="tab3">Dev Hour Packages</button>
   <button class="tab-btn" data-tab="tab4">Offers</button>
 </div>
 
@@ -232,29 +233,29 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
       <div class="pf-step"><div class="pf-num">1</div><div class="pf-label">Dev Cost</div><div class="pf-sub">Hours × Rate</div></div>
       <div class="pf-arrow">+ Agency Margin →</div>
       <div class="pf-step"><div class="pf-num">2</div><div class="pf-label">Wholesale Price</div><div class="pf-sub">Your price to resell</div></div>
-      <div class="pf-arrow">+ ScaleLogix Commission →</div>
+      <div class="pf-arrow">= Client Price →</div>
       <div class="pf-step"><div class="pf-num">3</div><div class="pf-label">Client Price</div><div class="pf-sub">What the client pays</div></div>
     </div>
     <div class="input-grid">
       <div class="field">
         <label>Dev Rate ($/hr)</label>
-        <input type="number" id="cfg-r" value="87.50" step="0.50" min="0">
-        <span class="hint">Hourly cost to build &amp; maintain automations</span>
+        <input type="number" id="cfg-r" value="105" step="0.50" min="0">
+        <span class="hint">Hourly cost to build &amp; maintain automations (commission absorbed)</span>
       </div>
       <div class="field">
         <label>Agency Margin %</label>
-        <input type="number" id="cfg-margin-pct" value="50" step="1" min="1" max="99">
-        <span class="hint">Your profit as agency owner — at 50%, a $100 dev cost becomes $200 wholesale</span>
+        <input type="number" id="cfg-margin-pct" value="40" step="1" min="20" max="99">
+        <span class="hint">Your profit as agency owner (20% floor) — at 40%, a $100 dev cost becomes ~$167 wholesale</span>
       </div>
       <div class="field" style="opacity:.55">
         <label>Wholesale Multiplier (auto)</label>
-        <input type="number" id="cfg-mu" value="2.0" step="0.1" min="1" readonly style="cursor:default">
+        <input type="number" id="cfg-mu" value="1.67" step="0.1" min="1" readonly style="cursor:default">
         <span class="hint">Auto-calculated from Agency Margin — do not edit</span>
       </div>
-      <div class="field">
+      <div class="field" style="opacity:.55">
         <label>ScaleLogix Commission %</label>
-        <input type="number" id="cfg-phi" value="20" step="1" min="0" max="100">
-        <span class="hint">Added on top of wholesale — ScaleLogix's cut for selling on your behalf</span>
+        <input type="number" id="cfg-phi" value="0" step="1" min="0" max="100" readonly style="cursor:default">
+        <span class="hint">Removed — absorbed into dev rate</span>
       </div>
       <div class="field">
         <label>Plus Bundle Discount %</label>
@@ -319,7 +320,23 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
       </table>
     </div>
   </div>
+  <div id="t2-pkg-rec" style="display:none"></div>
   <div class="bottom-summary" id="t2-bottom"></div>
+</div>
+
+<!-- ===== TAB 3 — DEV HOUR PACKAGES ===== -->
+<div id="tab3" class="tab-content">
+  <div class="summary-bar" id="t3-summary">
+    <div class="summary-item"><div class="label">Monthly Dev Hours</div><div class="value" id="t3-sel-label">—</div></div>
+    <div class="summary-item"><div class="label">Wholesale Price</div><div class="value gold" id="t3-sel-ws">—</div></div>
+    <div class="summary-item"><div class="label">Client Price</div><div class="value gold" id="t3-sel-cp">—</div></div>
+    <div class="summary-item sales-only"><div class="label">Effective $/hr</div><div class="value green" id="t3-sel-ehr">—</div></div>
+  </div>
+  <div class="card">
+    <h3>Monthly Dev Hour Packages</h3>
+    <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:18px;line-height:1.6">Ongoing development hours for maintenance, optimization, and new builds. <strong style="color:var(--text)">No rollover</strong> — unused hours expire each month. Select a tier below.</p>
+    <div class="pkg-grid" id="t3-grid"></div>
+  </div>
 </div>
 
 <!-- ===== TAB 4 — OFFERS ===== -->
@@ -388,17 +405,27 @@ function checkPw(){
 
 // ========== CONFIG ==========
 const CFG = {
-  get r(){ return parseFloat(document.getElementById('cfg-r').value) || 87.50 },
+  get r(){ return parseFloat(document.getElementById('cfg-r').value) || 105 },
   get mu(){ return parseFloat(document.getElementById('cfg-mu').value) || 2.0 },
   get phi(){ return 1 + (parseFloat(document.getElementById('cfg-phi').value) || 20) / 100 },
   get ds(){ return (parseFloat(document.getElementById('cfg-ds').value) || 15) / 100 },
 };
 
 // ========== BUNDLE PRICING LOGIC ==========
-// Core Package: implementing all automations together yields ~40% faster fulfillment vs individually.
-// We pass 15% of wholesale back to the client as a bundle discount (keeping remaining savings as margin).
-const CORE_BUNDLE_EFFICIENCY = 0.40; // 40% faster when all Core items implemented together
-const CORE_BUNDLE_DISCOUNT   = 0.15; // ~15% discount passed to client from efficiency savings
+// Bundle efficiency: building items together shares infrastructure, reusable components, and
+// reduces total dev hours vs building each item individually.
+// We pass 15% of the efficiency savings back to the client as a bundle discount.
+const CORE_BUNDLE_EFFICIENCY = 0.40; // 40% fewer hours when all Core items implemented together
+const CORE_BUNDLE_DISCOUNT   = 0.15; // 15% discount passed to client from efficiency savings
+
+// Custom Build bundle: efficiency scales with number of items (shared infra, reuse)
+function bundleEfficiency(n){
+  if(n <= 1) return 0;
+  if(n <= 3) return 0.08;   // 8% efficiency for 2-3 items
+  if(n <= 6) return 0.12;   // 12% for 4-6 items
+  if(n <= 10) return 0.15;  // 15% for 7-10 items
+  return 0.18;              // 18% for 11+ items
+}
 
 // ========== HELPERS ==========
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US') }
@@ -420,114 +447,120 @@ function tierDiscount(n){
 // ========== CAPABILITY DATA ==========
 const CAPABILITIES = [
   { cat: "Lead Capture & Instant Response", items: [
-    { name: "AI voice agent inbound calls 24/7", tier: "complex", hb: 16, hm: 6 },
-    { name: "Missed-call text-back", tier: "simple", hb: 5, hm: 3 },
-    { name: "Website chat widget with SMS follow-up", tier: "medium", hb: 10, hm: 4 },
-    { name: "AI chatbot for websites and listings", tier: "medium", hb: 10, hm: 4 },
-    { name: "After-hours inquiry handling", tier: "simple", hb: 5, hm: 3 },
-    { name: "Instant lead response <2 min", tier: "simple", hb: 5, hm: 3 },
-    { name: "Quote request handling automation", tier: "medium", hb: 10, hm: 4 },
+    { name: "AI voice agent inbound calls 24/7", tier: "complex", hb: 16, hm: 6, desc: "AI-powered phone agent answers every call, qualifies leads, and routes to the right team" },
+    { name: "Missed-call text-back", tier: "simple", hb: 5, hm: 3, desc: "Automatically texts anyone whose call was missed within seconds" },
+    { name: "Website chat widget with SMS follow-up", tier: "medium", hb: 10, hm: 4, desc: "Live chat on your site that captures info and continues the conversation via SMS" },
+    { name: "AI chatbot for websites and listings", tier: "medium", hb: 10, hm: 4, desc: "Intelligent chatbot trained on your business to engage and qualify visitors" },
+    { name: "After-hours inquiry handling", tier: "simple", hb: 5, hm: 3, desc: "Captures and responds to leads that come in outside business hours" },
+    { name: "Instant lead response <2 min", tier: "simple", hb: 5, hm: 3, desc: "Triggers immediate outreach the moment a new lead comes in" },
+    { name: "Quote request handling automation", tier: "medium", hb: 10, hm: 4, desc: "Collects quote details, routes to the right person, and follows up automatically" },
   ]},
   { cat: "AI-Powered Outreach", items: [
-    { name: "AI cold email outreach campaigns", tier: "complex", hb: 16, hm: 6 },
-    { name: "AI personalized message generation", tier: "medium", hb: 10, hm: 4 },
-    { name: "Automated LinkedIn outreach sequences", tier: "complex", hb: 16, hm: 6 },
-    { name: "Lead list building & enrichment", tier: "medium", hb: 10, hm: 4 },
-    { name: "Multi-channel outbound campaigns", tier: "complex", hb: 16, hm: 6 },
-    { name: "AI reply handling & conversation routing", tier: "medium", hb: 10, hm: 4 },
-    { name: "Outreach performance analytics", tier: "medium", hb: 10, hm: 4 },
+    { name: "AI cold email outreach campaigns", tier: "complex", hb: 16, hm: 6, desc: "Automated cold email sequences with AI personalization at scale" },
+    { name: "AI personalized message generation", tier: "medium", hb: 10, hm: 4, desc: "AI writes unique, relevant messages for each prospect based on their profile" },
+    { name: "Automated LinkedIn outreach sequences", tier: "complex", hb: 16, hm: 6, desc: "Multi-step LinkedIn connection and messaging campaigns on autopilot" },
+    { name: "Lead list building & enrichment", tier: "medium", hb: 10, hm: 4, desc: "Builds targeted prospect lists and enriches them with contact and company data" },
+    { name: "Multi-channel outbound campaigns", tier: "complex", hb: 16, hm: 6, desc: "Coordinated outreach across email, LinkedIn, SMS, and phone" },
+    { name: "AI reply handling & conversation routing", tier: "medium", hb: 10, hm: 4, desc: "AI reads replies, classifies intent, and routes hot leads to your team" },
+    { name: "Outreach performance analytics", tier: "medium", hb: 10, hm: 4, desc: "Tracks open rates, reply rates, and conversions across all outreach channels" },
   ]},
   { cat: "Appointment Booking & Scheduling", items: [
-    { name: "Automated appointment booking system", tier: "complex", hb: 16, hm: 6 },
-    { name: "Calendar + CRM integration", tier: "medium", hb: 10, hm: 4 },
-    { name: "Smart appointment confirmations", tier: "simple", hb: 5, hm: 3 },
-    { name: "AI scheduling optimization", tier: "medium", hb: 10, hm: 4 },
-    { name: "Consultation booking automation", tier: "medium", hb: 10, hm: 4 },
-    { name: "Automatic rebooking workflows", tier: "simple", hb: 5, hm: 3 },
+    { name: "Automated appointment booking system", tier: "complex", hb: 16, hm: 6, desc: "Self-service booking linked to your calendar with automatic confirmations" },
+    { name: "Calendar + CRM integration", tier: "medium", hb: 10, hm: 4, desc: "Syncs appointments between your calendar and CRM so nothing falls through" },
+    { name: "Smart appointment confirmations", tier: "simple", hb: 5, hm: 3, desc: "Sends confirmation and reminder messages via SMS and email" },
+    { name: "AI scheduling optimization", tier: "medium", hb: 10, hm: 4, desc: "AI suggests optimal appointment times based on availability and travel" },
+    { name: "Consultation booking automation", tier: "medium", hb: 10, hm: 4, desc: "Dedicated booking flow for consultations with intake forms and prep materials" },
+    { name: "Automatic rebooking workflows", tier: "simple", hb: 5, hm: 3, desc: "Automatically offers new time slots when appointments are cancelled" },
   ]},
   { cat: "CRM Pipelines & Infrastructure", items: [
-    { name: "CRM setup and configuration", tier: "complex", hb: 16, hm: 6 },
-    { name: "Custom pipeline creation", tier: "medium", hb: 10, hm: 4 },
-    { name: "Lead tracking and status automation", tier: "medium", hb: 10, hm: 4 },
-    { name: "CRM + calendar integration", tier: "simple", hb: 5, hm: 3 },
-    { name: "Multi-location CRM coordination", tier: "complex", hb: 16, hm: 6 },
-    { name: "White-label client portal setup", tier: "complex", hb: 16, hm: 6 },
+    { name: "CRM setup and configuration", tier: "complex", hb: 16, hm: 6, desc: "Full CRM buildout with custom fields, stages, and automation rules" },
+    { name: "Custom pipeline creation", tier: "medium", hb: 10, hm: 4, desc: "Builds sales pipelines tailored to your specific deal flow and process" },
+    { name: "Lead tracking and status automation", tier: "medium", hb: 10, hm: 4, desc: "Automatically moves leads through stages based on their actions and responses" },
+    { name: "CRM + calendar integration", tier: "simple", hb: 5, hm: 3, desc: "Connects your CRM to calendars so meetings auto-log to contact records" },
+    { name: "Multi-location CRM coordination", tier: "complex", hb: 16, hm: 6, desc: "Unified CRM setup across multiple locations with proper routing and visibility" },
+    { name: "White-label client portal setup", tier: "complex", hb: 16, hm: 6, desc: "Branded portal where your clients can log in, view progress, and communicate" },
   ]},
   { cat: "Lead Qualification & Scoring", items: [
-    { name: "AI lead qualification workflows", tier: "medium", hb: 10, hm: 4 },
-    { name: "Paid-ad lead filtering", tier: "medium", hb: 10, hm: 4 },
-    { name: "Lead scoring and prioritization", tier: "medium", hb: 10, hm: 4 },
-    { name: "Client segmentation logic", tier: "medium", hb: 10, hm: 4 },
-    { name: "Client health scoring", tier: "complex", hb: 16, hm: 6 },
+    { name: "AI lead qualification workflows", tier: "medium", hb: 10, hm: 4, desc: "AI evaluates leads based on fit criteria and flags the best opportunities" },
+    { name: "Paid-ad lead filtering", tier: "medium", hb: 10, hm: 4, desc: "Filters and scores leads from paid campaigns to focus on high-quality prospects" },
+    { name: "Lead scoring and prioritization", tier: "medium", hb: 10, hm: 4, desc: "Assigns scores to leads so your team works the hottest opportunities first" },
+    { name: "Client segmentation logic", tier: "medium", hb: 10, hm: 4, desc: "Groups contacts by behavior, value, or profile for targeted communication" },
+    { name: "Client health scoring", tier: "complex", hb: 16, hm: 6, desc: "Monitors engagement signals to flag at-risk clients before they churn" },
   ]},
   { cat: "Follow-Up Nurture & Conversion", items: [
-    { name: "Email nurture sequences", tier: "simple", hb: 5, hm: 3 },
-    { name: "SMS nurture sequences", tier: "simple", hb: 5, hm: 3 },
-    { name: "Voice + SMS + email multi-channel campaigns", tier: "complex", hb: 16, hm: 6 },
-    { name: "Smart estimate follow-up", tier: "medium", hb: 10, hm: 4 },
-    { name: "Quote follow-up sequences", tier: "medium", hb: 10, hm: 4 },
-    { name: "Lost quote recovery", tier: "medium", hb: 10, hm: 4 },
-    { name: "No-show prevention", tier: "simple", hb: 5, hm: 3 },
-    { name: "Appointment reminder automation", tier: "simple", hb: 5, hm: 3 },
+    { name: "Email nurture sequences", tier: "simple", hb: 5, hm: 3, desc: "Drip email campaigns that warm leads over time with valuable content" },
+    { name: "SMS nurture sequences", tier: "simple", hb: 5, hm: 3, desc: "Text message follow-up series for faster, more personal engagement" },
+    { name: "Voice + SMS + email multi-channel campaigns", tier: "complex", hb: 16, hm: 6, desc: "Coordinated follow-up across phone, text, and email for maximum reach" },
+    { name: "Smart estimate follow-up", tier: "medium", hb: 10, hm: 4, desc: "Automated check-ins after sending estimates to keep deals moving" },
+    { name: "Quote follow-up sequences", tier: "medium", hb: 10, hm: 4, desc: "Multi-step follow-up after quotes are sent until a decision is made" },
+    { name: "Lost quote recovery", tier: "medium", hb: 10, hm: 4, desc: "Re-engages prospects who received quotes but went cold" },
+    { name: "No-show prevention", tier: "simple", hb: 5, hm: 3, desc: "Pre-appointment reminders and confirmations to reduce no-shows" },
+    { name: "Appointment reminder automation", tier: "simple", hb: 5, hm: 3, desc: "Scheduled reminders via SMS and email before upcoming appointments" },
   ]},
   { cat: "Reviews Referrals & Reputation", items: [
-    { name: "Review request automation", tier: "simple", hb: 5, hm: 3 },
-    { name: "Review generation workflows", tier: "simple", hb: 5, hm: 3 },
-    { name: "Referral request automation", tier: "simple", hb: 5, hm: 3 },
-    { name: "Systematic referral engines", tier: "medium", hb: 10, hm: 4 },
+    { name: "Review request automation", tier: "simple", hb: 5, hm: 3, desc: "Asks happy customers for reviews at the right moment via SMS or email" },
+    { name: "Review generation workflows", tier: "simple", hb: 5, hm: 3, desc: "Multi-step campaign to maximize Google/Yelp review collection" },
+    { name: "Referral request automation", tier: "simple", hb: 5, hm: 3, desc: "Systematically asks satisfied clients for referrals with easy sharing links" },
+    { name: "Systematic referral engines", tier: "medium", hb: 10, hm: 4, desc: "Full referral program with tracking, rewards, and automated follow-up" },
   ]},
   { cat: "Client & Customer Operations", items: [
-    { name: "Digital intake form automation", tier: "simple", hb: 5, hm: 3 },
-    { name: "Smart onboarding workflows", tier: "medium", hb: 10, hm: 4 },
-    { name: "Maintenance ticket automation", tier: "medium", hb: 10, hm: 4 },
-    { name: "Issue resolution workflows", tier: "medium", hb: 10, hm: 4 },
-    { name: "Pre-consultation education sequences", tier: "simple", hb: 5, hm: 3 },
+    { name: "Digital intake form automation", tier: "simple", hb: 5, hm: 3, desc: "Online forms that collect client info and feed directly into your systems" },
+    { name: "Smart onboarding workflows", tier: "medium", hb: 10, hm: 4, desc: "Guided onboarding sequence that walks new clients through setup steps" },
+    { name: "Maintenance ticket automation", tier: "medium", hb: 10, hm: 4, desc: "Ticket creation, routing, and status updates handled automatically" },
+    { name: "Issue resolution workflows", tier: "medium", hb: 10, hm: 4, desc: "Automated triage and escalation paths to resolve client issues faster" },
+    { name: "Pre-consultation education sequences", tier: "simple", hb: 5, hm: 3, desc: "Sends prep materials and expectations before consultations" },
   ]},
   { cat: "Retention Reactivation & LTV", items: [
-    { name: "Customer reactivation campaigns", tier: "medium", hb: 10, hm: 4 },
-    { name: "Renewal reminder automation", tier: "simple", hb: 5, hm: 3 },
-    { name: "Churn prediction systems", tier: "complex", hb: 16, hm: 6 },
-    { name: "Churn prevention automation", tier: "medium", hb: 10, hm: 4 },
-    { name: "Upsell automation", tier: "medium", hb: 10, hm: 4 },
-    { name: "Cross-sell automation", tier: "medium", hb: 10, hm: 4 },
-    { name: "Lifetime value optimization", tier: "complex", hb: 16, hm: 6 },
+    { name: "Customer reactivation campaigns", tier: "medium", hb: 10, hm: 4, desc: "Win-back campaigns targeting inactive customers with personalized offers" },
+    { name: "Renewal reminder automation", tier: "simple", hb: 5, hm: 3, desc: "Proactive reminders before contracts or subscriptions expire" },
+    { name: "Churn prediction systems", tier: "complex", hb: 16, hm: 6, desc: "AI monitors engagement patterns to predict which clients may leave" },
+    { name: "Churn prevention automation", tier: "medium", hb: 10, hm: 4, desc: "Triggered outreach and offers when churn risk is detected" },
+    { name: "Upsell automation", tier: "medium", hb: 10, hm: 4, desc: "Identifies and presents relevant upgrade opportunities to existing clients" },
+    { name: "Cross-sell automation", tier: "medium", hb: 10, hm: 4, desc: "Recommends complementary services based on what the client already uses" },
+    { name: "Lifetime value optimization", tier: "complex", hb: 16, hm: 6, desc: "Data-driven strategies to maximize revenue per client over time" },
   ]},
   { cat: "Analytics Dashboards & Intelligence", items: [
-    { name: "Monthly performance reporting", tier: "medium", hb: 10, hm: 4 },
-    { name: "Real-time dashboards", tier: "complex", hb: 16, hm: 6 },
-    { name: "Revenue forecasting dashboards", tier: "complex", hb: 16, hm: 6 },
-    { name: "Multi-location performance dashboards", tier: "complex", hb: 16, hm: 6 },
-    { name: "Predictive analytics & forecasting", tier: "complex", hb: 16, hm: 6 },
+    { name: "Monthly performance reporting", tier: "medium", hb: 10, hm: 4, desc: "Automated monthly reports covering KPIs, trends, and recommendations" },
+    { name: "Real-time dashboards", tier: "complex", hb: 16, hm: 6, desc: "Live dashboards showing pipeline, revenue, and team performance" },
+    { name: "Revenue forecasting dashboards", tier: "complex", hb: 16, hm: 6, desc: "Predictive views of expected revenue based on pipeline and trends" },
+    { name: "Multi-location performance dashboards", tier: "complex", hb: 16, hm: 6, desc: "Comparative dashboards across all locations for executive visibility" },
+    { name: "Predictive analytics & forecasting", tier: "complex", hb: 16, hm: 6, desc: "AI-powered forecasting for demand, revenue, and resource planning" },
   ]},
   { cat: "Content & Communication Automation", items: [
-    { name: "AI-generated email content", tier: "simple", hb: 5, hm: 3 },
-    { name: "AI-generated SMS content", tier: "simple", hb: 5, hm: 3 },
-    { name: "AI-generated social content", tier: "medium", hb: 10, hm: 4 },
-    { name: "AI-generated newsletters", tier: "medium", hb: 10, hm: 4 },
-    { name: "Pre-sale education workflows", tier: "simple", hb: 5, hm: 3 },
+    { name: "AI-generated email content", tier: "simple", hb: 5, hm: 3, desc: "AI writes professional email content tailored to your audience and brand" },
+    { name: "AI-generated SMS content", tier: "simple", hb: 5, hm: 3, desc: "AI creates concise, engaging text messages for campaigns and follow-ups" },
+    { name: "AI-generated social content", tier: "medium", hb: 10, hm: 4, desc: "AI produces social media posts, captions, and content calendars" },
+    { name: "AI-generated newsletters", tier: "medium", hb: 10, hm: 4, desc: "Automated newsletter creation with curated content and personalization" },
+    { name: "Pre-sale education workflows", tier: "simple", hb: 5, hm: 3, desc: "Educational content sequences that warm prospects before the sales call" },
   ]},
   { cat: "AI Productivity & Internal Operations", items: [
-    { name: "AI meeting summaries", tier: "simple", hb: 5, hm: 3 },
-    { name: "Automated action-item extraction", tier: "simple", hb: 5, hm: 3 },
-    { name: "Internal task automation", tier: "medium", hb: 10, hm: 4 },
+    { name: "AI meeting summaries", tier: "simple", hb: 5, hm: 3, desc: "Automatic meeting notes, key decisions, and action items after every call" },
+    { name: "Automated action-item extraction", tier: "simple", hb: 5, hm: 3, desc: "Pulls action items from meetings and assigns them to the right people" },
+    { name: "Internal task automation", tier: "medium", hb: 10, hm: 4, desc: "Automates repetitive internal tasks like data entry, notifications, and approvals" },
   ]},
   { cat: "Compliance & Secure Workflows", items: [
-    { name: "Compliance-friendly workflow design", tier: "medium", hb: 10, hm: 4 },
-    { name: "HIPAA-compliant automation design", tier: "complex", hb: 16, hm: 6 },
-    { name: "Secure data handling workflows", tier: "medium", hb: 10, hm: 4 },
+    { name: "Compliance-friendly workflow design", tier: "medium", hb: 10, hm: 4, desc: "Workflows built with regulatory requirements and audit trails in mind" },
+    { name: "HIPAA-compliant automation design", tier: "complex", hb: 16, hm: 6, desc: "Healthcare-grade automation with proper data handling and access controls" },
+    { name: "Secure data handling workflows", tier: "medium", hb: 10, hm: 4, desc: "Encrypted data flows with access controls and secure storage practices" },
   ]},
   { cat: "Custom Engineering & Integrations", items: [
-    { name: "Custom software integrations", tier: "complex", hb: 16, hm: 6 },
-    { name: "Custom automation logic builds", tier: "complex", hb: 16, hm: 6 },
-    { name: "API-based workflow automation", tier: "complex", hb: 16, hm: 6 },
+    { name: "Custom software integrations", tier: "complex", hb: 16, hm: 6, desc: "Connects your existing tools and platforms into a unified workflow" },
+    { name: "Custom automation logic builds", tier: "complex", hb: 16, hm: 6, desc: "Bespoke automation logic tailored to your unique business processes" },
+    { name: "API-based workflow automation", tier: "complex", hb: 16, hm: 6, desc: "Builds custom API connections between systems for seamless data flow" },
+  ]},
+  { cat: "Website Development", items: [
+    { name: "Homepage with integrations & AI chat", tier: "complex", hb: 10, hm: 3, desc: "Full homepage build including design, copy, integrations, and AI chatbot setup" },
+    { name: "Additional website page", tier: "medium", hb: 5, hm: 1, desc: "Extra page with custom layout, copy creation, and responsive design" },
+    { name: "Website copy creation", tier: "medium", hb: 6, hm: 2, desc: "Professional copywriting for all website pages — messaging, CTAs, and brand voice" },
+    { name: "AI chatbot / bot integration", tier: "complex", hb: 10, hm: 4, desc: "Intelligent AI chat widget trained on your business for 24/7 visitor engagement" },
   ]},
   { cat: "Training Support & Optimization", items: [
-    { name: "Team onboarding and training", tier: "medium", hb: 10, hm: 0 },
-    { name: "System training documentation", tier: "simple", hb: 5, hm: 0 },
-    { name: "Ongoing system optimization", tier: "simple", hb: 0, hm: 3 },
-    { name: "Weekly optimization sessions", tier: "simple", hb: 0, hm: 3 },
-    { name: "Dedicated manager support", tier: "medium", hb: 0, hm: 4 },
-    { name: "Priority Slack and email support", tier: "simple", hb: 0, hm: 3 },
+    { name: "Team onboarding and training", tier: "medium", hb: 10, hm: 0, desc: "Live training sessions to get your team fully up to speed on all automations" },
+    { name: "System training documentation", tier: "simple", hb: 5, hm: 0, desc: "Step-by-step guides and SOPs for every automation in your stack" },
+    { name: "Ongoing system optimization", tier: "simple", hb: 0, hm: 3, desc: "Continuous tuning and improvements based on performance data" },
+    { name: "Weekly optimization sessions", tier: "simple", hb: 0, hm: 3, desc: "Regular strategy calls to review results and plan next optimizations" },
+    { name: "Dedicated manager support", tier: "medium", hb: 0, hm: 4, desc: "A dedicated account manager for proactive support and strategic guidance" },
+    { name: "Priority Slack and email support", tier: "simple", hb: 0, hm: 3, desc: "Fast-response support channel for urgent issues and questions" },
   ]},
 ];
 
@@ -607,9 +640,10 @@ function buildTab2Table(){
     cat.items.forEach(item => {
       const ws = roundSetup(wholesaleSetup(item.hb));
       const wm = roundMonthly(wholesaleMonthly(item.hm));
+      const descHtml = item.desc ? `<div style="font-size:.68rem;color:var(--text-dim);margin-top:2px;line-height:1.4;font-weight:300">${item.desc}</div>` : '';
       html += `<tr>
         <td class="cb"><input type="checkbox" data-idx="${idx}" class="t2-cb"></td>
-        <td>${item.name}</td>
+        <td>${item.name}${descHtml}</td>
         <td><span class="badge ${item.tier}">${item.tier}</span></td>
         <td>${item.hb}</td>
         <td>${item.hm}</td>
@@ -636,25 +670,25 @@ function renderTab2(){
   t2Checkboxes.forEach(cb => { if(cb.checked) selected.push(allItems[parseInt(cb.dataset.idx)]); });
 
   const n = selected.length;
-  const dn = tierDiscount(n);
-  let sumWs = 0, sumWm = 0;
-  selected.forEach(item => {
-    sumWs += wholesaleSetup(item.hb);
-    sumWm += wholesaleMonthly(item.hm);
-  });
+  const dn = bundleEfficiency(n);
+  // Sum total hours first, then price from reduced hours (real efficiency)
+  let totalHb = 0, totalHm = 0;
+  selected.forEach(item => { totalHb += item.hb; totalHm += item.hm; });
+  const effHb = totalHb * (1 - dn);
+  const effHm = totalHm * (1 - dn);
 
-  const fullWs = roundSetup(sumWs);
-  const fullWm = roundMonthly(sumWm);
-  const discWs = roundSetup(sumWs * (1 - dn));
-  const discWm = roundMonthly(sumWm * (1 - dn));
-  const cWs = roundSetup(clientPrice(sumWs * (1 - dn)));
-  const cWm = roundMonthly(clientPrice(sumWm * (1 - dn)));
+  const fullWs = roundSetup(wholesaleSetup(totalHb));
+  const fullWm = roundMonthly(wholesaleMonthly(totalHm));
+  const discWs = roundSetup(wholesaleSetup(effHb));
+  const discWm = roundMonthly(wholesaleMonthly(effHm));
+  const cWs = roundSetup(clientPrice(wholesaleSetup(effHb)));
+  const cWm = roundMonthly(clientPrice(wholesaleMonthly(effHm)));
   const savingsS = fullWs - discWs;
   const savingsM = fullWm - discWm;
 
   document.getElementById('t2-summary').innerHTML = `
     <div class="summary-item"><div class="label">Items Selected</div><div class="value">${n}</div></div>
-    <div class="summary-item"><div class="label">Volume Discount</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
+    <div class="summary-item"><div class="label">Bundle Efficiency</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Setup</div><div class="value">${fmt(discWs)}</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
     <div class="summary-item"><div class="label">Setup Investment</div><div class="value gold">${fmt(cWs)}</div></div>
@@ -663,7 +697,7 @@ function renderTab2(){
 
   document.getElementById('t2-bottom').innerHTML = `
     <div class="summary-item"><div class="label">Items</div><div class="value">${n}</div></div>
-    <div class="summary-item"><div class="label">Volume Discount</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
+    <div class="summary-item"><div class="label">Bundle Efficiency</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
     <div class="summary-item sales-only"><div class="label">W. Setup Total</div><div class="value">${fmt(discWs)}</div></div>
     <div class="summary-item sales-only"><div class="label">W. Monthly Total</div><div class="value">${fmt(discWm)}</div></div>
     <div class="summary-item"><div class="label">Total Setup Investment</div><div class="value gold">${fmt(cWs)}</div></div>
@@ -684,6 +718,74 @@ function renderTab2(){
       ri++;
     });
   });
+
+  // Smart package recommendation
+  const recEl = document.getElementById('t2-pkg-rec');
+  if(n >= 3){
+    const recPkg = totalHm >= 20 ? DEV_PACKAGES[2] : (totalHm >= 8 ? DEV_PACKAGES[1] : DEV_PACKAGES[0]);
+    const recClient = roundSetup(recPkg.wholesale * CFG.phi);
+    recEl.style.display = 'block';
+    recEl.innerHTML = `
+      <div style="background:linear-gradient(135deg,rgba(92,74,133,.08),rgba(121,102,162,.04));border:1.5px solid rgba(121,102,162,.25);border-radius:var(--radius-lg);padding:16px 22px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;color:var(--purple);font-weight:600;margin-bottom:4px">Recommended Monthly Package</div>
+          <div style="font-size:.95rem;font-weight:700;color:var(--text)">${recPkg.name} — ${recPkg.hours > 0 ? recPkg.hours + ' hrs/mo' : 'Custom scope'}</div>
+          <div style="font-size:.76rem;color:var(--text-dim);margin-top:2px">Based on ${totalHm} monthly support hours across ${n} selected items</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.68rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px">From</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--purple)">${fmt(recClient)}/mo</div>
+        </div>
+      </div>`;
+  } else {
+    recEl.style.display = 'none';
+  }
+}
+
+// ========== TAB 3 — DEV HOUR PACKAGES ==========
+const DEV_PACKAGES = [
+  { name: "Core", hours: 10, wholesale: 500, subtitle: "Essential maintenance & small optimizations", features: ["10 dev hours / month","Bug fixes & minor tweaks","Monthly performance review","Email support","No rollover"] },
+  { name: "Plus", hours: 25, wholesale: 1500, subtitle: "Active development & growth — best for scaling teams", features: ["25 dev hours / month","New feature builds","Workflow optimization","Priority Slack support","Weekly check-in call","No rollover"], featured: true },
+  { name: "Custom", hours: 0, wholesale: 2500, subtitle: "Enterprise-grade — dedicated dev resources for complex needs", features: ["Custom hour allocation","Dedicated dev resource","Strategic planning sessions","Priority Slack + phone support","Custom SLA","Contact us to scope"] },
+];
+
+let selectedPkg = 1; // default to Plus
+
+function buildTab3(){
+  const grid = document.getElementById('t3-grid');
+  grid.innerHTML = DEV_PACKAGES.map((pkg, i) => {
+    const isFeatured = pkg.featured ? ' featured' : '';
+    const clientPrice = roundSetup(pkg.wholesale * CFG.phi);
+    const effRate = pkg.hours > 0 ? (pkg.wholesale / pkg.hours) : 0;
+    const featuresHtml = pkg.features.map(f => `<li>${f}</li>`).join('');
+    return `
+    <div class="pkg-card${isFeatured}" style="cursor:pointer;${selectedPkg===i?'border-color:var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.25)':''}" onclick="selectPkg(${i})">
+      <div class="pkg-name">${pkg.name}</div>
+      <div class="pkg-subtitle">${pkg.subtitle}</div>
+      <div class="pkg-prices">
+        <div class="price-row sales-only"><span class="plabel">Wholesale / mo</span><span class="pval">${fmt(pkg.wholesale)}</span></div>
+        <div class="price-row"><span class="plabel">Monthly Investment</span><span class="pval gold">${fmt(clientPrice)}</span></div>
+        ${pkg.hours > 0 ? `<div class="price-row sales-only"><span class="plabel">Effective $/hr</span><span class="pval green">${fmt(effRate)}</span></div>` : `<div class="price-row"><span class="plabel">Hours</span><span class="pval">Custom scope</span></div>`}
+      </div>
+      <ul class="pkg-items">${featuresHtml}</ul>
+    </div>`;
+  }).join('');
+  renderTab3Summary();
+}
+
+function selectPkg(i){
+  selectedPkg = i;
+  buildTab3();
+}
+
+function renderTab3Summary(){
+  const pkg = DEV_PACKAGES[selectedPkg];
+  const clientP = roundSetup(pkg.wholesale * CFG.phi);
+  const effRate = pkg.hours > 0 ? (pkg.wholesale / pkg.hours) : 0;
+  document.getElementById('t3-sel-label').textContent = pkg.hours > 0 ? `${pkg.hours} hrs (${pkg.name})` : `Custom (${pkg.name})`;
+  document.getElementById('t3-sel-ws').textContent = fmt(pkg.wholesale);
+  document.getElementById('t3-sel-cp').textContent = fmt(clientP);
+  document.getElementById('t3-sel-ehr').textContent = pkg.hours > 0 ? fmt(effRate) : '—';
 }
 
 // ========== TAB 4 — OFFERS ==========
@@ -881,6 +983,7 @@ function toggleView(){
 function updateAll(){
   renderTab1();
   renderTab2();
+  renderTab3Summary();
   renderTab4();
 }
 
@@ -914,6 +1017,7 @@ muInput.addEventListener('input', () => {
 
 // ========== INIT ==========
 buildTab2Table();
+buildTab3();
 buildTab4();
 updateAll();
 </script>
