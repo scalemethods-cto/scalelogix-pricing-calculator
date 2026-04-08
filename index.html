@@ -540,15 +540,27 @@ async function handleLogin(){
 async function initSession(user){
   try {
     currentUser = user;
-    const { data: profile } = await sb.from('profiles').select('role, full_name, org_name').eq('id', user.id).single();
-    currentRole = profile?.role || 'client';
-  } catch(e) {
-    console.warn('Profile fetch failed, defaulting to client', e);
-    currentRole = 'client';
-  }
+    // Show loading overlay while data loads
+    document.getElementById('pw-gate').classList.add('hidden');
+    document.getElementById('app-loading').classList.remove('hidden');
 
-  applyRole(currentRole);
-  await loadData();
+    let role = 'client';
+    try {
+      const { data: profile } = await sb.from('profiles').select('role, full_name, org_name').eq('id', user.id).single();
+      role = profile?.role || 'client';
+    } catch(e) {
+      console.warn('Profile fetch failed, defaulting to client', e);
+    }
+    currentRole = role;
+    applyRole(currentRole);
+
+    await loadData();
+  } catch(e) {
+    console.warn('initSession failed, falling back', e);
+    currentRole = currentRole || 'client';
+    applyRole(currentRole);
+    loadFallbackData();
+  }
   document.getElementById('app-loading').classList.add('hidden');
 }
 
@@ -556,13 +568,14 @@ async function initFallbackSession(role){
   offlineMode = true;
   currentUser = { id: 'fallback' };
   currentRole = role;
+  document.getElementById('pw-gate').classList.add('hidden');
+  document.getElementById('app-loading').classList.remove('hidden');
   applyRole(role);
   loadFallbackData();
   document.getElementById('app-loading').classList.add('hidden');
 }
 
 function applyRole(role){
-  document.getElementById('pw-gate').classList.add('hidden');
   if(role === 'client'){
     document.body.classList.add('client-mode');
     document.getElementById('view-toggle').style.display = 'none';
@@ -677,10 +690,15 @@ async function loadData(){
     return;
   }
 
-  buildTab2Table();
-  buildTab3();
-  buildTab4();
-  updateAll();
+  try {
+    buildTab2Table();
+    buildTab3();
+    buildTab4();
+    updateAll();
+  } catch(e) {
+    console.warn('Tab build failed with Supabase data, falling back', e);
+    loadFallbackData();
+  }
 }
 
 // ========== FALLBACK DATA (works when Supabase is unreachable) ==========
