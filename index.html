@@ -1165,39 +1165,44 @@ function renderTab2(){
 
   document.getElementById('t2-summary').innerHTML = `
     <div class="summary-item"><div class="label">Items Selected</div><div class="value">${n}</div></div>
-    <div class="summary-item"><div class="label">Discounts</div><div class="value gold">${(dn*100).toFixed(0)}% eff${ds > 0 ? ' + '+(ds*100).toFixed(0)+'% bundle' : ''}</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Setup</div><div class="value">${fmt(discWs)}</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(cWs)}</div></div>
     <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${fmt(cWm)}</div></div>
+    <div class="summary-item"><div class="label">Total Saved</div><div class="value green">${fmt(totalSavingsS)}</div></div>
   `;
 
-  // Savings breakdown below summary
+  // Savings breakdown below summary — two separate boxes
   const breakdownEl = document.getElementById('t2-breakdown');
   if(breakdownEl){
     if(n > 1 && (dn > 0 || ds > 0)){
       breakdownEl.style.display = 'block';
-      let bdHtml = `<div style="background:linear-gradient(135deg,rgba(92,74,133,.06),rgba(30,138,80,.04));border:1px solid rgba(121,102,162,.15);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:14px">`;
+      let bdHtml = '';
+
       if(dn > 0){
         bdHtml += `
-        <div style="margin-bottom:${ds > 0 ? '10px' : '0'}">
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--purple);font-weight:600;margin-bottom:4px">Bundle Efficiency (${(dn*100).toFixed(0)}%)</div>
-          <div style="font-size:.78rem;color:var(--text)">Building ${n} items together saves <strong>${hrsSavedBuild} build hrs</strong> + <strong>${hrsSavedMonthly} mo hrs</strong> → <strong style="color:var(--green)">${fmt(effSavingsS)} setup</strong> · <strong style="color:var(--green)">${fmt(effSavingsM)}/mo</strong></div>
+        <div style="background:rgba(92,74,133,.06);border:1px solid rgba(121,102,162,.15);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:10px">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--purple);font-weight:600;margin-bottom:6px">Bundle Efficiency</div>
+          <div style="font-size:.82rem;color:var(--text);line-height:1.6">Building ${n} items together saves <strong>${hrsSavedBuild} build hrs</strong> and <strong>${hrsSavedMonthly} monthly hrs</strong> through shared infrastructure and reusable components.</div>
+          <div style="display:flex;gap:16px;margin-top:8px">
+            <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(effSavingsS)}</span> <span style="font-size:.68rem;color:var(--text-dim)">setup saved</span></div>
+            <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(effSavingsM)}</span> <span style="font-size:.68rem;color:var(--text-dim)">monthly saved</span></div>
+          </div>
         </div>`;
       }
+
       if(ds > 0){
         bdHtml += `
-        <div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--purple);font-weight:600;margin-bottom:4px">Plus Bundle Discount (${(ds*100).toFixed(0)}%)</div>
-          <div style="font-size:.78rem;color:var(--text)">10+ items qualifies for additional discount → <strong style="color:var(--green)">${fmt(dsSavingsS)} setup</strong> · <strong style="color:var(--green)">${fmt(dsSavingsM)}/mo</strong></div>
+        <div style="background:rgba(30,138,80,.04);border:1px solid rgba(30,138,80,.15);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:10px">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--green);font-weight:600;margin-bottom:6px">Cross-Bundle Feature Discount</div>
+          <div style="font-size:.82rem;color:var(--text);line-height:1.6">Selecting 10+ automations across categories qualifies for an additional package discount on the combined build.</div>
+          <div style="display:flex;gap:16px;margin-top:8px">
+            <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(dsSavingsS)}</span> <span style="font-size:.68rem;color:var(--text-dim)">setup saved</span></div>
+            <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(dsSavingsM)}</span> <span style="font-size:.68rem;color:var(--text-dim)">monthly saved</span></div>
+          </div>
         </div>`;
       }
-      bdHtml += `
-        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(121,102,162,.12);display:flex;gap:16px">
-          <div><span style="font-size:.9rem;font-weight:700;color:var(--green)">${fmt(totalSavingsS)}</span> <span style="font-size:.68rem;color:var(--text-dim)">total setup saved</span></div>
-          <div><span style="font-size:.9rem;font-weight:700;color:var(--green)">${fmt(totalSavingsM)}</span> <span style="font-size:.68rem;color:var(--text-dim)">total monthly saved</span></div>
-        </div>
-      </div>`;
+
       breakdownEl.innerHTML = bdHtml;
     } else {
       breakdownEl.style.display = 'none';
@@ -1543,41 +1548,42 @@ function renderTab4(){
       <div class="price-row"><span class="plabel">Setup Price</span><span class="pval gold">${fmt(cWs)}</span></div>
       <div class="price-row"><span class="plabel">Monthly Price</span><span class="pval gold">${fmt(cWm)}</span></div>
     `;
-    // Savings breakdown
-    if(dn > 0 || ds > 0){
-      html += `<div style="margin-top:12px;padding:12px;background:linear-gradient(135deg,rgba(92,74,133,.06),rgba(30,138,80,.04));border:1px solid rgba(121,102,162,.15);border-radius:var(--radius)">`;
-      if(dn > 0){
-        html += `
-        <div style="margin-bottom:${ds > 0 ? '10px' : '0'}">
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--purple);font-weight:600;margin-bottom:4px">Bundle Efficiency (${(dn*100).toFixed(0)}%)</div>
-          <div style="font-size:.78rem;color:var(--text)">Saves <strong>${hrsSavedBuild} build hrs</strong> + <strong>${hrsSavedMonthly} mo hrs</strong> → <strong style="color:var(--green)">${fmt(effSavingsS)} setup</strong> · <strong style="color:var(--green)">${fmt(effSavingsM)}/mo</strong></div>
-        </div>`;
-      }
-      if(ds > 0){
-        html += `
-        <div>
-          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--purple);font-weight:600;margin-bottom:4px">Plus Bundle Discount (${(ds*100).toFixed(0)}%)</div>
-          <div style="font-size:.78rem;color:var(--text)">Additional package discount → <strong style="color:var(--green)">${fmt(dsSavingsS)} setup</strong> · <strong style="color:var(--green)">${fmt(dsSavingsM)}/mo</strong></div>
-        </div>`;
-      }
+
+    if(dn > 0){
       html += `
-        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(121,102,162,.12);display:flex;gap:16px">
-          <div><span style="font-size:.9rem;font-weight:700;color:var(--green)">${fmt(totalSavingsS)}</span> <span style="font-size:.68rem;color:var(--text-dim)">total setup saved</span></div>
-          <div><span style="font-size:.9rem;font-weight:700;color:var(--green)">${fmt(totalSavingsM)}</span> <span style="font-size:.68rem;color:var(--text-dim)">total monthly saved</span></div>
+      <div style="margin-top:12px;background:rgba(92,74,133,.06);border:1px solid rgba(121,102,162,.15);border-radius:var(--radius);padding:14px 18px">
+        <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--purple);font-weight:600;margin-bottom:6px">Bundle Efficiency</div>
+        <div style="font-size:.82rem;color:var(--text);line-height:1.6">Building ${n} items together saves <strong>${hrsSavedBuild} build hrs</strong> and <strong>${hrsSavedMonthly} monthly hrs</strong> through shared infrastructure and reusable components.</div>
+        <div style="display:flex;gap:16px;margin-top:8px">
+          <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(effSavingsS)}</span> <span style="font-size:.68rem;color:var(--text-dim)">setup saved</span></div>
+          <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(effSavingsM)}</span> <span style="font-size:.68rem;color:var(--text-dim)">monthly saved</span></div>
         </div>
       </div>`;
     }
+
+    if(ds > 0){
+      html += `
+      <div style="margin-top:10px;background:rgba(30,138,80,.04);border:1px solid rgba(30,138,80,.15);border-radius:var(--radius);padding:14px 18px">
+        <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--green);font-weight:600;margin-bottom:6px">Cross-Bundle Feature Discount</div>
+        <div style="font-size:.82rem;color:var(--text);line-height:1.6">Combining automations across multiple categories qualifies for an additional package discount on the combined build.</div>
+        <div style="display:flex;gap:16px;margin-top:8px">
+          <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(dsSavingsS)}</span> <span style="font-size:.68rem;color:var(--text-dim)">setup saved</span></div>
+          <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(dsSavingsM)}</span> <span style="font-size:.68rem;color:var(--text-dim)">monthly saved</span></div>
+        </div>
+      </div>`;
+    }
+
     totalsEl.innerHTML = html;
   }
 
   // Summary bar
   document.getElementById('t4-summary').innerHTML = `
     <div class="summary-item"><div class="label">${OFFER_TIERS[selectedOfferTier].name} Items</div><div class="value">${n}</div></div>
-    <div class="summary-item"><div class="label">Bundle Efficiency</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Setup</div><div class="value">${fmt(discWs)}</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
     <div class="summary-item"><div class="label">Setup Price</div><div class="value gold">${fmt(cWs)}</div></div>
     <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${fmt(cWm)}</div></div>
+    <div class="summary-item"><div class="label">Total Saved</div><div class="value green">${fmt(totalSavingsS)}</div></div>
     <div class="summary-item"><div class="label">Setup Savings</div><div class="value green">${fmt(savingsS)}</div></div>
     <div class="summary-item"><div class="label">Monthly Savings</div><div class="value green">${fmt(savingsM)}</div></div>
   `;
