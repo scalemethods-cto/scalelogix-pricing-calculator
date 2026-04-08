@@ -402,6 +402,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 <!-- ===== TAB 2 — CUSTOM BUILD ===== -->
 <div id="tab2" class="tab-content">
   <div class="summary-bar" id="t2-summary"></div>
+  <div id="t2-breakdown" style="display:none"></div>
   <div id="t2-pkg-rec" style="display:none"></div>
   <button class="view-toggle-btn sales-only" onclick="saveQuote()" style="position:static;margin-top:8px;margin-bottom:16px;width:100%">Save & Share Quote</button>
   <div class="t2-layout">
@@ -1146,6 +1147,8 @@ function renderTab2(){
   const cWm = roundMonthly(clientPrice(wholesaleMonthly(effHm)));
   const savingsS = fullWs - discWs;
   const savingsM = fullWm - discWm;
+  const hrsSavedBuild = Math.round((totalHb - effHb) * 10) / 10;
+  const hrsSavedMonthly = Math.round((totalHm - effHm) * 10) / 10;
 
   document.getElementById('t2-summary').innerHTML = `
     <div class="summary-item"><div class="label">Items Selected</div><div class="value">${n}</div></div>
@@ -1154,9 +1157,42 @@ function renderTab2(){
     <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(cWs)}</div></div>
     <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${fmt(cWm)}</div></div>
-    <div class="summary-item"><div class="label">Setup Savings</div><div class="value green">${fmt(savingsS)}</div></div>
-    <div class="summary-item"><div class="label">Monthly Savings</div><div class="value green">${fmt(savingsM)}</div></div>
   `;
+
+  // Efficiency & savings breakdown below summary
+  const breakdownEl = document.getElementById('t2-breakdown');
+  if(breakdownEl){
+    if(n > 1 && dn > 0){
+      breakdownEl.style.display = 'block';
+      breakdownEl.innerHTML = `
+        <div style="background:linear-gradient(135deg,rgba(92,74,133,.06),rgba(30,138,80,.04));border:1px solid rgba(121,102,162,.15);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;color:var(--purple);font-weight:600;margin-bottom:6px">Bundle Efficiency (${(dn*100).toFixed(0)}%)</div>
+              <div style="font-size:.82rem;color:var(--text);line-height:1.6">
+                Building ${n} items together saves <strong>${hrsSavedBuild} build hrs</strong> and <strong>${hrsSavedMonthly} monthly hrs</strong> through shared infrastructure and reusable components.
+              </div>
+            </div>
+            <div>
+              <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;color:var(--green);font-weight:600;margin-bottom:6px">Your Savings</div>
+              <div style="display:flex;gap:16px;flex-wrap:wrap">
+                <div>
+                  <div style="font-size:1rem;font-weight:700;color:var(--green)">${fmt(savingsS)}</div>
+                  <div style="font-size:.68rem;color:var(--text-dim)">off setup</div>
+                </div>
+                <div>
+                  <div style="font-size:1rem;font-weight:700;color:var(--green)">${fmt(savingsM)}</div>
+                  <div style="font-size:.68rem;color:var(--text-dim)">off monthly</div>
+                </div>
+              </div>
+              <div style="font-size:.72rem;color:var(--text-dim);margin-top:6px">vs. building each item individually</div>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      breakdownEl.style.display = 'none';
+    }
+  }
 
   // Update table cells with current CFG
   const rows = document.querySelectorAll('#t2-body tr:not(.cat-header)');
