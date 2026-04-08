@@ -448,15 +448,23 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 </div>
 
 <script>
-// ========== SUPABASE CLIENT ==========
+// ========== SUPABASE CLIENT (with fallback) ==========
 const SUPABASE_URL = 'https://ypukudaoqksdooidwpai.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlwdWt1ZGFvcWtzZG9vaWR3cGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MzgwODEsImV4cCI6MjA5MTIxNDA4MX0.cC3o1zcwJMXwNizxP5pVStdxRYjXFVoxalyBElGAxkI';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let sb = null;
+let offlineMode = false;
+try {
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch(e) {
+  console.warn('Supabase client failed to init, running in offline mode', e);
+  offlineMode = true;
+}
 
 let currentUser = null;
 let currentRole = null;
 
-// ========== DATA (loaded from Supabase) ==========
+// ========== DATA (loaded from Supabase, with hardcoded fallback) ==========
 let CAPABILITIES = [];
 let INSURANCE_CORE = [];
 let INSURANCE_SECONDARY = [];
@@ -464,8 +472,11 @@ let DEV_PACKAGES = [];
 let activePricingConfig = null;
 let bundleTiers = [];
 
+// ========== FALLBACK PASSWORDS ==========
+const FALLBACK_SALES_PW = '8CN8eAAnrQrXk1nB';
+const FALLBACK_CLIENT_PW = 'EwwKiWWpoQGuq06a';
+
 // ========== AUTH ==========
-// Universal accounts — password determines role
 const AUTH_ACCOUNTS = [
   { email: 'sales@scalelogix.ai', role: 'sales' },
   { email: 'client@scalelogix.ai', role: 'client' },
@@ -474,20 +485,36 @@ const AUTH_ACCOUNTS = [
 async function handleLogin(){
   const password = document.getElementById('pw-input').value.trim();
   const errEl = document.getElementById('pw-error');
-
   if(!password){ errEl.textContent = 'Please enter an access code'; errEl.style.display = 'block'; return; }
 
-  // Try each account with the entered password
-  for(const acct of AUTH_ACCOUNTS){
-    const { data, error } = await sb.auth.signInWithPassword({ email: acct.email, password });
-    if(!error && data?.user){
-      errEl.style.display = 'none';
-      await initSession(data.user);
-      return;
+  // Try Supabase auth first
+  if(sb && !offlineMode){
+    try {
+      for(const acct of AUTH_ACCOUNTS){
+        const { data, error } = await sb.auth.signInWithPassword({ email: acct.email, password });
+        if(!error && data?.user){
+          errEl.style.display = 'none';
+          await initSession(data.user);
+          return;
+        }
+      }
+    } catch(e) {
+      console.warn('Supabase auth failed, trying fallback', e);
     }
   }
 
-  // No account matched
+  // Fallback: hardcoded passwords (works even if Supabase is down)
+  if(password === FALLBACK_SALES_PW){
+    errEl.style.display = 'none';
+    await initFallbackSession('sales');
+    return;
+  }
+  if(password === FALLBACK_CLIENT_PW){
+    errEl.style.display = 'none';
+    await initFallbackSession('client');
+    return;
+  }
+
   errEl.textContent = 'Incorrect access code — please try again';
   errEl.style.display = 'block';
   document.getElementById('pw-input').value = '';
@@ -495,24 +522,40 @@ async function handleLogin(){
 }
 
 async function initSession(user){
-  currentUser = user;
+  try {
+    currentUser = user;
+    const { data: profile } = await sb.from('profiles').select('role, full_name, org_name').eq('id', user.id).single();
+    currentRole = profile?.role || 'client';
+  } catch(e) {
+    console.warn('Profile fetch failed, defaulting to client', e);
+    currentRole = 'client';
+  }
 
-  const { data: profile } = await sb.from('profiles').select('role, full_name, org_name').eq('id', user.id).single();
-  currentRole = profile?.role || 'client';
+  applyRole(currentRole);
+  await loadData();
+  document.getElementById('app-loading').classList.add('hidden');
+}
 
+async function initFallbackSession(role){
+  offlineMode = true;
+  currentUser = { id: 'fallback' };
+  currentRole = role;
+  applyRole(role);
+  loadFallbackData();
+  document.getElementById('app-loading').classList.add('hidden');
+}
+
+function applyRole(role){
   document.getElementById('pw-gate').classList.add('hidden');
-
-  if(currentRole === 'client'){
+  if(role === 'client'){
     document.body.classList.add('client-mode');
     document.getElementById('view-toggle').style.display = 'none';
     setViewTag('client');
+    document.querySelector('[data-tab="tab4"]').click();
   } else {
     document.body.classList.remove('client-mode');
     setViewTag('sales');
   }
-
-  await loadData();
-  document.getElementById('app-loading').classList.add('hidden');
 }
 
 function setViewTag(mode){
@@ -527,79 +570,249 @@ function setViewTag(mode){
 }
 
 // Session restore
-sb.auth.onAuthStateChange(async (event, session) => {
-  if(event === 'SIGNED_IN' && session?.user && !currentUser){
-    await initSession(session.user);
-  } else if(event === 'SIGNED_OUT'){
-    currentUser = null;
-    currentRole = null;
-    document.getElementById('pw-gate').classList.remove('hidden');
-    document.getElementById('app-loading').classList.add('hidden');
-  }
-});
+if(sb && !offlineMode){
+  sb.auth.onAuthStateChange(async (event, session) => {
+    try {
+      if(event === 'SIGNED_IN' && session?.user && !currentUser){
+        await initSession(session.user);
+      } else if(event === 'SIGNED_OUT'){
+        currentUser = null;
+        currentRole = null;
+        document.getElementById('pw-gate').classList.remove('hidden');
+        document.getElementById('app-loading').classList.add('hidden');
+      }
+    } catch(e) { console.warn('Auth state change error', e); }
+  });
+}
 
-// Initial check
+// Initial check — with 5s timeout
 (async function(){
-  const { data: { session } } = await sb.auth.getSession();
-  if(session?.user){
-    await initSession(session.user);
-  } else {
-    document.getElementById('app-loading').classList.add('hidden');
+  if(sb && !offlineMode){
+    try {
+      const timeout = new Promise((_, reject) => setTimeout(() => reject('timeout'), 5000));
+      const check = sb.auth.getSession();
+      const { data: { session } } = await Promise.race([check, timeout]);
+      if(session?.user){
+        await initSession(session.user);
+        return;
+      }
+    } catch(e) {
+      console.warn('Session check failed/timed out', e);
+    }
   }
+  document.getElementById('app-loading').classList.add('hidden');
 })();
 
 // ========== LOAD DATA FROM SUPABASE ==========
 async function loadData(){
-  const [catRes, itemRes, pkgRes, cfgRes, tierRes] = await Promise.all([
-    sb.from('capability_categories').select('*').eq('is_active', true).order('sort_order'),
-    sb.from('capability_items').select('*').eq('is_active', true).order('sort_order'),
-    sb.from('dev_packages').select('*').eq('is_active', true).order('sort_order'),
-    sb.from('pricing_config').select('*').eq('is_active', true).single(),
-    sb.from('bundle_efficiency_tiers').select('*').order('min_items'),
-  ]);
+  try {
+    const timeout = new Promise((_, reject) => setTimeout(() => reject('timeout'), 8000));
+    const queries = Promise.all([
+      sb.from('capability_categories').select('*').eq('is_active', true).order('sort_order'),
+      sb.from('capability_items').select('*').eq('is_active', true).order('sort_order'),
+      sb.from('dev_packages').select('*').eq('is_active', true).order('sort_order'),
+      sb.from('pricing_config').select('*').eq('is_active', true).single(),
+      sb.from('bundle_efficiency_tiers').select('*').order('min_items'),
+    ]);
+    const [catRes, itemRes, pkgRes, cfgRes, tierRes] = await Promise.race([queries, timeout]);
 
-  const categories = catRes.data || [];
-  const items = itemRes.data || [];
+    const categories = catRes.data || [];
+    const items = itemRes.data || [];
 
-  // Build CAPABILITIES array (general catalog)
-  CAPABILITIES = categories
-    .filter(c => c.catalog === 'general')
-    .map(cat => ({
-      cat: cat.name,
-      items: items
-        .filter(i => i.category_id === cat.id)
-        .map(i => ({ id: i.id, name: i.name, tier: i.tier, hb: Number(i.build_hours), hm: Number(i.monthly_hours), desc: i.description }))
+    if(!categories.length || !items.length) throw new Error('Empty data from Supabase');
+
+    CAPABILITIES = categories
+      .filter(c => c.catalog === 'general')
+      .map(cat => ({
+        cat: cat.name,
+        items: items
+          .filter(i => i.category_id === cat.id)
+          .map(i => ({ id: i.id, name: i.name, tier: i.tier, hb: Number(i.build_hours), hm: Number(i.monthly_hours), desc: i.description }))
+      }));
+
+    const coreCats = categories.filter(c => c.catalog === 'insurance_core');
+    INSURANCE_CORE = items
+      .filter(i => coreCats.some(c => c.id === i.category_id))
+      .map(i => ({ id: i.id, name: i.name, hb: Number(i.build_hours), hm: Number(i.monthly_hours) }));
+
+    const secCats = categories.filter(c => c.catalog === 'insurance_secondary');
+    INSURANCE_SECONDARY = items
+      .filter(i => secCats.some(c => c.id === i.category_id))
+      .map(i => ({ id: i.id, name: i.name, hb: Number(i.build_hours), hm: Number(i.monthly_hours) }));
+
+    DEV_PACKAGES = (pkgRes.data || []).map(p => ({
+      id: p.id, name: p.name, hours: p.hours, wholesale: Number(p.wholesale_price),
+      subtitle: p.subtitle, features: p.features || [], featured: p.is_featured
     }));
 
-  // Build INSURANCE arrays
-  const coreCats = categories.filter(c => c.catalog === 'insurance_core');
-  INSURANCE_CORE = items
-    .filter(i => coreCats.some(c => c.id === i.category_id))
-    .map(i => ({ id: i.id, name: i.name, hb: Number(i.build_hours), hm: Number(i.monthly_hours) }));
+    activePricingConfig = cfgRes.data;
+    bundleTiers = (tierRes.data || []);
 
-  const secCats = categories.filter(c => c.catalog === 'insurance_secondary');
-  INSURANCE_SECONDARY = items
-    .filter(i => secCats.some(c => c.id === i.category_id))
-    .map(i => ({ id: i.id, name: i.name, hb: Number(i.build_hours), hm: Number(i.monthly_hours) }));
-
-  DEV_PACKAGES = (pkgRes.data || []).map(p => ({
-    id: p.id, name: p.name, hours: p.hours, wholesale: Number(p.wholesale_price),
-    subtitle: p.subtitle, features: p.features || [], featured: p.is_featured
-  }));
-
-  activePricingConfig = cfgRes.data;
-  bundleTiers = (tierRes.data || []);
-
-  // Apply config to DOM inputs
-  if(activePricingConfig){
-    document.getElementById('cfg-r').value = activePricingConfig.dev_rate;
-    document.getElementById('cfg-margin-pct').value = activePricingConfig.margin_pct;
-    document.getElementById('cfg-mu').value = Number(activePricingConfig.multiplier).toFixed(2);
-    document.getElementById('cfg-phi').value = activePricingConfig.commission_pct;
-    document.getElementById('cfg-ds').value = activePricingConfig.bundle_discount_pct;
+    if(activePricingConfig){
+      document.getElementById('cfg-r').value = activePricingConfig.dev_rate;
+      document.getElementById('cfg-margin-pct').value = activePricingConfig.margin_pct;
+      document.getElementById('cfg-mu').value = Number(activePricingConfig.multiplier).toFixed(2);
+      document.getElementById('cfg-phi').value = activePricingConfig.commission_pct;
+      document.getElementById('cfg-ds').value = activePricingConfig.bundle_discount_pct;
+    }
+  } catch(e) {
+    console.warn('Supabase data load failed, using fallback data', e);
+    loadFallbackData();
+    return;
   }
 
-  // Rebuild all tabs with fresh data
+  buildTab2Table();
+  buildTab3();
+  buildTab4();
+  updateAll();
+}
+
+// ========== FALLBACK DATA (works when Supabase is unreachable) ==========
+function loadFallbackData(){
+  offlineMode = true;
+  CAPABILITIES = [
+    { cat: "Lead Capture & Instant Response", items: [
+      { name: "AI voice agent inbound calls 24/7", tier: "complex", hb: 5, hm: 2, desc: "AI-powered phone agent answers every call, qualifies leads, and routes to the right team" },
+      { name: "Missed-call text-back", tier: "simple", hb: 2, hm: 1, desc: "Automatically texts anyone whose call was missed within seconds" },
+      { name: "Website chat widget with SMS follow-up", tier: "medium", hb: 3, hm: 1.5, desc: "Live chat on your site that captures info and continues the conversation via SMS" },
+      { name: "AI chatbot for websites and listings", tier: "medium", hb: 3, hm: 1.5, desc: "Intelligent chatbot trained on your business to engage and qualify visitors" },
+      { name: "After-hours inquiry handling", tier: "simple", hb: 2, hm: 1, desc: "Captures and responds to leads that come in outside business hours" },
+      { name: "Instant lead response <2 min", tier: "simple", hb: 2, hm: 1, desc: "Triggers immediate outreach the moment a new lead comes in" },
+      { name: "Quote request handling automation", tier: "medium", hb: 3, hm: 1.5, desc: "Collects quote details, routes to the right person, and follows up automatically" },
+    ]},
+    { cat: "AI-Powered Outreach", items: [
+      { name: "AI cold email outreach campaigns", tier: "complex", hb: 5, hm: 2, desc: "Automated cold email sequences with AI personalization at scale" },
+      { name: "AI personalized message generation", tier: "medium", hb: 3, hm: 1.5, desc: "AI writes unique, relevant messages for each prospect based on their profile" },
+      { name: "Automated LinkedIn outreach sequences", tier: "complex", hb: 5, hm: 2, desc: "Multi-step LinkedIn connection and messaging campaigns on autopilot" },
+      { name: "Lead list building & enrichment", tier: "medium", hb: 3, hm: 1.5, desc: "Builds targeted prospect lists and enriches them with contact and company data" },
+      { name: "Multi-channel outbound campaigns", tier: "complex", hb: 5, hm: 2, desc: "Coordinated outreach across email, LinkedIn, SMS, and phone" },
+      { name: "AI reply handling & conversation routing", tier: "medium", hb: 3, hm: 1.5, desc: "AI reads replies, classifies intent, and routes hot leads to your team" },
+      { name: "Outreach performance analytics", tier: "medium", hb: 3, hm: 1.5, desc: "Tracks open rates, reply rates, and conversions across all outreach channels" },
+    ]},
+    { cat: "Appointment Booking & Scheduling", items: [
+      { name: "Automated appointment booking system", tier: "complex", hb: 5, hm: 2, desc: "Self-service booking linked to your calendar with automatic confirmations" },
+      { name: "Calendar + CRM integration", tier: "medium", hb: 3, hm: 1.5, desc: "Syncs appointments between your calendar and CRM so nothing falls through" },
+      { name: "Smart appointment confirmations", tier: "simple", hb: 2, hm: 1, desc: "Sends confirmation and reminder messages via SMS and email" },
+      { name: "AI scheduling optimization", tier: "medium", hb: 3, hm: 1.5, desc: "AI suggests optimal appointment times based on availability and travel" },
+      { name: "Consultation booking automation", tier: "medium", hb: 3, hm: 1.5, desc: "Dedicated booking flow for consultations with intake forms and prep materials" },
+      { name: "Automatic rebooking workflows", tier: "simple", hb: 2, hm: 1, desc: "Automatically offers new time slots when appointments are cancelled" },
+    ]},
+    { cat: "CRM Pipelines & Infrastructure", items: [
+      { name: "CRM setup and configuration", tier: "complex", hb: 5, hm: 2, desc: "Full CRM buildout with custom fields, stages, and automation rules" },
+      { name: "Custom pipeline creation", tier: "medium", hb: 3, hm: 1.5, desc: "Builds sales pipelines tailored to your specific deal flow and process" },
+      { name: "Lead tracking and status automation", tier: "medium", hb: 3, hm: 1.5, desc: "Automatically moves leads through stages based on their actions and responses" },
+      { name: "CRM + calendar integration", tier: "simple", hb: 2, hm: 1, desc: "Connects your CRM to calendars so meetings auto-log to contact records" },
+      { name: "Multi-location CRM coordination", tier: "complex", hb: 5, hm: 2, desc: "Unified CRM setup across multiple locations with proper routing and visibility" },
+      { name: "White-label client portal setup", tier: "complex", hb: 5, hm: 2, desc: "Branded portal where your clients can log in, view progress, and communicate" },
+    ]},
+    { cat: "Lead Qualification & Scoring", items: [
+      { name: "AI lead qualification workflows", tier: "medium", hb: 3, hm: 1.5, desc: "AI evaluates leads based on fit criteria and flags the best opportunities" },
+      { name: "Paid-ad lead filtering", tier: "medium", hb: 3, hm: 1.5, desc: "Filters and scores leads from paid campaigns to focus on high-quality prospects" },
+      { name: "Lead scoring and prioritization", tier: "medium", hb: 3, hm: 1.5, desc: "Assigns scores to leads so your team works the hottest opportunities first" },
+      { name: "Client segmentation logic", tier: "medium", hb: 3, hm: 1.5, desc: "Groups contacts by behavior, value, or profile for targeted communication" },
+      { name: "Client health scoring", tier: "complex", hb: 5, hm: 2, desc: "Monitors engagement signals to flag at-risk clients before they churn" },
+    ]},
+    { cat: "Follow-Up Nurture & Conversion", items: [
+      { name: "Email nurture sequences", tier: "simple", hb: 2, hm: 1, desc: "Drip email campaigns that warm leads over time with valuable content" },
+      { name: "SMS nurture sequences", tier: "simple", hb: 2, hm: 1, desc: "Text message follow-up series for faster, more personal engagement" },
+      { name: "Voice + SMS + email multi-channel campaigns", tier: "complex", hb: 5, hm: 2, desc: "Coordinated follow-up across phone, text, and email for maximum reach" },
+      { name: "Smart estimate follow-up", tier: "medium", hb: 3, hm: 1.5, desc: "Automated check-ins after sending estimates to keep deals moving" },
+      { name: "Quote follow-up sequences", tier: "medium", hb: 3, hm: 1.5, desc: "Multi-step follow-up after quotes are sent until a decision is made" },
+      { name: "Lost quote recovery", tier: "medium", hb: 3, hm: 1.5, desc: "Re-engages prospects who received quotes but went cold" },
+      { name: "No-show prevention", tier: "simple", hb: 2, hm: 1, desc: "Pre-appointment reminders and confirmations to reduce no-shows" },
+      { name: "Appointment reminder automation", tier: "simple", hb: 2, hm: 1, desc: "Scheduled reminders via SMS and email before upcoming appointments" },
+    ]},
+    { cat: "Reviews Referrals & Reputation", items: [
+      { name: "Review request automation", tier: "simple", hb: 2, hm: 1, desc: "Asks happy customers for reviews at the right moment via SMS or email" },
+      { name: "Review generation workflows", tier: "simple", hb: 2, hm: 1, desc: "Multi-step campaign to maximize Google/Yelp review collection" },
+      { name: "Referral request automation", tier: "simple", hb: 2, hm: 1, desc: "Systematically asks satisfied clients for referrals with easy sharing links" },
+      { name: "Systematic referral engines", tier: "medium", hb: 3, hm: 1.5, desc: "Full referral program with tracking, rewards, and automated follow-up" },
+    ]},
+    { cat: "Client & Customer Operations", items: [
+      { name: "Digital intake form automation", tier: "simple", hb: 2, hm: 1, desc: "Online forms that collect client info and feed directly into your systems" },
+      { name: "Smart onboarding workflows", tier: "medium", hb: 3, hm: 1.5, desc: "Guided onboarding sequence that walks new clients through setup steps" },
+      { name: "Maintenance ticket automation", tier: "medium", hb: 3, hm: 1.5, desc: "Ticket creation, routing, and status updates handled automatically" },
+      { name: "Issue resolution workflows", tier: "medium", hb: 3, hm: 1.5, desc: "Automated triage and escalation paths to resolve client issues faster" },
+      { name: "Pre-consultation education sequences", tier: "simple", hb: 2, hm: 1, desc: "Sends prep materials and expectations before consultations" },
+    ]},
+    { cat: "Retention Reactivation & LTV", items: [
+      { name: "Customer reactivation campaigns", tier: "medium", hb: 3, hm: 1.5, desc: "Win-back campaigns targeting inactive customers with personalized offers" },
+      { name: "Renewal reminder automation", tier: "simple", hb: 2, hm: 1, desc: "Proactive reminders before contracts or subscriptions expire" },
+      { name: "Churn prediction systems", tier: "complex", hb: 5, hm: 2, desc: "AI monitors engagement patterns to predict which clients may leave" },
+      { name: "Churn prevention automation", tier: "medium", hb: 3, hm: 1.5, desc: "Triggered outreach and offers when churn risk is detected" },
+      { name: "Upsell automation", tier: "medium", hb: 3, hm: 1.5, desc: "Identifies and presents relevant upgrade opportunities to existing clients" },
+      { name: "Cross-sell automation", tier: "medium", hb: 3, hm: 1.5, desc: "Recommends complementary services based on what the client already uses" },
+      { name: "Lifetime value optimization", tier: "complex", hb: 5, hm: 2, desc: "Data-driven strategies to maximize revenue per client over time" },
+    ]},
+    { cat: "Analytics Dashboards & Intelligence", items: [
+      { name: "Monthly performance reporting", tier: "medium", hb: 3, hm: 1.5, desc: "Automated monthly reports covering KPIs, trends, and recommendations" },
+      { name: "Real-time dashboards", tier: "complex", hb: 5, hm: 2, desc: "Live dashboards showing pipeline, revenue, and team performance" },
+      { name: "Revenue forecasting dashboards", tier: "complex", hb: 5, hm: 2, desc: "Predictive views of expected revenue based on pipeline and trends" },
+      { name: "Multi-location performance dashboards", tier: "complex", hb: 5, hm: 2, desc: "Comparative dashboards across all locations for executive visibility" },
+      { name: "Predictive analytics & forecasting", tier: "complex", hb: 5, hm: 2, desc: "AI-powered forecasting for demand, revenue, and resource planning" },
+    ]},
+    { cat: "Content & Communication Automation", items: [
+      { name: "AI-generated email content", tier: "simple", hb: 2, hm: 1, desc: "AI writes professional email content tailored to your audience and brand" },
+      { name: "AI-generated SMS content", tier: "simple", hb: 2, hm: 1, desc: "AI creates concise, engaging text messages for campaigns and follow-ups" },
+      { name: "AI-generated social content", tier: "medium", hb: 3, hm: 1.5, desc: "AI produces social media posts, captions, and content calendars" },
+      { name: "AI-generated newsletters", tier: "medium", hb: 3, hm: 1.5, desc: "Automated newsletter creation with curated content and personalization" },
+      { name: "Pre-sale education workflows", tier: "simple", hb: 2, hm: 1, desc: "Educational content sequences that warm prospects before the sales call" },
+    ]},
+    { cat: "AI Productivity & Internal Operations", items: [
+      { name: "AI meeting summaries", tier: "simple", hb: 2, hm: 1, desc: "Automatic meeting notes, key decisions, and action items after every call" },
+      { name: "Automated action-item extraction", tier: "simple", hb: 2, hm: 1, desc: "Pulls action items from meetings and assigns them to the right people" },
+      { name: "Internal task automation", tier: "medium", hb: 3, hm: 1.5, desc: "Automates repetitive internal tasks like data entry, notifications, and approvals" },
+    ]},
+    { cat: "Compliance & Secure Workflows", items: [
+      { name: "Compliance-friendly workflow design", tier: "medium", hb: 3, hm: 1.5, desc: "Workflows built with regulatory requirements and audit trails in mind" },
+      { name: "HIPAA-compliant automation design", tier: "complex", hb: 5, hm: 2, desc: "Healthcare-grade automation with proper data handling and access controls" },
+      { name: "Secure data handling workflows", tier: "medium", hb: 3, hm: 1.5, desc: "Encrypted data flows with access controls and secure storage practices" },
+    ]},
+    { cat: "Custom Engineering & Integrations", items: [
+      { name: "Custom software integrations", tier: "complex", hb: 5, hm: 2, desc: "Connects your existing tools and platforms into a unified workflow" },
+      { name: "Custom automation logic builds", tier: "complex", hb: 5, hm: 2, desc: "Bespoke automation logic tailored to your unique business processes" },
+      { name: "API-based workflow automation", tier: "complex", hb: 5, hm: 2, desc: "Builds custom API connections between systems for seamless data flow" },
+    ]},
+    { cat: "Website Development", items: [
+      { name: "Homepage with integrations & AI chat", tier: "complex", hb: 6, hm: 1, desc: "Full homepage build including design, copy, integrations, and AI chatbot setup" },
+      { name: "Additional website page", tier: "medium", hb: 3, hm: 1, desc: "Extra page with custom layout, copy creation, and responsive design" },
+      { name: "Website copy creation", tier: "medium", hb: 3, hm: 1.5, desc: "Professional copywriting for all website pages — messaging, CTAs, and brand voice" },
+      { name: "AI chatbot / bot integration", tier: "complex", hb: 3, hm: 1.5, desc: "Intelligent AI chat widget trained on your business for 24/7 visitor engagement" },
+    ]},
+    { cat: "Training Support & Optimization", items: [
+      { name: "Team onboarding and training", tier: "medium", hb: 3, hm: 0, desc: "Live training sessions to get your team fully up to speed on all automations" },
+      { name: "System training documentation", tier: "simple", hb: 2, hm: 0, desc: "Step-by-step guides and SOPs for every automation in your stack" },
+      { name: "Ongoing system optimization", tier: "simple", hb: 0, hm: 1, desc: "Continuous tuning and improvements based on performance data" },
+      { name: "Weekly optimization sessions", tier: "simple", hb: 0, hm: 1, desc: "Regular strategy calls to review results and plan next optimizations" },
+      { name: "Dedicated manager support", tier: "medium", hb: 0, hm: 1.5, desc: "A dedicated account manager for proactive support and strategic guidance" },
+      { name: "Priority Slack and email support", tier: "simple", hb: 0, hm: 1, desc: "Fast-response support channel for urgent issues and questions" },
+    ]},
+  ];
+  INSURANCE_CORE = [
+    { name: "Speed-to-lead automation (web forms, email, SMS)", hb: 3, hm: 1.5 },
+    { name: "Automated intake & routing to producer / service team", hb: 3, hm: 1.5 },
+    { name: "Follow-up sequences (multi-touch, no fallthrough)", hb: 3, hm: 1.5 },
+    { name: "After-hours / overflow voice agent (optional add-on)", hb: 5, hm: 2 },
+    { name: "Service request triage (COIs, endorsements, renewals)", hb: 3, hm: 1 },
+    { name: "CRM setup + pipeline configuration", hb: 5, hm: 1 },
+    { name: "Owner visibility dashboard (response speed, follow-up)", hb: 5, hm: 1.5 },
+    { name: "Onboarding, training & documentation", hb: 3, hm: 0 },
+    { name: "Ongoing optimization + priority support", hb: 0, hm: 2 },
+  ];
+  INSURANCE_SECONDARY = [
+    { name: "High-intent lead sourcing setup & vendor integration", hb: 3, hm: 1 },
+    { name: "Demand intelligence for ads & outreach", hb: 3, hm: 1.5 },
+    { name: "Lead ROI clarity dashboard (source to conversion)", hb: 5, hm: 1.5 },
+    { name: "Missed-opportunity reactivation campaigns", hb: 3, hm: 1.5 },
+    { name: "Owner-level performance dashboards", hb: 5, hm: 1.5 },
+    { name: "Safe scaling optimization workflows", hb: 3, hm: 1 },
+  ];
+  DEV_PACKAGES = [
+    { name: "Core", hours: 10, wholesale: 500, subtitle: "Essential maintenance & small optimizations", features: ["10 dev hours / month","Bug fixes & minor tweaks","Monthly performance review","Email support","No rollover"] },
+    { name: "Plus", hours: 25, wholesale: 1500, subtitle: "Active development & growth — best for scaling teams", features: ["25 dev hours / month","New feature builds","Workflow optimization","Priority Slack support","Weekly check-in call","No rollover"], featured: true },
+    { name: "Custom", hours: 0, wholesale: 2500, subtitle: "Enterprise-grade — dedicated dev resources for complex needs", features: ["Custom hour allocation","Dedicated dev resource","Strategic planning sessions","Priority Slack + phone support","Custom SLA","Contact us to scope"] },
+  ];
+  bundleTiers = [];
   buildTab2Table();
   buildTab3();
   buildTab4();
