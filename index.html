@@ -197,6 +197,27 @@ body.client-mode .client-only{display:block!important}
   pointer-events:none;border-radius:inherit;
 }
 
+/* Category sidebar menu (Custom Build) */
+.t2-layout{display:grid;grid-template-columns:220px 1fr;gap:16px}
+.cat-menu{position:sticky;top:18px;align-self:start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px;box-shadow:var(--shadow);max-height:75vh;overflow-y:auto}
+.cat-menu::-webkit-scrollbar{width:4px}
+.cat-menu::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.cat-menu-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);font-weight:600;padding:6px 10px 8px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.cat-menu-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:.74rem;color:var(--text-slate);transition:all .2s;font-weight:500;line-height:1.3}
+.cat-menu-item:hover{background:rgba(121,102,162,.06);color:var(--purple-dark)}
+.cat-menu-item.active{background:rgba(121,102,162,.1);color:var(--purple-dark);font-weight:600}
+.cat-menu-item .cat-count{margin-left:auto;min-width:20px;height:20px;border-radius:10px;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text-dim);border:1px solid var(--border);flex-shrink:0}
+.cat-menu-item .cat-count.has-items{background:rgba(121,102,162,.12);color:var(--purple);border-color:rgba(121,102,162,.25)}
+.cat-menu-item .cat-dot{width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .2s}
+.cat-menu-item.active .cat-dot{background:var(--purple)}
+.cat-menu-item .cat-count.has-items ~ .cat-dot{background:var(--purple)}
+@media(max-width:900px){
+  .t2-layout{grid-template-columns:1fr}
+  .cat-menu{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:4px}
+  .cat-menu-title{display:none}
+  .cat-menu-item{padding:6px 10px;font-size:.68rem;white-space:nowrap}
+}
+
 /* Presentation mode polish */
 ::selection{background:rgba(196,154,124,.3);color:var(--white)}
 input[type="number"]::-webkit-inner-spin-button{opacity:.5}
@@ -328,23 +349,26 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 <!-- ===== TAB 2 — CUSTOM BUILD ===== -->
 <div id="tab2" class="tab-content">
   <div class="summary-bar" id="t2-summary"></div>
-  <div class="card">
-    <h3>Pick &amp; Choose Capabilities</h3>
-    <div class="scroll-wrap">
-      <table class="cap-table" id="t2-table">
-        <thead>
-          <tr>
-            <th class="cb"></th>
-            <th>Capability</th>
-            <th>Tier</th>
-            <th>Build Hrs</th>
-            <th>Mo. Hrs</th>
-            <th class="sales-only">W Setup</th>
-            <th class="sales-only">W Monthly</th>
-          </tr>
-        </thead>
-        <tbody id="t2-body"></tbody>
-      </table>
+  <div class="t2-layout">
+    <div class="cat-menu" id="t2-cat-menu"></div>
+    <div class="card" style="min-width:0">
+      <h3>Pick &amp; Choose Capabilities</h3>
+      <div class="scroll-wrap" id="t2-scroll">
+        <table class="cap-table" id="t2-table">
+          <thead>
+            <tr>
+              <th class="cb"></th>
+              <th>Capability</th>
+              <th>Tier</th>
+              <th>Build Hrs</th>
+              <th>Mo. Hrs</th>
+              <th class="sales-only">W Setup</th>
+              <th class="sales-only">W Monthly</th>
+            </tr>
+          </thead>
+          <tbody id="t2-body"></tbody>
+        </table>
+      </div>
     </div>
   </div>
   <div id="t2-pkg-rec" style="display:none"></div>
@@ -689,12 +713,54 @@ function renderTab1(){
 // ========== TAB 2 — CUSTOM BUILD ==========
 let t2Checkboxes = [];
 
+function buildCatMenu(){
+  const menu = document.getElementById('t2-cat-menu');
+  menu.innerHTML = `<div class="cat-menu-title">Categories</div>` +
+    CAPABILITIES.map((cat, ci) =>
+      `<div class="cat-menu-item${ci===0?' active':''}" data-cat="${ci}" onclick="scrollToCat(${ci})">
+        <span class="cat-dot"></span>
+        <span class="cat-label">${cat.cat}</span>
+        <span class="cat-count" id="cat-count-${ci}">0</span>
+      </div>`
+    ).join('');
+}
+
+function scrollToCat(ci){
+  const header = document.getElementById('cat-hdr-'+ci);
+  if(header){
+    const scrollWrap = document.getElementById('t2-scroll');
+    scrollWrap.scrollTo({top: header.offsetTop - scrollWrap.offsetTop - 10, behavior:'smooth'});
+  }
+  document.querySelectorAll('.cat-menu-item').forEach((el,i) => {
+    el.classList.toggle('active', i === ci);
+  });
+}
+
+function updateCatCounts(){
+  const allItems = getAllItems();
+  let idx = 0;
+  CAPABILITIES.forEach((cat, ci) => {
+    let count = 0;
+    cat.items.forEach(() => {
+      if(t2Checkboxes[idx] && t2Checkboxes[idx].checked) count++;
+      idx++;
+    });
+    const el = document.getElementById('cat-count-'+ci);
+    if(el){
+      el.textContent = count;
+      el.classList.toggle('has-items', count > 0);
+    }
+  });
+}
+
 function buildTab2Table(){
   const tbody = document.getElementById('t2-body');
   let html = '';
   let idx = 0;
+  let catIdx = 0;
   CAPABILITIES.forEach(cat => {
-    html += `<tr class="cat-header"><td colspan="7">${cat.cat}</td></tr>`;
+    html += `<tr class="cat-header" id="cat-hdr-${catIdx}"><td colspan="7">${cat.cat}</td></tr>`;
+    catIdx++;
     cat.items.forEach(item => {
       const ws = roundSetup(wholesaleSetup(item.hb));
       const wm = roundMonthly(wholesaleMonthly(item.hm));
@@ -713,7 +779,8 @@ function buildTab2Table(){
   });
   tbody.innerHTML = html;
   t2Checkboxes = document.querySelectorAll('.t2-cb');
-  t2Checkboxes.forEach(cb => cb.addEventListener('change', renderTab2));
+  t2Checkboxes.forEach(cb => cb.addEventListener('change', () => { renderTab2(); updateCatCounts(); }));
+  buildCatMenu();
 }
 
 function getAllItems(){
