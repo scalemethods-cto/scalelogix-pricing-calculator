@@ -1149,8 +1149,8 @@ function renderTab2(){
   const hrsSavedBuild = Math.round((totalHb - effHb) * 10) / 10;
   const hrsSavedMonthly = Math.round((totalHm - effHm) * 10) / 10;
 
-  // Plus Bundle Discount (applies at 10+ items in Custom Build)
-  const dsApplies = n >= 10;
+  // Plus Bundle Discount (applies at 3+ items in Custom Build)
+  const dsApplies = n >= 3;
   const ds = dsApplies ? CFG.ds : 0;
   const dsSavingsS = roundSetup(afterEffWs * ds);
   const dsSavingsM = roundMonthly(afterEffWm * ds);
@@ -1169,7 +1169,8 @@ function renderTab2(){
     <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(cWs)}</div></div>
     <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${fmt(cWm)}</div></div>
-    <div class="summary-item"><div class="label">Total Saved</div><div class="value green">${fmt(totalSavingsS)}</div></div>
+    <div class="summary-item"><div class="label">Setup Saved</div><div class="value green">${fmt(totalSavingsS)}</div></div>
+    <div class="summary-item"><div class="label">Monthly Saved</div><div class="value green">${fmt(totalSavingsM)}</div></div>
   `;
 
   // Savings breakdown below summary — two separate boxes
@@ -1195,7 +1196,7 @@ function renderTab2(){
         bdHtml += `
         <div style="background:rgba(30,138,80,.04);border:1px solid rgba(30,138,80,.15);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:10px">
           <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--green);font-weight:600;margin-bottom:6px">Cross-Bundle Feature Discount</div>
-          <div style="font-size:.82rem;color:var(--text);line-height:1.6">Selecting 10+ automations across categories qualifies for an additional package discount on the combined build.</div>
+          <div style="font-size:.82rem;color:var(--text);line-height:1.6">Combining automations across categories qualifies for an additional package discount on the combined build.</div>
           <div style="display:flex;gap:16px;margin-top:8px">
             <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(dsSavingsS)}</span> <span style="font-size:.68rem;color:var(--text-dim)">setup saved</span></div>
             <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(dsSavingsM)}</span> <span style="font-size:.68rem;color:var(--text-dim)">monthly saved</span></div>
@@ -1583,9 +1584,8 @@ function renderTab4(){
     <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
     <div class="summary-item"><div class="label">Setup Price</div><div class="value gold">${fmt(cWs)}</div></div>
     <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${fmt(cWm)}</div></div>
-    <div class="summary-item"><div class="label">Total Saved</div><div class="value green">${fmt(totalSavingsS)}</div></div>
-    <div class="summary-item"><div class="label">Setup Savings</div><div class="value green">${fmt(savingsS)}</div></div>
-    <div class="summary-item"><div class="label">Monthly Savings</div><div class="value green">${fmt(savingsM)}</div></div>
+    <div class="summary-item"><div class="label">Setup Saved</div><div class="value green">${fmt(totalSavingsS)}</div></div>
+    <div class="summary-item"><div class="label">Monthly Saved</div><div class="value green">${fmt(totalSavingsM)}</div></div>
   `;
 
   // Monthly hours estimation
