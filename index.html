@@ -1194,14 +1194,18 @@ function buildTab3(){
   if(!grid) return;
   grid.innerHTML = DEV_PACKAGES.map((pkg, i) => {
     const isFeatured = pkg.featured ? ' featured' : '';
+    const ws = calcPkgWholesale(pkg);
+    const cp = roundSetup(ws * CFG.phi);
+    const effRate = pkg.hours > 0 ? (ws / pkg.hours) : 0;
     const featuresHtml = (pkg.features || []).map(f => `<li>${f}</li>`).join('');
     return `
     <div class="pkg-card${isFeatured}" style="cursor:pointer;${selectedPkg===i?'border-color:var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.25)':''}" onclick="selectPkg(${i})">
       <div class="pkg-name">${pkg.name}</div>
       <div class="pkg-subtitle">${pkg.subtitle || ''}</div>
-      <div style="text-align:center;padding:14px 0;margin:10px 0;background:rgba(121,102,162,.06);border-radius:var(--radius);border:1px solid rgba(121,102,162,.12)">
-        <div style="font-size:.92rem;font-weight:700;color:var(--purple)">${pkg.hours > 0 ? pkg.hours + ' hours / month' : 'Custom hours'}</div>
-        <div style="font-size:.7rem;color:var(--text-dim);margin-top:4px">Contact us to scope pricing</div>
+      <div class="pkg-prices">
+        <div class="price-row sales-only"><span class="plabel">Wholesale / mo</span><span class="pval">${fmt(ws)}</span></div>
+        <div class="price-row"><span class="plabel">Monthly Investment</span><span class="pval gold">${fmt(cp)}</span></div>
+        ${pkg.hours > 0 ? `<div class="price-row sales-only"><span class="plabel">Effective $/hr</span><span class="pval green">${fmt(effRate)}/hr</span></div>` : `<div class="price-row"><span class="plabel">Hours</span><span class="pval">Custom scope</span></div>`}
       </div>
       <ul class="pkg-items">${featuresHtml}</ul>
     </div>`;
@@ -1217,10 +1221,13 @@ function selectPkg(i){
 function renderTab3Summary(){
   if(!DEV_PACKAGES.length) return;
   const pkg = DEV_PACKAGES[selectedPkg] || DEV_PACKAGES[0];
+  const ws = calcPkgWholesale(pkg);
+  const cp = roundSetup(ws * CFG.phi);
+  const effRate = pkg.hours > 0 ? (ws / pkg.hours) : 0;
   document.getElementById('t3-sel-label').textContent = pkg.hours > 0 ? `${pkg.hours} hrs / mo (${pkg.name})` : `Custom (${pkg.name})`;
-  document.getElementById('t3-sel-ws').textContent = 'Scoped';
-  document.getElementById('t3-sel-cp').textContent = 'Scoped';
-  document.getElementById('t3-sel-ehr').textContent = '—';
+  document.getElementById('t3-sel-ws').textContent = fmt(ws);
+  document.getElementById('t3-sel-cp').textContent = fmt(cp);
+  document.getElementById('t3-sel-ehr').textContent = pkg.hours > 0 ? fmt(effRate) + '/hr' : '—';
   shimmerSummary(document.getElementById('t3-summary'));
   flashValues(document.getElementById('t3-summary'));
 }
@@ -1312,8 +1319,9 @@ function renderTab4(){
       starterChecked++;
     }
   });
-  const starterWs = roundSetup(wholesaleSetup(starterHb));
-  const starterCs = roundSetup(clientPrice(wholesaleSetup(starterHb)));
+  const STARTER_MIN = 4500; // Minimum $4.5K setup for Starter
+  const starterWs = Math.max(STARTER_MIN, roundSetup(wholesaleSetup(starterHb)));
+  const starterCs = Math.max(STARTER_MIN, roundSetup(clientPrice(wholesaleSetup(starterHb))));
 
   const starterEl = document.getElementById('starter-meta');
   if(starterEl) starterEl.textContent = `${starterChecked} automations`;
@@ -1338,8 +1346,9 @@ function renderTab4(){
   const isFullCore = coreChecked === INSURANCE_CORE.length;
   const coreBundleDisc = isFullCore ? CORE_BUNDLE_DISCOUNT : 0;
   const proWsBase = wholesaleSetup(coreHb);
-  const proWs = roundSetup(proWsBase * (1 - coreBundleDisc));
-  const proCs = roundSetup(clientPrice(proWsBase * (1 - coreBundleDisc)));
+  const PRO_MIN = 8500; // Minimum $8.5K setup for Pro
+  const proWs = Math.max(PRO_MIN, roundSetup(proWsBase * (1 - coreBundleDisc)));
+  const proCs = Math.max(PRO_MIN, roundSetup(clientPrice(proWsBase * (1 - coreBundleDisc))));
   const proSavingsS = isFullCore ? roundSetup(proWsBase * coreBundleDisc) : 0;
 
   document.getElementById('core-meta').textContent = isFullCore
