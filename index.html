@@ -449,6 +449,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
   <div id="t4-pkg-rec" style="display:none"></div>
   <button class="view-toggle-btn sales-only" onclick="saveQuote()" style="position:static;margin-top:8px;margin-bottom:16px;width:100%">Save & Share Quote</button>
   <div class="pkg-grid" id="t4-grid"></div>
+  <div id="t4-detail" style="display:none"></div>
 </div>
 </div>
 
@@ -1249,20 +1250,23 @@ const OFFER_TIERS = {
   starter: {
     name: 'Starter',
     catIndices: [0, 5],
+    maxPerCat: 3,
     badge: 'BEST FOR: Solo operators &amp; small teams getting started with AI',
     badgeColor: 'green',
     subtitle: 'Essential automations to capture leads, follow up, and never miss an opportunity'
   },
   pro: {
     name: 'Pro',
-    catIndices: [0, 2, 3, 5, 6],
+    catIndices: [0, 2, 3, 5],
+    maxPerCat: 3,
     badge: 'MOST POPULAR: Growing businesses ready to automate their full pipeline',
     badgeColor: 'purple',
     subtitle: 'The complete operational foundation — automates your entire client pipeline'
   },
   max: {
     name: 'Max',
-    catIndices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    catIndices: [0, 1, 2, 3, 4, 5, 6, 7],
+    maxPerCat: 3,
     badge: 'BEST VALUE: Agencies &amp; multi-location businesses scaling fast',
     badgeColor: 'purple',
     subtitle: 'Full-stack operations and growth intelligence — everything you need to scale'
@@ -1273,9 +1277,10 @@ function getOfferTierItems(tierKey){
   const tier = OFFER_TIERS[tierKey];
   if(!tier) return [];
   const items = [];
+  const maxPerCat = tier.maxPerCat || 999;
   tier.catIndices.forEach(ci => {
     if(CAPABILITIES[ci]){
-      CAPABILITIES[ci].items.forEach((item, ii) => {
+      CAPABILITIES[ci].items.slice(0, maxPerCat).forEach((item, ii) => {
         items.push({ item, catIdx: ci, itemIdx: ii, globalKey: ci + '-' + ii, catName: CAPABILITIES[ci].cat });
       });
     }
@@ -1301,71 +1306,65 @@ function getOfferTierPreview(tierKey){
 function buildTab4(){
   const grid = document.getElementById('t4-grid');
 
-  if(!selectedOfferTier){
-    // Show overview cards for all tiers + Enterprise
-    let html = '';
-    ['starter','pro','max'].forEach(tierKey => {
-      const tier = OFFER_TIERS[tierKey];
-      const preview = getOfferTierPreview(tierKey);
-      const isFeatured = tierKey === 'max' ? ' featured' : '';
-      const badgeBg = tier.badgeColor === 'green'
-        ? 'background:rgba(92,201,142,.1);color:var(--green);border:1px solid rgba(92,201,142,.25)'
-        : 'background:rgba(121,102,162,.1);color:var(--purple);border:1px solid rgba(121,102,162,.25)';
+  // Always show all 4 tier cards — selected one gets highlighted
+  let html = '';
+  ['starter','pro','max'].forEach(tierKey => {
+    const tier = OFFER_TIERS[tierKey];
+    const preview = getOfferTierPreview(tierKey);
+    const isFeatured = tierKey === 'max' ? ' featured' : '';
+    const isSelected = tierKey === selectedOfferTier;
+    const selectedStyle = isSelected ? 'border-color:var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.25)' : '';
+    const badgeBg = tier.badgeColor === 'green'
+      ? 'background:rgba(92,201,142,.1);color:var(--green);border:1px solid rgba(92,201,142,.25)'
+      : 'background:rgba(121,102,162,.1);color:var(--purple);border:1px solid rgba(121,102,162,.25)';
 
-      html += `
-      <div class="pkg-card${isFeatured}" style="cursor:pointer" onclick="selectOfferTier('${tierKey}')">
-        <div class="pkg-name">${tier.name}</div>
-        <div style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.4px;${badgeBg};margin-bottom:10px">${tier.badge}</div>
-        <div class="pkg-subtitle">${tier.subtitle}</div>
-        <div class="pkg-discount">${preview.n} automations · ${(preview.dn*100).toFixed(0)}% bundle efficiency</div>
-        <div class="pkg-prices">
-          <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(preview.wsSetup)}</span></div>
-          <div class="price-row sales-only"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(preview.wsMo)}</span></div>
-          <div class="price-row"><span class="plabel">Setup Price</span><span class="pval gold">${fmt(preview.csSetup)}</span></div>
-          <div class="price-row"><span class="plabel">Monthly Price</span><span class="pval gold">${fmt(preview.csMo)}</span></div>
-        </div>
-        <div style="text-align:center;margin-top:14px">
-          <div style="display:inline-block;padding:8px 20px;background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#fff;border-radius:8px;font-size:.78rem;font-weight:600;letter-spacing:.3px">View &amp; Customize →</div>
-        </div>
-      </div>`;
-    });
-
-    // Enterprise card
     html += `
-    <div class="pkg-card" style="cursor:pointer" onclick="document.querySelector('[data-tab=\\'tab2\\']').click()">
-      <div class="pkg-name">Enterprise</div>
-      <div style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.4px;background:rgba(187,133,117,.1);color:var(--accent-dark);border:1px solid rgba(187,133,117,.25);margin-bottom:10px">BEST FOR: Established firms with 5+ locations or complex needs</div>
-      <div class="pkg-subtitle">Fully custom — pick exactly what you need from our full capability catalog</div>
-      <div class="pkg-discount">${getAllItems().length}+ automations available</div>
-      <div style="text-align:center;padding:24px 0;margin:14px 0">
-        <div style="font-size:1.1rem;font-weight:700;color:var(--accent-dark);margin-bottom:8px">Custom Build</div>
-        <div style="font-size:.78rem;color:var(--text-dim);line-height:1.6;max-width:260px;margin:0 auto">Select from ${getAllItems().length}+ automations across ${CAPABILITIES.length} categories. Dedicated dev team, custom SLA, white-glove onboarding.</div>
-        <div style="margin-top:14px;display:inline-block;padding:8px 20px;background:linear-gradient(135deg,var(--accent-dark),var(--accent));color:#fff;border-radius:8px;font-size:.78rem;font-weight:600;letter-spacing:.3px">Open Custom Builder →</div>
+    <div class="pkg-card${isFeatured}" style="cursor:pointer;${selectedStyle}" onclick="selectOfferTier('${tierKey}')">
+      <div class="pkg-name">${tier.name}</div>
+      <div style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.4px;${badgeBg};margin-bottom:10px">${tier.badge}</div>
+      <div class="pkg-subtitle">${tier.subtitle}</div>
+      <div class="pkg-discount">${preview.n} automations · ${(preview.dn*100).toFixed(0)}% efficiency</div>
+      <div class="pkg-prices">
+        <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(preview.wsSetup)}</span></div>
+        <div class="price-row"><span class="plabel">Setup Price</span><span class="pval gold">${fmt(preview.csSetup)}</span></div>
       </div>
+      ${isSelected ? '<div style="text-align:center;margin-top:10px;font-size:.7rem;color:var(--purple);font-weight:600">SELECTED ✓</div>' : ''}
     </div>`;
+  });
 
-    grid.innerHTML = html;
+  // Enterprise card
+  html += `
+  <div class="pkg-card" style="cursor:pointer" onclick="document.querySelector('[data-tab=\\'tab2\\']').click()">
+    <div class="pkg-name">Enterprise</div>
+    <div style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.4px;background:rgba(187,133,117,.1);color:var(--accent-dark);border:1px solid rgba(187,133,117,.25);margin-bottom:10px">BEST FOR: 5+ locations or complex needs</div>
+    <div class="pkg-subtitle">Fully custom — pick from our full capability catalog</div>
+    <div style="text-align:center;padding:14px 0;margin:10px 0">
+      <div style="display:inline-block;padding:8px 20px;background:linear-gradient(135deg,var(--accent-dark),var(--accent));color:#fff;border-radius:8px;font-size:.78rem;font-weight:600;letter-spacing:.3px">Open Custom Builder →</div>
+    </div>
+  </div>`;
+
+  grid.innerHTML = html;
+
+  // If a tier is selected, build the item detail section below the cards
+  const detailEl = document.getElementById('t4-detail');
+  if(!detailEl) return;
+
+  if(!selectedOfferTier){
+    detailEl.innerHTML = '';
+    detailEl.style.display = 'none';
     insOfferCbs = [];
     return;
   }
 
-  // Detail view for selected tier
   const tier = OFFER_TIERS[selectedOfferTier];
   const tierItems = getOfferTierItems(selectedOfferTier);
-  const isFeatured = selectedOfferTier === 'max' ? ' featured' : '';
 
-  // Initialize check states for this tier if not already set
   if(!offerCheckStates[selectedOfferTier]){
     offerCheckStates[selectedOfferTier] = {};
     tierItems.forEach(e => { offerCheckStates[selectedOfferTier][e.globalKey] = true; });
   }
   const states = offerCheckStates[selectedOfferTier];
 
-  const badgeBg = tier.badgeColor === 'green'
-    ? 'background:rgba(92,201,142,.1);color:var(--green);border:1px solid rgba(92,201,142,.25)'
-    : 'background:rgba(121,102,162,.1);color:var(--purple);border:1px solid rgba(121,102,162,.25)';
-
-  // Group items by category for display
   let lastCat = '';
   let itemsHtml = '';
   tierItems.forEach((e, i) => {
@@ -1378,36 +1377,28 @@ function buildTab4(){
     <div class="ins-item">
       <input type="checkbox" class="ins-offer-cb" data-gkey="${e.globalKey}" data-idx="${i}" ${checked}>
       <span class="iname">${e.item.name}</span>
-      <span class="ihours">${e.item.hb}b / ${e.item.hm}m</span>
+      <span class="ihours sales-only">${e.item.hb}b / ${e.item.hm}m</span>
     </div>`;
   });
 
-  grid.innerHTML = `
-    <div class="pkg-card${isFeatured}" style="grid-column:1/-1;border-color:var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.2)">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
-        <div>
-          <div class="pkg-name">${tier.name}</div>
-          <div style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.4px;${badgeBg};margin-top:4px">${tier.badge}</div>
-        </div>
-        <div style="cursor:pointer;padding:8px 18px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.76rem;font-weight:600;color:var(--text-slate);letter-spacing:.3px" onclick="selectedOfferTier=null;buildTab4();renderTab4()">← Back to packages</div>
-      </div>
-      <div class="pkg-subtitle">${tier.subtitle}</div>
-      <div class="pkg-discount" id="offer-detail-meta">${tierItems.length} automations</div>
-      <div class="ins-items-list" style="max-height:400px">${itemsHtml}</div>
-      <div class="pkg-prices" id="offer-detail-totals"></div>
+  detailEl.style.display = 'block';
+  detailEl.innerHTML = `
+    <div class="card" style="margin-top:16px;border-color:var(--purple);border-width:1.5px">
+      <h3>${tier.name} Package — ${tierItems.length} Automations</h3>
+      <div class="ins-items-list" style="max-height:350px">${itemsHtml}</div>
+      <div class="pkg-prices" id="offer-detail-totals" style="margin-top:14px"></div>
     </div>
   `;
 
   insOfferCbs = document.querySelectorAll('.ins-offer-cb');
   insOfferCbs.forEach(cb => cb.addEventListener('change', () => {
-    // Update stored state
     offerCheckStates[selectedOfferTier][cb.dataset.gkey] = cb.checked;
     renderTab4();
   }));
 }
 
 function selectOfferTier(tier){
-  selectedOfferTier = tier;
+  selectedOfferTier = selectedOfferTier === tier ? null : tier; // toggle
   buildTab4();
   renderTab4();
 }
