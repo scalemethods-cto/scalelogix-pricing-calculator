@@ -1001,16 +1001,16 @@ function renderTab1(){
   document.getElementById('t1-summary').innerHTML = `
     <div class="summary-item sales-only"><div class="label">Wholesale Setup</div><div class="value">${fmt(wSetup)}</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(wMonthly)}</div></div>
-    <div class="summary-item"><div class="label">Setup Investment</div><div class="value gold">${fmt(cSetup)}</div></div>
-    <div class="summary-item"><div class="label">Monthly Investment</div><div class="value gold">${fmt(cMonthly)}</div></div>
+    <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(cSetup)}</div></div>
+    <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${fmt(cMonthly)}</div></div>
     <div class="summary-item sales-only"><div class="label">Margin %</div><div class="value green">${mgn.toFixed(1)}%</div></div>
   `;
 
   document.getElementById('t1-results').innerHTML = `
     <div class="result-box sales-only"><div class="rlabel">Wholesale Setup</div><div class="rvalue">${fmt(wSetup)}</div></div>
     <div class="result-box sales-only"><div class="rlabel">Wholesale Monthly</div><div class="rvalue">${fmt(wMonthly)}</div></div>
-    <div class="result-box"><div class="rlabel">Setup Investment</div><div class="rvalue" style="color:var(--purple)">${fmt(cSetup)}</div></div>
-    <div class="result-box"><div class="rlabel">Monthly Investment</div><div class="rvalue" style="color:var(--purple)">${fmt(cMonthly)}</div></div>
+    <div class="result-box"><div class="rlabel">Total Price</div><div class="rvalue" style="color:var(--purple)">${fmt(cSetup)}</div></div>
+    <div class="result-box"><div class="rlabel">Monthly Price</div><div class="rvalue" style="color:var(--purple)">${fmt(cMonthly)}</div></div>
     <div class="result-box sales-only"><div class="rlabel">Gross Margin %</div><div class="rvalue" style="color:var(--green)">${mgn.toFixed(1)}%</div></div>
   `;
   shimmerSummary(document.getElementById('t1-summary'));
@@ -1124,8 +1124,8 @@ function renderTab2(){
     <div class="summary-item"><div class="label">Bundle Efficiency</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Setup</div><div class="value">${fmt(discWs)}</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Monthly</div><div class="value">${fmt(discWm)}</div></div>
-    <div class="summary-item"><div class="label">Setup Investment</div><div class="value gold">${fmt(cWs)}</div></div>
-    <div class="summary-item"><div class="label">Monthly Investment</div><div class="value gold">${fmt(cWm)}</div></div>
+    <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(cWs)}</div></div>
+    <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${fmt(cWm)}</div></div>
   `;
 
   document.getElementById('t2-bottom').innerHTML = `
@@ -1133,7 +1133,7 @@ function renderTab2(){
     <div class="summary-item"><div class="label">Bundle Efficiency</div><div class="value gold">${(dn*100).toFixed(0)}%</div></div>
     <div class="summary-item sales-only"><div class="label">W. Setup Total</div><div class="value">${fmt(discWs)}</div></div>
     <div class="summary-item sales-only"><div class="label">W. Monthly Total</div><div class="value">${fmt(discWm)}</div></div>
-    <div class="summary-item"><div class="label">Total Setup Investment</div><div class="value gold">${fmt(cWs)}</div></div>
+    <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(cWs)}</div></div>
     <div class="summary-item"><div class="label">Setup Savings</div><div class="value green">${fmt(savingsS)}</div></div>
     <div class="summary-item"><div class="label">Monthly Savings</div><div class="value green">${fmt(savingsM)}</div></div>
   `;
@@ -1204,7 +1204,7 @@ function buildTab3(){
       <div class="pkg-subtitle">${pkg.subtitle || ''}</div>
       <div class="pkg-prices">
         <div class="price-row sales-only"><span class="plabel">Wholesale / mo</span><span class="pval">${fmt(ws)}</span></div>
-        <div class="price-row"><span class="plabel">Monthly Investment</span><span class="pval gold">${fmt(cp)}</span></div>
+        <div class="price-row"><span class="plabel">Monthly Price</span><span class="pval gold">${fmt(cp)}</span></div>
         ${pkg.hours > 0 ? `<div class="price-row sales-only"><span class="plabel">Effective $/hr</span><span class="pval green">${fmt(effRate)}/hr</span></div>` : `<div class="price-row"><span class="plabel">Hours</span><span class="pval">Custom scope</span></div>`}
       </div>
       <ul class="pkg-items">${featuresHtml}</ul>
@@ -1329,7 +1329,7 @@ function renderTab4(){
   const starterTotalsEl = document.getElementById('ins-starter-totals');
   if(starterTotalsEl) starterTotalsEl.innerHTML = `
     <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(starterWs)}</span></div>
-    <div class="price-row"><span class="plabel">Setup Investment</span><span class="pval gold">${fmt(starterCs)}</span></div>
+    <div class="price-row"><span class="plabel">Total Price</span><span class="pval gold">${fmt(starterCs)}</span></div>
   `;
 
   // === PRO: All Core items with bundle efficiency discount ===
@@ -1357,7 +1357,7 @@ function renderTab4(){
 
   let proHtml = `
     <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(proWs)}</span></div>
-    <div class="price-row"><span class="plabel">Setup Investment</span><span class="pval gold">${fmt(proCs)}</span></div>
+    <div class="price-row"><span class="plabel">Total Price</span><span class="pval gold">${fmt(proCs)}</span></div>
   `;
   if(isFullCore){
     proHtml += `
@@ -1389,7 +1389,7 @@ function renderTab4(){
 
   let maxHtml = `
     <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(maxWs)}</span></div>
-    <div class="price-row"><span class="plabel">Setup Investment</span><span class="pval gold">${fmt(maxCs)}</span></div>
+    <div class="price-row"><span class="plabel">Total Price</span><span class="pval gold">${fmt(maxCs)}</span></div>
   `;
   if(maxSavingsS > 0){
     maxHtml += `
