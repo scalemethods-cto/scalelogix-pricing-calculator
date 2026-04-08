@@ -170,6 +170,33 @@ body.client-mode .client-only{display:block!important}
 .pw-error{font-size:.76rem;color:var(--red);margin-top:4px;display:none;letter-spacing:.2px}
 .pw-footer{font-size:.68rem;color:var(--text-dim);margin-top:20px;opacity:.6}
 
+/* Value update loader / flash animation */
+@keyframes valueFlash{
+  0%{background:rgba(121,102,162,.18);transform:scale(1.03)}
+  100%{background:transparent;transform:scale(1)}
+}
+@keyframes shimmer{
+  0%{background-position:-200% 0}
+  100%{background-position:200% 0}
+}
+.value-updating{animation:valueFlash .45s ease-out}
+.card-updating{position:relative;overflow:hidden}
+.card-updating::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 25%,rgba(121,102,162,.08) 50%,transparent 75%);
+  background-size:200% 100%;
+  animation:shimmer .6s ease-in-out;
+  pointer-events:none;border-radius:inherit;
+}
+.summary-updating{position:relative;overflow:hidden}
+.summary-updating::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 25%,rgba(121,102,162,.06) 50%,transparent 75%);
+  background-size:200% 100%;
+  animation:shimmer .5s ease-in-out;
+  pointer-events:none;border-radius:inherit;
+}
+
 /* Presentation mode polish */
 ::selection{background:rgba(196,154,124,.3);color:var(--white)}
 input[type="number"]::-webkit-inner-spin-button{opacity:.5}
@@ -411,6 +438,34 @@ const CFG = {
   get ds(){ return (parseFloat(document.getElementById('cfg-ds').value) || 15) / 100 },
 };
 
+// ========== LOADER ANIMATIONS ==========
+function flashValues(container){
+  if(!container) return;
+  container.querySelectorAll('.value, .rvalue, .pval, .sval').forEach(el => {
+    el.classList.remove('value-updating');
+    void el.offsetWidth; // force reflow to restart animation
+    el.classList.add('value-updating');
+  });
+}
+function shimmerCard(el){
+  if(!el) return;
+  el.classList.remove('card-updating');
+  void el.offsetWidth;
+  el.classList.add('card-updating');
+  setTimeout(() => el.classList.remove('card-updating'), 650);
+}
+function shimmerSummary(el){
+  if(!el) return;
+  el.classList.remove('summary-updating');
+  void el.offsetWidth;
+  el.classList.add('summary-updating');
+  setTimeout(() => el.classList.remove('summary-updating'), 550);
+}
+// Remove animation class after it ends so it can replay
+document.addEventListener('animationend', e => {
+  if(e.animationName === 'valueFlash') e.target.classList.remove('value-updating');
+});
+
 // ========== BUNDLE PRICING LOGIC ==========
 // Bundle efficiency: building items together shares infrastructure, reusable components, and
 // reduces total dev hours vs building each item individually.
@@ -626,6 +681,9 @@ function renderTab1(){
     <div class="result-box"><div class="rlabel">Monthly Investment</div><div class="rvalue" style="color:var(--purple)">${fmt(cMonthly)}</div></div>
     <div class="result-box sales-only"><div class="rlabel">Gross Margin %</div><div class="rvalue" style="color:var(--green)">${mgn.toFixed(1)}%</div></div>
   `;
+  shimmerSummary(document.getElementById('t1-summary'));
+  flashValues(document.getElementById('t1-summary'));
+  flashValues(document.getElementById('t1-results'));
 }
 
 // ========== TAB 2 — CUSTOM BUILD ==========
@@ -740,6 +798,10 @@ function renderTab2(){
   } else {
     recEl.style.display = 'none';
   }
+  shimmerSummary(document.getElementById('t2-summary'));
+  flashValues(document.getElementById('t2-summary'));
+  flashValues(document.getElementById('t2-bottom'));
+  shimmerSummary(document.getElementById('t2-bottom'));
 }
 
 // ========== TAB 3 — DEV HOUR PACKAGES ==========
@@ -786,6 +848,8 @@ function renderTab3Summary(){
   document.getElementById('t3-sel-ws').textContent = fmt(pkg.wholesale);
   document.getElementById('t3-sel-cp').textContent = fmt(clientP);
   document.getElementById('t3-sel-ehr').textContent = pkg.hours > 0 ? fmt(effRate) : '—';
+  shimmerSummary(document.getElementById('t3-summary'));
+  flashValues(document.getElementById('t3-summary'));
 }
 
 // ========== TAB 4 — OFFERS ==========
@@ -950,6 +1014,12 @@ function renderTab4(){
     <div class="summary-item"><div class="label">Max Client Monthly</div><div class="value gold">${fmt(maxCm)}</div></div>
     <div class="summary-item"><div class="label">Total Savings</div><div class="value green">${fmt(maxSavingsS)}</div></div>
   `;
+  shimmerSummary(document.getElementById('t4-summary'));
+  flashValues(document.getElementById('t4-summary'));
+  document.querySelectorAll('#t4-grid .pkg-card').forEach(c => shimmerCard(c));
+  flashValues(document.getElementById('ins-core-totals'));
+  flashValues(document.getElementById('ins-combo-totals'));
+  flashValues(document.getElementById('ins-sec-totals'));
 }
 
 // ========== LOGOUT ==========
