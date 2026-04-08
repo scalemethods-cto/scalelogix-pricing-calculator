@@ -1538,16 +1538,20 @@ function renderTab4(){
 
   // Update detail meta
   const metaEl = document.getElementById('offer-detail-meta');
-  if(metaEl) metaEl.textContent = `${checkedCount} automations · ${(dn*100).toFixed(0)}% efficiency${ds > 0 ? ' + '+(ds*100).toFixed(0)+'% bundle discount' : ''}`;
+  if(metaEl) metaEl.textContent = `${checkedCount} of ${tierItems.length} automations selected`;
 
   // Update detail totals
   const totalsEl = document.getElementById('offer-detail-totals');
   if(totalsEl){
     let html = `
-      <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(discWs)}</span></div>
-      <div class="price-row sales-only"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(discWm)}</span></div>
-      <div class="price-row"><span class="plabel">Setup Price</span><span class="pval gold">${fmt(cWs)}</span></div>
-      <div class="price-row"><span class="plabel">Monthly Price</span><span class="pval gold">${fmt(cWm)}</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;padding:14px;background:var(--bg);border-radius:var(--radius);margin-bottom:12px">
+        <div class="sales-only" style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Wholesale Setup</div><div style="font-size:1rem;font-weight:700;color:var(--text)">${fmt(discWs)}</div></div>
+        <div class="sales-only" style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Wholesale Monthly</div><div style="font-size:1rem;font-weight:700;color:var(--text)">${fmt(discWm)}</div></div>
+        <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Setup Price</div><div style="font-size:1.1rem;font-weight:700;color:var(--purple)">${fmt(cWs)}</div></div>
+        <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Monthly Price</div><div style="font-size:1.1rem;font-weight:700;color:var(--purple)">${fmt(cWm)}</div></div>
+        <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Setup Saved</div><div style="font-size:1.1rem;font-weight:700;color:var(--green)">${fmt(totalSavingsS)}</div></div>
+        <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Monthly Saved</div><div style="font-size:1.1rem;font-weight:700;color:var(--green)">${fmt(totalSavingsM)}</div></div>
+      </div>
     `;
 
     if(dn > 0){
@@ -1638,6 +1642,7 @@ function updateAll(){
   renderTab1();
   renderTab2();
   buildTab3();
+  buildTab4();
   renderTab4();
 }
 
