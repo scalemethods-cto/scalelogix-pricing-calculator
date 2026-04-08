@@ -407,7 +407,7 @@ function checkPw(){
 const CFG = {
   get r(){ return parseFloat(document.getElementById('cfg-r').value) || 105 },
   get mu(){ return parseFloat(document.getElementById('cfg-mu').value) || 2.0 },
-  get phi(){ return 1 + (parseFloat(document.getElementById('cfg-phi').value) || 20) / 100 },
+  get phi(){ const v = parseFloat(document.getElementById('cfg-phi').value); return 1 + (isNaN(v) ? 0 : v) / 100 },
   get ds(){ return (parseFloat(document.getElementById('cfg-ds').value) || 15) / 100 },
 };
 
@@ -810,24 +810,32 @@ function buildTab4(){
 
   grid.innerHTML = `
     <div class="pkg-card">
-      <div class="pkg-name">Core</div>
+      <div class="pkg-name">Pro</div>
+      <div style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.4px;background:rgba(92,201,142,.1);color:var(--green);border:1px solid rgba(92,201,142,.25);margin-bottom:10px">BEST FOR: Small teams &amp; solo operators getting started with AI</div>
       <div class="pkg-subtitle">The operational foundation — automates your entire client pipeline from first contact to ongoing support</div>
       <div class="pkg-discount" id="core-meta">${(CORE_BUNDLE_DISCOUNT*100).toFixed(0)}% Bundle Discount · ${INSURANCE_CORE.length} automations</div>
       <div class="ins-items-list">${coreItems}</div>
       <div class="pkg-prices" id="ins-core-totals"></div>
     </div>
-    <div class="pkg-card">
-      <div class="pkg-name">Plus</div>
-      <div class="pkg-subtitle">The growth intelligence layer — advanced revenue systems that stack on top of Core to accelerate growth</div>
-      <div class="pkg-discount" id="plus-meta">${INSURANCE_SECONDARY.length} advanced add-ons</div>
-      <div class="ins-items-list">${secItems}</div>
-      <div class="pkg-prices" id="ins-sec-totals"></div>
-    </div>
     <div class="pkg-card featured">
-      <div class="pkg-name">Core + Plus Bundle</div>
-      <div class="pkg-subtitle">The complete AI system — full-stack operations and growth intelligence from Day 1</div>
+      <div class="pkg-name">Max</div>
+      <div style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.4px;background:rgba(121,102,162,.1);color:var(--purple);border:1px solid rgba(121,102,162,.25);margin-bottom:10px">BEST VALUE: Growing agencies &amp; multi-location businesses scaling fast</div>
+      <div class="pkg-subtitle">Pro + growth intelligence — advanced revenue systems, sourcing, and analytics layered on top</div>
       <div class="pkg-discount" id="bundle-meta">${INSURANCE_CORE.length + INSURANCE_SECONDARY.length} automations included</div>
+      <div class="ins-items-list">${coreItems}${secItems}</div>
       <div class="pkg-prices" id="ins-combo-totals"></div>
+    </div>
+    <div class="pkg-card">
+      <div class="pkg-name">Enterprise</div>
+      <div style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.4px;background:rgba(187,133,117,.1);color:var(--accent-dark);border:1px solid rgba(187,133,117,.25);margin-bottom:10px">BEST FOR: Established firms with 5+ locations or complex compliance needs</div>
+      <div class="pkg-subtitle">Everything in Max plus dedicated dev resources, custom integrations, and white-glove onboarding</div>
+      <div class="pkg-discount" id="plus-meta">All ${INSURANCE_CORE.length + INSURANCE_SECONDARY.length} automations + custom scope</div>
+      <div class="ins-items-list">${coreItems}${secItems}</div>
+      <div class="pkg-prices" id="ins-sec-totals"></div>
+      <div style="background:rgba(187,133,117,.08);border:1px solid rgba(187,133,117,.2);border-radius:var(--radius);padding:14px;text-align:center;margin-top:14px">
+        <div style="font-size:.72rem;color:var(--accent-dark);font-weight:600;letter-spacing:.3px">Custom Scope — Contact Us</div>
+        <div style="font-size:.68rem;color:var(--text-dim);margin-top:4px">Dedicated dev team, custom SLA, priority support, strategic planning</div>
+      </div>
     </div>
   `;
 
@@ -838,7 +846,7 @@ function buildTab4(){
 }
 
 function renderTab4(){
-  // Core totals — apply efficiency bundle discount when ALL Core items are selected
+  // === PRO: Core items with bundle efficiency discount ===
   let coreHb = 0, coreHm = 0, coreChecked = 0;
   insCoreCbs.forEach(cb => {
     if(cb.checked){
@@ -851,36 +859,35 @@ function renderTab4(){
 
   const isFullCore = coreChecked === INSURANCE_CORE.length;
   const coreBundleDisc = isFullCore ? CORE_BUNDLE_DISCOUNT : 0;
-  const coreWsBase = wholesaleSetup(coreHb);
-  const coreWmBase = wholesaleMonthly(coreHm);
-  const coreWs = roundSetup(coreWsBase * (1 - coreBundleDisc));
-  const coreWm = roundMonthly(coreWmBase * (1 - coreBundleDisc));
-  const coreCs = roundSetup(clientPrice(coreWsBase * (1 - coreBundleDisc)));
-  const coreCm = roundMonthly(clientPrice(coreWmBase * (1 - coreBundleDisc)));
-  const coreEffSavingsS = isFullCore ? roundSetup(coreWsBase * coreBundleDisc) : 0;
-  const coreEffSavingsM = isFullCore ? roundMonthly(coreWmBase * coreBundleDisc) : 0;
+  const proWsBase = wholesaleSetup(coreHb);
+  const proWmBase = wholesaleMonthly(coreHm);
+  const proWs = roundSetup(proWsBase * (1 - coreBundleDisc));
+  const proWm = roundMonthly(proWmBase * (1 - coreBundleDisc));
+  const proCs = roundSetup(clientPrice(proWsBase * (1 - coreBundleDisc)));
+  const proCm = roundMonthly(clientPrice(proWmBase * (1 - coreBundleDisc)));
+  const proSavingsS = isFullCore ? roundSetup(proWsBase * coreBundleDisc) : 0;
+  const proSavingsM = isFullCore ? roundMonthly(proWmBase * coreBundleDisc) : 0;
 
-  // Update Core meta line
   document.getElementById('core-meta').textContent = isFullCore
     ? `${(CORE_BUNDLE_DISCOUNT*100).toFixed(0)}% Bundle Discount · ${coreChecked} automations`
     : `${coreChecked} automations`;
 
-  let coreTotalsHtml = `
-    <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(coreWs)}</span></div>
-    <div class="price-row sales-only"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(coreWm)}</span></div>
-    <div class="price-row"><span class="plabel">Client Setup</span><span class="pval gold">${fmt(coreCs)}</span></div>
-    <div class="price-row"><span class="plabel">Client Monthly</span><span class="pval gold">${fmt(coreCm)}</span></div>
+  let proHtml = `
+    <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(proWs)}</span></div>
+    <div class="price-row sales-only"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(proWm)}</span></div>
+    <div class="price-row"><span class="plabel">Setup Investment</span><span class="pval gold">${fmt(proCs)}</span></div>
+    <div class="price-row"><span class="plabel">Monthly Investment</span><span class="pval gold">${fmt(proCm)}</span></div>
   `;
   if(isFullCore){
-    coreTotalsHtml += `
+    proHtml += `
     <div class="efficiency-banner">
-      <div class="slabel sales-only">Bundle Efficiency — ~${(CORE_BUNDLE_EFFICIENCY*100).toFixed(0)}% faster fulfillment · ${(coreBundleDisc*100).toFixed(0)}% discount applied</div>
-      <div class="sval">${fmt(coreEffSavingsS)} setup · ${fmt(coreEffSavingsM)}/mo saved</div>
+      <div class="slabel sales-only">${(coreBundleDisc*100).toFixed(0)}% bundle efficiency applied</div>
+      <div class="sval">${fmt(proSavingsS)} setup · ${fmt(proSavingsM)}/mo saved</div>
     </div>`;
   }
-  document.getElementById('ins-core-totals').innerHTML = coreTotalsHtml;
+  document.getElementById('ins-core-totals').innerHTML = proHtml;
 
-  // Plus totals
+  // === MAX: Core + Secondary combined with bundle discount (featured) ===
   let secHb = 0, secHm = 0, secChecked = 0;
   insSecCbs.forEach(cb => {
     if(cb.checked){
@@ -890,66 +897,58 @@ function renderTab4(){
       secChecked++;
     }
   });
-  const secWsRaw = wholesaleSetup(secHb);
-  const secWmRaw = wholesaleMonthly(secHm);
-  const secWs = roundSetup(secWsRaw);
-  const secWm = roundMonthly(secWmRaw);
-  const secCs = roundSetup(clientPrice(secWsRaw));
-  const secCm = roundMonthly(clientPrice(secWmRaw));
 
-  // Update Plus meta line
-  document.getElementById('plus-meta').textContent = `${secChecked} advanced add-ons`;
-
-  document.getElementById('ins-sec-totals').innerHTML = `
-    <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(secWs)}</span></div>
-    <div class="price-row sales-only"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(secWm)}</span></div>
-    <div class="price-row"><span class="plabel">Client Setup</span><span class="pval gold">${fmt(secCs)}</span></div>
-    <div class="price-row"><span class="plabel">Client Monthly</span><span class="pval gold">${fmt(secCm)}</span></div>
-  `;
-
-  // Combo: Core (with efficiency discount if full bundle) + Plus with ds% bundle discount
   const ds = CFG.ds;
-  const comboWsRaw = coreWsBase * (1 - coreBundleDisc) + wholesaleSetup(secHb) * (1 - ds);
-  const comboWmRaw = coreWmBase * (1 - coreBundleDisc) + wholesaleMonthly(secHm) * (1 - ds);
-  const comboWs = roundSetup(comboWsRaw);
-  const comboWm = roundMonthly(comboWmRaw);
-  const comboCs = roundSetup(clientPrice(comboWsRaw));
-  const comboCm = roundMonthly(clientPrice(comboWmRaw));
-  const plusSavingsSetup = roundSetup(wholesaleSetup(secHb) * ds);
-  const plusSavingsMonthly = roundMonthly(wholesaleMonthly(secHm) * ds);
-  const totalBundleSavingsSetup = plusSavingsSetup + coreEffSavingsS;
-  const totalBundleSavingsMonthly = plusSavingsMonthly + coreEffSavingsM;
+  const maxWsRaw = proWsBase * (1 - coreBundleDisc) + wholesaleSetup(secHb) * (1 - ds);
+  const maxWmRaw = proWmBase * (1 - coreBundleDisc) + wholesaleMonthly(secHm) * (1 - ds);
+  const maxWs = roundSetup(maxWsRaw);
+  const maxWm = roundMonthly(maxWmRaw);
+  const maxCs = roundSetup(clientPrice(maxWsRaw));
+  const maxCm = roundMonthly(clientPrice(maxWmRaw));
+  const maxSavingsS = proSavingsS + roundSetup(wholesaleSetup(secHb) * ds);
+  const maxSavingsM = proSavingsM + roundMonthly(wholesaleMonthly(secHm) * ds);
 
-  // Update Bundle meta line
   document.getElementById('bundle-meta').textContent = `${coreChecked + secChecked} automations included`;
 
-  const hasCore = coreHb > 0 || coreHm > 0;
-  const hasSec = secHb > 0 || secHm > 0;
-
-  let comboHtml = `
-    <div class="price-row sales-only"><span class="plabel">Combo Wholesale Setup</span><span class="pval">${fmt(comboWs)}</span></div>
-    <div class="price-row sales-only"><span class="plabel">Combo Wholesale Monthly</span><span class="pval">${fmt(comboWm)}</span></div>
-    <div class="price-row"><span class="plabel">Setup Investment</span><span class="pval gold">${fmt(comboCs)}</span></div>
-    <div class="price-row"><span class="plabel">Monthly Investment</span><span class="pval gold">${fmt(comboCm)}</span></div>
+  let maxHtml = `
+    <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(maxWs)}</span></div>
+    <div class="price-row sales-only"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(maxWm)}</span></div>
+    <div class="price-row"><span class="plabel">Setup Investment</span><span class="pval gold">${fmt(maxCs)}</span></div>
+    <div class="price-row"><span class="plabel">Monthly Investment</span><span class="pval gold">${fmt(maxCm)}</span></div>
   `;
-  if(hasCore && hasSec){
-    const coreTag = isFullCore ? ` + Core ${(coreBundleDisc*100).toFixed(0)}% efficiency` : '';
-    comboHtml += `
+  if(maxSavingsS > 0 || maxSavingsM > 0){
+    maxHtml += `
     <div class="savings-banner">
-      <div class="slabel">${(ds*100).toFixed(0)}% off Plus${coreTag} — total bundle savings</div>
-      <div class="sval">${fmt(totalBundleSavingsSetup)} setup · ${fmt(totalBundleSavingsMonthly)}/mo</div>
+      <div class="slabel">Total bundle savings</div>
+      <div class="sval">${fmt(maxSavingsS)} setup · ${fmt(maxSavingsM)}/mo</div>
     </div>`;
   }
-  document.getElementById('ins-combo-totals').innerHTML = comboHtml;
+  document.getElementById('ins-combo-totals').innerHTML = maxHtml;
+
+  // === ENTERPRISE: same items as Max but with custom premium ===
+  const entMultiplier = 1.35; // Enterprise premium for dedicated resources & SLA
+  const entWs = roundSetup(maxWsRaw * entMultiplier);
+  const entWm = roundMonthly(maxWmRaw * entMultiplier);
+  const entCs = roundSetup(clientPrice(maxWsRaw * entMultiplier));
+  const entCm = roundMonthly(clientPrice(maxWmRaw * entMultiplier));
+
+  document.getElementById('plus-meta').textContent = `All ${coreChecked + secChecked} automations + custom scope`;
+
+  document.getElementById('ins-sec-totals').innerHTML = `
+    <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval">${fmt(entWs)}</span></div>
+    <div class="price-row sales-only"><span class="plabel">Wholesale Monthly</span><span class="pval">${fmt(entWm)}</span></div>
+    <div class="price-row"><span class="plabel">Setup Investment</span><span class="pval gold">${fmt(entCs)}</span></div>
+    <div class="price-row"><span class="plabel">Monthly Investment</span><span class="pval gold">${fmt(entCm)}</span></div>
+  `;
 
   // Summary bar
   document.getElementById('t4-summary').innerHTML = `
-    <div class="summary-item sales-only"><div class="label">Core W. Setup</div><div class="value">${fmt(coreWs)}</div></div>
-    <div class="summary-item sales-only"><div class="label">Plus W. Setup</div><div class="value">${fmt(secWs)}</div></div>
-    <div class="summary-item sales-only"><div class="label">Combo W. Setup</div><div class="value gold">${fmt(comboWs)}</div></div>
-    <div class="summary-item"><div class="label">Bundle Client Setup</div><div class="value gold">${fmt(comboCs)}</div></div>
-    <div class="summary-item"><div class="label">Bundle Client Monthly</div><div class="value gold">${fmt(comboCm)}</div></div>
-    <div class="summary-item"><div class="label">Total Bundle Savings</div><div class="value green">${fmt(totalBundleSavingsSetup)}</div></div>
+    <div class="summary-item sales-only"><div class="label">Pro W. Setup</div><div class="value">${fmt(proWs)}</div></div>
+    <div class="summary-item sales-only"><div class="label">Max W. Setup</div><div class="value gold">${fmt(maxWs)}</div></div>
+    <div class="summary-item"><div class="label">Pro Client Setup</div><div class="value gold">${fmt(proCs)}</div></div>
+    <div class="summary-item"><div class="label">Max Client Setup</div><div class="value gold">${fmt(maxCs)}</div></div>
+    <div class="summary-item"><div class="label">Max Client Monthly</div><div class="value gold">${fmt(maxCm)}</div></div>
+    <div class="summary-item"><div class="label">Total Savings</div><div class="value green">${fmt(maxSavingsS)}</div></div>
   `;
 }
 
