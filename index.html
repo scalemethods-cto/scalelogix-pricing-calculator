@@ -468,6 +468,7 @@ try {
 
 let currentUser = null;
 let currentRole = null;
+let isInitializing = false; // prevent double-init race condition
 
 // ========== DATA (loaded from Supabase, with hardcoded fallback) ==========
 let CAPABILITIES = [];
@@ -489,8 +490,7 @@ const AUTH_ACCOUNTS = [
 
 function setLoginStatus(state, msg){
   const el = document.getElementById('pw-status');
-  el.className = 'pw-status ' + state;
-  el.textContent = msg;
+  if(el){ el.className = 'pw-status ' + state; el.textContent = msg; }
 }
 
 async function handleLogin(){
@@ -507,6 +507,7 @@ async function handleLogin(){
         const { data, error } = await sb.auth.signInWithPassword({ email: acct.email, password });
         if(!error && data?.user){
           setLoginStatus('success', 'Access granted — loading calculator...');
+          // onAuthStateChange will NOT handle this — we do it ourselves
           await initSession(data.user);
           document.querySelector('.pw-btn').disabled = false;
           return;
@@ -538,22 +539,25 @@ async function handleLogin(){
 }
 
 async function initSession(user){
+  if(isInitializing) return; // prevent race condition
+  isInitializing = true;
+
   try {
     currentUser = user;
-    // Show loading overlay while data loads
     document.getElementById('pw-gate').classList.add('hidden');
     document.getElementById('app-loading').classList.remove('hidden');
 
     let role = 'client';
-    try {
-      const { data: profile } = await sb.from('profiles').select('role, full_name, org_name').eq('id', user.id).single();
-      role = profile?.role || 'client';
-    } catch(e) {
-      console.warn('Profile fetch failed, defaulting to client', e);
+    if(sb && !offlineMode){
+      try {
+        const { data: profile } = await sb.from('profiles').select('role, full_name, org_name').eq('id', user.id).single();
+        role = profile?.role || 'client';
+      } catch(e) {
+        console.warn('Profile fetch failed, defaulting to client', e);
+      }
     }
     currentRole = role;
     applyRole(currentRole);
-
     await loadData();
   } catch(e) {
     console.warn('initSession failed, falling back', e);
@@ -562,9 +566,12 @@ async function initSession(user){
     loadFallbackData();
   }
   document.getElementById('app-loading').classList.add('hidden');
+  isInitializing = false;
 }
 
 async function initFallbackSession(role){
+  if(isInitializing) return;
+  isInitializing = true;
   offlineMode = true;
   currentUser = { id: 'fallback' };
   currentRole = role;
@@ -573,6 +580,7 @@ async function initFallbackSession(role){
   applyRole(role);
   loadFallbackData();
   document.getElementById('app-loading').classList.add('hidden');
+  isInitializing = false;
 }
 
 function applyRole(role){
@@ -580,15 +588,17 @@ function applyRole(role){
     document.body.classList.add('client-mode');
     document.getElementById('view-toggle').style.display = 'none';
     setViewTag('client');
-    document.querySelector('[data-tab="tab4"]').click();
+    try { document.querySelector('[data-tab="tab4"]').click(); } catch(e){}
   } else {
     document.body.classList.remove('client-mode');
+    document.getElementById('view-toggle').style.display = '';
     setViewTag('sales');
   }
 }
 
 function setViewTag(mode){
   const tag = document.getElementById('view-tag');
+  if(!tag) return;
   if(mode === 'client'){
     tag.textContent = 'Client View';
     tag.className = 'view-tag client';
@@ -598,23 +608,22 @@ function setViewTag(mode){
   }
 }
 
-// Session restore
+// Session restore — only handles page reload, NOT login (handleLogin does that)
 if(sb && !offlineMode){
-  sb.auth.onAuthStateChange(async (event, session) => {
-    try {
-      if(event === 'SIGNED_IN' && session?.user && !currentUser){
-        await initSession(session.user);
-      } else if(event === 'SIGNED_OUT'){
-        currentUser = null;
-        currentRole = null;
-        document.getElementById('pw-gate').classList.remove('hidden');
-        document.getElementById('app-loading').classList.add('hidden');
-      }
-    } catch(e) { console.warn('Auth state change error', e); }
+  // Don't use onAuthStateChange for SIGNED_IN — it races with handleLogin.
+  // Only use it for SIGNED_OUT (logout).
+  sb.auth.onAuthStateChange((event, session) => {
+    if(event === 'SIGNED_OUT'){
+      currentUser = null;
+      currentRole = null;
+      isInitializing = false;
+      document.getElementById('pw-gate').classList.remove('hidden');
+      document.getElementById('app-loading').classList.add('hidden');
+    }
   });
 }
 
-// Initial check — with 5s timeout
+// Initial check — restore session on page reload
 (async function(){
   if(sb && !offlineMode){
     try {
@@ -1384,16 +1393,20 @@ function renderTab4(){
 
 // ========== LOGOUT ==========
 async function logout(){
-  await sb.auth.signOut();
+  try { if(sb) await sb.auth.signOut(); } catch(e){ console.warn('signOut error', e); }
   currentUser = null;
   currentRole = null;
+  isInitializing = false;
+  offlineMode = false;
   document.body.classList.remove('client-mode');
   document.getElementById('view-toggle').style.display = '';
   document.getElementById('view-toggle').textContent = 'Client View';
   setViewTag('sales');
   document.getElementById('pw-input').value = '';
-  document.getElementById('pw-error').style.display = 'none';
+  const status = document.getElementById('pw-status');
+  if(status){ status.className = 'pw-status'; status.textContent = ''; }
   document.getElementById('pw-gate').classList.remove('hidden');
+  document.querySelector('.pw-btn').disabled = false;
 }
 
 // ========== CLIENT / SALES VIEW TOGGLE ==========
