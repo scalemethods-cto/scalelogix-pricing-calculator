@@ -170,31 +170,51 @@ body.client-mode .client-only{display:block!important}
 .pw-error{font-size:.76rem;color:var(--red);margin-top:4px;display:none;letter-spacing:.2px}
 .pw-footer{font-size:.68rem;color:var(--text-dim);margin-top:20px;opacity:.6}
 
-/* Value update loader / flash animation */
+/* ─── Value update animations ─── */
 @keyframes valueFlash{
-  0%{background:rgba(121,102,162,.18);transform:scale(1.03)}
+  0%{background:rgba(121,102,162,.22);border-radius:4px;transform:scale(1.04)}
+  40%{background:rgba(121,102,162,.10);transform:scale(1.01)}
   100%{background:transparent;transform:scale(1)}
 }
 @keyframes shimmer{
   0%{background-position:-200% 0}
   100%{background-position:200% 0}
 }
-.value-updating{animation:valueFlash .45s ease-out}
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes countPop{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.25)}
+  100%{transform:scale(1)}
+}
+.value-updating{animation:valueFlash .5s cubic-bezier(.22,1,.36,1);border-radius:4px;padding:0 3px;margin:0 -3px}
 .card-updating{position:relative;overflow:hidden}
 .card-updating::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent 25%,rgba(121,102,162,.08) 50%,transparent 75%);
-  background-size:200% 100%;
-  animation:shimmer .6s ease-in-out;
+  background:linear-gradient(105deg,transparent 20%,rgba(121,102,162,.07) 35%,rgba(121,102,162,.12) 50%,rgba(121,102,162,.07) 65%,transparent 80%);
+  background-size:250% 100%;
+  animation:shimmer .8s cubic-bezier(.4,0,.2,1);
   pointer-events:none;border-radius:inherit;
 }
 .summary-updating{position:relative;overflow:hidden}
 .summary-updating::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent 25%,rgba(121,102,162,.06) 50%,transparent 75%);
-  background-size:200% 100%;
-  animation:shimmer .5s ease-in-out;
+  background:linear-gradient(105deg,transparent 20%,rgba(121,102,162,.05) 35%,rgba(121,102,162,.09) 50%,rgba(121,102,162,.05) 65%,transparent 80%);
+  background-size:250% 100%;
+  animation:shimmer .7s cubic-bezier(.4,0,.2,1);
   pointer-events:none;border-radius:inherit;
+}
+/* Smooth number transitions on summary values */
+.summary-item .value,.result-box .rvalue,.price-row .pval{transition:color .2s ease}
+/* Category count pop when items change */
+.cat-count.pop{animation:countPop .3s cubic-bezier(.22,1,.36,1)}
+/* Checkbox row highlight on toggle */
+.cap-table tr.row-flash td{animation:rowHighlight .4s ease-out}
+@keyframes rowHighlight{
+  0%{background:rgba(121,102,162,.1)}
+  100%{background:transparent}
 }
 
 /* Category sidebar menu (Custom Build) */
@@ -232,25 +252,35 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
   .ins-grid{grid-template-columns:1fr}
   .header-inner{flex-direction:column;gap:8px}
 }
-.app-loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;transition:opacity .3s}
+/* ─── App loading overlay ─── */
+.app-loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;transition:opacity .5s cubic-bezier(.4,0,.2,1)}
 .app-loading.hidden{opacity:0;pointer-events:none}
-.app-loading .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.app-loading p{margin-top:14px;color:var(--text-dim);font-size:.82rem;font-weight:500}
-.save-indicator{position:fixed;bottom:20px;right:20px;z-index:300;padding:10px 18px;border-radius:8px;font-size:.78rem;font-weight:600;font-family:inherit;transition:all .3s;opacity:0;transform:translateY(10px);pointer-events:none}
-.save-indicator.show{opacity:1;transform:translateY(0)}
-.save-indicator.saving{background:rgba(121,102,162,.12);color:var(--purple);border:1px solid rgba(121,102,162,.25)}
-.save-indicator.saved{background:rgba(30,138,80,.1);color:var(--green);border:1px solid rgba(30,138,80,.25)}
-.save-indicator.error{background:rgba(192,64,64,.1);color:var(--red);border:1px solid rgba(192,64,64,.25)}
+.app-loading .load-logo{height:80px;margin-bottom:28px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.1));animation:logoFloat 2s ease-in-out infinite}
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.app-loading .load-bar{width:180px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.app-loading .load-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--purple-dark),var(--purple),var(--accent-light));border-radius:2px;animation:loadProgress 2s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes loadProgress{0%{width:0%}30%{width:45%}60%{width:70%}80%{width:85%}100%{width:95%}}
+.app-loading.hidden .load-bar-fill{width:100%!important;transition:width .2s}
+.app-loading p{color:var(--text-dim);font-size:.78rem;font-weight:500;letter-spacing:.3px}
+.app-loading .load-dots::after{content:'';animation:dots 1.5s steps(4,end) infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+
+/* ─── Save indicator toast ─── */
+.save-indicator{position:fixed;bottom:24px;right:24px;z-index:300;padding:12px 20px;border-radius:10px;font-size:.78rem;font-weight:600;font-family:inherit;transition:all .35s cubic-bezier(.22,1,.36,1);opacity:0;transform:translateY(16px) scale(.95);pointer-events:none;backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.save-indicator.show{opacity:1;transform:translateY(0) scale(1)}
+.save-indicator .save-icon{display:inline-block;margin-right:6px;font-size:.9rem;vertical-align:middle}
+.save-indicator.saving{background:rgba(121,102,162,.15);color:var(--purple-dark);border:1px solid rgba(121,102,162,.3)}
+.save-indicator.saved{background:rgba(30,138,80,.12);color:var(--green);border:1px solid rgba(30,138,80,.3)}
+.save-indicator.error{background:rgba(192,64,64,.12);color:var(--red);border:1px solid rgba(192,64,64,.3)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
 <div class="app-loading" id="app-loading">
-  <img src="brand/4-removebg-preview.png" style="height:100px;margin-bottom:20px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.1))">
-  <div class="spinner"></div>
-  <p>Loading calculator...</p>
+  <img src="brand/4-removebg-preview.png" class="load-logo" alt="ScaleLogix AI">
+  <div class="load-bar"><div class="load-bar-fill"></div></div>
+  <p>Loading<span class="load-dots"></span></p>
 </div>
 <div class="save-indicator" id="save-indicator"></div>
 
@@ -588,8 +618,9 @@ const CFG = {
 let saveTimeout = null;
 function showSaveStatus(status, msg){
   const el = document.getElementById('save-indicator');
+  const icons = { saving: '↻', saved: '✓', error: '✕' };
   el.className = 'save-indicator show ' + status;
-  el.textContent = msg;
+  el.innerHTML = `<span class="save-icon">${icons[status] || ''}</span>${msg}`;
   if(status !== 'saving') setTimeout(() => { el.classList.remove('show'); }, 2500);
 }
 
@@ -648,14 +679,30 @@ function shimmerCard(el){
   el.classList.remove('card-updating');
   void el.offsetWidth;
   el.classList.add('card-updating');
-  setTimeout(() => el.classList.remove('card-updating'), 650);
+  setTimeout(() => el.classList.remove('card-updating'), 850);
 }
 function shimmerSummary(el){
   if(!el) return;
   el.classList.remove('summary-updating');
   void el.offsetWidth;
   el.classList.add('summary-updating');
-  setTimeout(() => el.classList.remove('summary-updating'), 550);
+  setTimeout(() => el.classList.remove('summary-updating'), 750);
+}
+function flashRow(checkbox){
+  const row = checkbox.closest('tr');
+  if(!row) return;
+  row.classList.remove('row-flash');
+  void row.offsetWidth;
+  row.classList.add('row-flash');
+  setTimeout(() => row.classList.remove('row-flash'), 450);
+}
+function popCount(catIdx){
+  const el = document.getElementById('cat-count-'+catIdx);
+  if(!el) return;
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+  setTimeout(() => el.classList.remove('pop'), 350);
 }
 document.addEventListener('animationend', e => {
   if(e.animationName === 'valueFlash') e.target.classList.remove('value-updating');
@@ -784,7 +831,7 @@ function buildTab2Table(){
   });
   tbody.innerHTML = html;
   t2Checkboxes = document.querySelectorAll('.t2-cb');
-  t2Checkboxes.forEach(cb => cb.addEventListener('change', () => { renderTab2(); updateCatCounts(); }));
+  t2Checkboxes.forEach(cb => cb.addEventListener('change', (e) => { flashRow(e.target); renderTab2(); updateCatCounts(); }));
   buildCatMenu();
 }
 
@@ -889,7 +936,7 @@ function buildTab3(){
     return `
     <div class="pkg-card${isFeatured}" style="cursor:pointer;${selectedPkg===i?'border-color:var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.25)':''}" onclick="selectPkg(${i})">
       <div class="pkg-name">${pkg.name}</div>
-      <div class="pkg-subtitle">${pkg.subtitle}</div>
+      <div class="pkg-subtitle">${pkg.subtitle || ''}</div>
       <div class="pkg-prices">
         <div class="price-row sales-only"><span class="plabel">Wholesale / mo</span><span class="pval">${fmt(pkg.wholesale)}</span></div>
         <div class="price-row"><span class="plabel">Monthly Investment</span><span class="pval gold">${fmt(clientPrice)}</span></div>
