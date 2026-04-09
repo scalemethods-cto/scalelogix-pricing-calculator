@@ -243,6 +243,17 @@ body.client-mode .client-only{display:block!important}
   .cat-menu-item{padding:6px 10px;font-size:.68rem;white-space:nowrap}
 }
 
+/* Single Item — category pills + service cards */
+.t1-pill{padding:7px 14px;border-radius:20px;font-size:.74rem;font-weight:600;letter-spacing:.3px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text-slate);transition:all .2s;white-space:nowrap;font-family:inherit}
+.t1-pill:hover{border-color:var(--purple);color:var(--purple-dark);background:rgba(121,102,162,.05)}
+.t1-pill.active{background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#fff;border-color:var(--purple)}
+.t1-svc-card{padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;margin-bottom:8px}
+.t1-svc-card:hover{border-color:var(--purple);background:rgba(121,102,162,.04)}
+.t1-svc-card.active{border-color:var(--purple);background:rgba(121,102,162,.08);box-shadow:0 2px 12px rgba(121,102,162,.15)}
+.t1-svc-card .svc-name{font-size:.88rem;font-weight:600;color:var(--text)}
+.t1-svc-card .svc-desc{font-size:.72rem;color:var(--text-dim);margin-top:3px;line-height:1.4}
+.t1-svc-card .svc-price{font-size:.78rem;font-weight:700;color:var(--purple);margin-top:6px}
+
 /* Presentation mode polish */
 ::selection{background:rgba(196,154,124,.3);color:var(--white)}
 input[type="number"]::-webkit-inner-spin-button{opacity:.5}
@@ -346,15 +357,10 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 
   <div class="card">
     <h3>Service Pricing Calculator</h3>
-    <div class="input-grid">
-      <div class="field" style="grid-column:1/-1">
-        <label>Select Service</label>
-        <select id="t1-service" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:9px 14px;color:var(--text);font-size:.92rem;width:100%;font-family:inherit;transition:border-color .2s;cursor:pointer">
-          <option value="">— Choose a service —</option>
-        </select>
-      </div>
-    </div>
-    <div id="t1-detail" style="margin-top:18px"></div>
+    <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:14px">Pick a category, then select a service to see pricing.</p>
+    <div id="t1-cat-pills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+    <div id="t1-service-list" style="display:none"></div>
+    <div id="t1-detail" style="margin-top:14px"></div>
     <div class="results-grid" id="t1-results"></div>
   </div>
 </div>
@@ -814,40 +820,81 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 // ========== TAB 1 — SINGLE ITEM ==========
+let t1SelectedCat = null;
+let t1SelectedService = null;
+
 function buildTab1ServiceDropdown(){
-  const sel = document.getElementById('t1-service');
-  if(!sel) return;
-  let html = '<option value="">— Choose a service —</option>';
-  SERVICES.forEach((cat, ci) => {
-    html += `<optgroup label="${cat.cat}">`;
-    cat.items.forEach((item, ii) => {
-      html += `<option value="${ci}-${ii}">${item.name}</option>`;
-    });
-    html += '</optgroup>';
-  });
-  sel.innerHTML = html;
-  sel.addEventListener('change', renderTab1);
+  const pillsEl = document.getElementById('t1-cat-pills');
+  if(!pillsEl) return;
+  pillsEl.innerHTML = SERVICES.map((cat, ci) =>
+    `<button class="t1-pill${t1SelectedCat===ci?' active':''}" onclick="selectT1Cat(${ci})">${cat.cat}</button>`
+  ).join('');
+  if(t1SelectedCat !== null) showT1Services(t1SelectedCat);
+}
+
+function selectT1Cat(ci){
+  t1SelectedCat = ci;
+  t1SelectedService = null;
+  buildTab1ServiceDropdown();
+  showT1Services(ci);
+  renderTab1();
+}
+
+function showT1Services(ci){
+  const listEl = document.getElementById('t1-service-list');
+  if(!listEl || !SERVICES[ci]) return;
+  const cat = SERVICES[ci];
+  listEl.style.display = 'block';
+  listEl.innerHTML = `
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;color:var(--purple);font-weight:600;margin-bottom:8px">${cat.cat}</div>
+    ${cat.items.map((item, ii) => {
+      const isActive = t1SelectedService === ii;
+      const svcType = getServiceType(item);
+      const priceLabel = item.wsMin ? fmt(item.wsMin) + (item.wsMax > item.wsMin ? ' - ' + fmt(item.wsMax) : '') : '';
+      const moLabel = item.moWsMin ? fmt(item.moWsMin) + '/mo' : '';
+      const priceText = [priceLabel, moLabel].filter(Boolean).join(' + ');
+      return `
+      <div class="t1-svc-card${isActive?' active':''}" onclick="selectT1Service(${ci},${ii})">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div>
+            <div class="svc-name">${item.name}</div>
+            <div class="svc-desc">${item.desc || ''}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div class="svc-price">${priceText || 'Custom'}</div>
+            <div style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;background:rgba(121,102,162,.08);color:var(--purple);margin-top:4px">${svcType === 'both' ? 'Setup + Monthly' : svcType === 'monthly' ? 'Monthly' : 'Setup'}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function selectT1Service(ci, ii){
+  t1SelectedCat = ci;
+  t1SelectedService = ii;
+  buildTab1ServiceDropdown();
+  renderTab1();
 }
 
 function renderTab1(){
-  const sel = document.getElementById('t1-service');
-  const val = sel ? sel.value : '';
   const detailEl = document.getElementById('t1-detail');
   const resultsEl = document.getElementById('t1-results');
   const summaryEl = document.getElementById('t1-summary');
 
-  if(!val){
+  if(t1SelectedCat === null || t1SelectedService === null){
     summaryEl.innerHTML = `
       <div class="summary-item"><div class="label">Service</div><div class="value">—</div></div>
       <div class="summary-item"><div class="label">Setup Price</div><div class="value gold">—</div></div>
       <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">—</div></div>
     `;
-    detailEl.innerHTML = '<p style="font-size:.82rem;color:var(--text-dim);text-align:center;padding:20px">Select a service above to see pricing details</p>';
+    detailEl.innerHTML = '';
     resultsEl.innerHTML = '';
     return;
   }
 
-  const [ci, ii] = val.split('-').map(Number);
+  const ci = t1SelectedCat;
+  const ii = t1SelectedService;
   const cat = SERVICES[ci];
   const item = cat.items[ii];
   const ws = getWholesale(item);
