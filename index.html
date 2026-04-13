@@ -726,9 +726,9 @@ function debouncedSaveConfig(){
 
 // ========== PRICING HELPERS ==========
 function getWholesale(item){ return item.wsMin || 0 }
-function getRetail(item){ return item.rtMin || Math.round(getWholesale(item) * (1 + CFG.markup)) }
+function getRetail(item){ return Math.round(getWholesale(item) * (1 + CFG.markup)) }
 function getMonthlyWs(item){ return item.moWsMin || 0 }
-function getMonthlyRt(item){ return item.moRtMin || Math.round(getMonthlyWs(item) * (1 + CFG.markup)) }
+function getMonthlyRt(item){ return Math.round(getMonthlyWs(item) * (1 + CFG.markup)) }
 function getMaintHrs(item){ return item.maintHrs || 0 }
 function marginPct(retail, wholesale){ return wholesale === 0 ? 0 : ((retail - wholesale) / retail * 100) }
 
@@ -1466,8 +1466,17 @@ function toggleView(){
 // ========== GLOBAL UPDATE ==========
 function updateAll(){
   renderTab1();
+  // Save checked state before rebuilding tab2 table
+  const checkedIdxs = [];
+  t2Checkboxes.forEach(cb => { if(cb.checked) checkedIdxs.push(parseInt(cb.dataset.idx)); });
+  buildTab2Table();
+  checkedIdxs.forEach(idx => {
+    const cb = document.querySelector(`.t2-cb[data-idx="${idx}"]`);
+    if(cb) cb.checked = true;
+  });
   renderTab2();
   buildTab3();
+  buildTab4();
   renderTab4();
 }
 
