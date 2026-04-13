@@ -740,27 +740,23 @@ function getServiceType(item){
 }
 
 function fmtWsRange(item){
-  if(!item.wsMin && !item.wsMax) return '—';
-  if(item.wsMin === item.wsMax) return fmt(item.wsMin);
-  return fmt(item.wsMin) + ' – ' + fmt(item.wsMax);
+  const v = getWholesale(item);
+  return v > 0 ? fmt(v) : '—';
 }
 
 function fmtRtRange(item){
-  if(!item.rtMin && !item.rtMax) return '—';
-  if(item.rtMin === item.rtMax) return fmt(item.rtMin);
-  return fmt(item.rtMin) + ' – ' + fmt(item.rtMax);
+  const v = getRetail(item);
+  return v > 0 ? fmt(v) : '—';
 }
 
 function fmtMoWsRange(item){
-  if(!item.moWsMin && !item.moWsMax) return '—';
-  if(item.moWsMin === item.moWsMax) return fmt(item.moWsMin) + '/mo';
-  return fmt(item.moWsMin) + ' – ' + fmt(item.moWsMax) + '/mo';
+  const v = getMonthlyWs(item);
+  return v > 0 ? fmt(v) + '/mo' : '—';
 }
 
 function fmtMoRtRange(item){
-  if(!item.moRtMin && !item.moRtMax) return '—';
-  if(item.moRtMin === item.moRtMax) return fmt(item.moRtMin) + '/mo';
-  return fmt(item.moRtMin) + ' – ' + fmt(item.moRtMax) + '/mo';
+  const v = getMonthlyRt(item);
+  return v > 0 ? fmt(v) + '/mo' : '—';
 }
 
 // ========== LOADER ANIMATIONS ==========
@@ -924,8 +920,8 @@ function renderTab1(){
   if(ws > 0 || rt > 0){
     detailHtml += `<div style="font-size:.76rem;font-weight:600;color:var(--text);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Setup Pricing</div>`;
     detailHtml += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px">`;
-    detailHtml += `<div class="result-box sales-only"><div class="rlabel">Wholesale Range</div><div class="rvalue">${fmtWsRange(item)}</div></div>`;
-    detailHtml += `<div class="result-box"><div class="rlabel">Retail Range</div><div class="rvalue" style="color:var(--purple)">${fmtRtRange(item)}</div></div>`;
+    detailHtml += `<div class="result-box sales-only"><div class="rlabel">Wholesale</div><div class="rvalue">${fmtWsRange(item)}</div></div>`;
+    detailHtml += `<div class="result-box"><div class="rlabel">Retail Price</div><div class="rvalue" style="color:var(--purple)">${fmtRtRange(item)}</div></div>`;
     detailHtml += `<div class="result-box sales-only"><div class="rlabel">Setup Margin</div><div class="rvalue" style="color:var(--green)">${mgn.toFixed(1)}%</div></div>`;
     detailHtml += `</div>`;
   }
@@ -1366,7 +1362,6 @@ function buildTab4(){
           <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Monthly Price</div><div style="font-size:1.1rem;font-weight:700;color:var(--purple)">${fmt(preview.rtMo)}/mo</div></div>
           ` : ''}
           <div class="sales-only" style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Margin</div><div style="font-size:1.1rem;font-weight:700;color:var(--green)">${preview.mgn.toFixed(1)}%</div></div>
-          <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Retainer Package</div><div style="font-size:1.1rem;font-weight:700;color:var(--purple);cursor:pointer;text-decoration:underline" onclick="document.querySelector('[data-tab=\\'tab3\\']').click()">${tier.suggestedPkg}${tier.suggestedHrs > 0 ? ' ('+tier.suggestedHrs+' hrs/mo)' : ''}</div></div>
         </div>
       </div>
     </div>
@@ -1451,20 +1446,12 @@ function renderTab4(){
     <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${fmt(preview.rtMo)}/mo</div></div>
     ` : ''}
     <div class="summary-item sales-only"><div class="label">Margin</div><div class="value green">${preview.mgn.toFixed(1)}%</div></div>
-    <div class="summary-item"><div class="label">Retainer</div><div class="value" style="color:var(--purple)">${tierConfig.suggestedPkg}${tierConfig.suggestedHrs > 0 ? ' ('+tierConfig.suggestedHrs+' hrs)' : ''}</div></div>
   `;
 
   const recEl = document.getElementById('t4-pkg-rec');
   if(recEl){
-    recEl.style.display = 'block';
-    recEl.innerHTML = `
-      <div style="background:linear-gradient(135deg,rgba(92,74,133,.08),rgba(121,102,162,.04));border:1.5px solid rgba(121,102,162,.25);border-radius:var(--radius-lg);padding:16px 22px;margin-top:14px;text-align:center">
-        <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;color:var(--purple);font-weight:600;margin-bottom:4px">Recommended Dev Support</div>
-        <div style="font-size:.82rem;color:var(--text-dim)">
-          <span style="cursor:pointer;color:var(--purple);text-decoration:underline;font-weight:600" onclick="document.querySelector('[data-tab=\\'tab3\\']').click()">${tierConfig.suggestedPkg} Package${tierConfig.suggestedHrs > 0 ? ' ('+tierConfig.suggestedHrs+' hrs/mo)' : ''}</span>
-          for ongoing optimization and support
-        </div>
-      </div>`;
+    recEl.style.display = 'none';
+    recEl.innerHTML = '';
   }
 
   shimmerSummary(document.getElementById('t4-summary'));
