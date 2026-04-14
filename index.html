@@ -1182,6 +1182,7 @@ const OFFER_TIERS = {
       { cat: 'AI Website & Conversion', items: [0] },
       { cat: 'AI Voice Packages', items: [0] },
     ],
+    discount: 0.05,
     suggestedPkg: 'Core',
     suggestedHrs: 7,
     badge: 'BEST FOR: Solo operators &amp; small teams',
@@ -1195,7 +1196,7 @@ const OFFER_TIERS = {
       { cat: 'AI Voice Packages', items: [1] },
       { cat: 'AI CRM & Automation', items: [0] },
     ],
-    plusDiscount: true,
+    discount: 0.15,
     suggestedPkg: 'Plus',
     suggestedHrs: 16,
     badge: 'MOST POPULAR: Growing businesses',
@@ -1211,7 +1212,7 @@ const OFFER_TIERS = {
       { cat: 'AI Ad Management', items: [0, 1] },
       { cat: 'AI Data & Intelligence', items: [0] },
     ],
-    plusDiscount: true,
+    discount: 0.25,
     suggestedPkg: 'Custom',
     suggestedHrs: 0,
     badge: 'BEST VALUE: Agencies scaling fast',
@@ -1246,12 +1247,12 @@ function getOfferTierPreview(tierKey){
     maintHrs += getMaintHrs(e.item);
   });
   const n = items.length;
-  const ds = tier && tier.plusDiscount ? CFG.ds : 0;
+  const ds = tier ? (tier.discount || 0) : 0;
   const dsSavingsSetup = Math.round(rtSetup * ds);
   const finalRtSetup = rtSetup - dsSavingsSetup;
   const finalWsSetup = wsSetup - Math.round(wsSetup * ds);
   const mgn = finalRtSetup > 0 ? marginPct(finalRtSetup, finalWsSetup) : 0;
-  return { n, wsSetup: finalWsSetup, rtSetup: finalRtSetup, maintHrs, dsSavingsSetup, mgn, ds };
+  return { n, wsSetup: finalWsSetup, rtSetup: finalRtSetup, rtBeforeDiscount: rtSetup, maintHrs, dsSavingsSetup, mgn, ds };
 }
 
 function buildTab4(){
@@ -1282,13 +1283,13 @@ function buildTab4(){
       <div class="pkg-subtitle">${tier.subtitle}</div>
       <div class="pkg-discount">${preview.n} services included</div>
       <div class="pkg-prices">
-        <div class="price-row sales-only"><span class="plabel">Wholesale Setup</span><span class="pval" id="offer-ws-${tierKey}">${fmt(preview.wsSetup)}</span></div>
-        <div class="price-row"><span class="plabel">Setup Price</span><span class="pval gold" id="offer-rt-${tierKey}">${fmt(preview.rtSetup)}</span></div>
+        <div class="price-row sales-only"><span class="plabel">Wholesale</span><span class="pval" id="offer-ws-${tierKey}">${fmt(preview.wsSetup)}</span></div>
+        <div class="price-row"><span class="plabel">Bundle Price</span><span class="pval gold" id="offer-rt-${tierKey}">${fmt(preview.rtSetup)}</span></div>
+        ${preview.ds > 0 ? `<div class="price-row"><span class="plabel" style="color:var(--green)">${Math.round(preview.ds*100)}% bundle savings</span><span class="pval" style="font-size:.7rem;color:var(--text-dim);text-decoration:line-through">${fmt(preview.rtBeforeDiscount)}</span></div>` : ''}
         <div class="price-row"><span class="plabel">Est. Maintenance</span><span class="pval">${preview.maintHrs} hrs/mo</span></div>
         <div class="price-row sales-only"><span class="plabel">Margin</span><span class="pval green">${preview.mgn.toFixed(1)}%</span></div>
       </div>
       ${tierItems.length > 0 ? itemListHtml : ''}
-      ${tier.plusDiscount ? `<div style="text-align:center;margin-top:8px;font-size:.68rem;color:var(--green);font-weight:600">${Math.round(CFG.ds*100)}% bundle discount applied</div>` : ''}
       ${isSelected ? '<div style="text-align:center;margin-top:10px;font-size:.7rem;color:var(--purple);font-weight:600">SELECTED</div>' : ''}
     </div>`;
   });
@@ -1426,8 +1427,9 @@ function renderTab4(){
 
   document.getElementById('t4-summary').innerHTML = `
     <div class="summary-item"><div class="label">${tierConfig.name} Services</div><div class="value">${preview.n}</div></div>
-    <div class="summary-item sales-only"><div class="label">Wholesale Setup</div><div class="value">${fmt(preview.wsSetup)}</div></div>
-    <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(preview.rtSetup)}</div></div>
+    <div class="summary-item sales-only"><div class="label">Wholesale</div><div class="value">${fmt(preview.wsSetup)}</div></div>
+    <div class="summary-item"><div class="label">Bundle Price</div><div class="value gold">${fmt(preview.rtSetup)}</div></div>
+    ${preview.dsSavingsSetup > 0 ? `<div class="summary-item"><div class="label">You Save</div><div class="value green">${fmt(preview.dsSavingsSetup)} (${Math.round(preview.ds*100)}%)</div></div>` : ''}
     <div class="summary-item"><div class="label">Est. Maint.</div><div class="value">${preview.maintHrs} hrs/mo</div></div>
     <div class="summary-item sales-only"><div class="label">Margin</div><div class="value green">${preview.mgn.toFixed(1)}%</div></div>
   `;
