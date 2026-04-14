@@ -337,11 +337,6 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
       <span class="hint">Discount applied when 3+ services are bundled together</span>
     </div>
     <div class="field">
-      <label>Default Markup %</label>
-      <input type="number" id="cfg-markup" value="100" step="5" min="20" max="300">
-      <span class="hint">Default retail markup above wholesale (100% = double the wholesale price)</span>
-    </div>
-    <div class="field">
       <label>Dev Rate ($/hr)</label>
       <input type="number" id="cfg-devrate" value="150" step="10" min="50" max="500">
       <span class="hint">Hourly dev rate — multiplied by maintenance hours to calculate monthly cost</span>
@@ -710,7 +705,6 @@ function loadFallbackData(){
 // ========== CONFIG ==========
 const CFG = {
   get ds(){ return (parseFloat(document.getElementById('cfg-ds').value) || 15) / 100 },
-  get markup(){ return (parseFloat(document.getElementById('cfg-markup').value) || 100) / 100 },
   get devRate(){ return parseFloat(document.getElementById('cfg-devrate').value) || 150 },
 };
 
@@ -731,9 +725,9 @@ function debouncedSaveConfig(){
 
 // ========== PRICING HELPERS ==========
 function getWholesale(item){ return item.wsMin || 0 }
-function getRetail(item){ return Math.round(getWholesale(item) * (1 + CFG.markup)) }
+function getRetail(item){ return item.rtMin || 0 }
 function getMonthlyWs(item){ return item.moWsMin || 0 }
-function getMonthlyRt(item){ return Math.round(getMonthlyWs(item) * (1 + CFG.markup)) }
+function getMonthlyRt(item){ return item.moRtMin || 0 }
 function getMaintHrs(item){ return item.maintHrs || 0 }
 function getMaintCost(item){ return getMaintHrs(item) * CFG.devRate }
 function marginPct(retail, wholesale){ return wholesale === 0 ? 0 : ((retail - wholesale) / retail * 100) }
@@ -1498,7 +1492,7 @@ function updateAll(){
 }
 
 // Listen to config changes
-['cfg-ds','cfg-markup','cfg-devrate'].forEach(id => {
+['cfg-ds','cfg-devrate'].forEach(id => {
   const el = document.getElementById(id);
   if(el) el.addEventListener('input', () => {
     updateAll();
@@ -1544,7 +1538,7 @@ async function saveQuote(){
     client_name: clientName,
     created_by: currentUser.id,
     quote_type: quoteType,
-    config_snapshot: { bundle_discount_pct: CFG.ds * 100, markup_pct: CFG.markup * 100 },
+    config_snapshot: { bundle_discount_pct: CFG.ds * 100, dev_rate: CFG.devRate },
     selected_capabilities: selectedServices,
     selected_insurance_core: [],
     selected_insurance_secondary: [],
@@ -1571,7 +1565,7 @@ async function checkSharedQuote(){
   if(data.config_snapshot){
     const cfg = data.config_snapshot;
     document.getElementById('cfg-ds').value = cfg.bundle_discount_pct || 15;
-    document.getElementById('cfg-markup').value = cfg.markup_pct || 100;
+    document.getElementById('cfg-devrate').value = cfg.dev_rate || 150;
   }
 
   // TODO: restore selected items based on quote_type and selected_* arrays
