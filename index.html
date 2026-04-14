@@ -85,7 +85,7 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .pkg-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--border-light);border-radius:var(--radius-lg);padding:26px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
 .pkg-card:hover{transform:translateY(-2px);border-color:var(--border-light)}
 .pkg-card.featured{border-color:var(--purple);border-top:3px solid var(--purple);box-shadow:0 4px 32px rgba(121,102,162,.2)}
-.pkg-card.featured::before{content:'BEST VALUE';position:absolute;top:14px;right:-28px;background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#FFFFFF;font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
+.pkg-card.featured::before{content:'TOP RATED';position:absolute;top:14px;right:-28px;background:linear-gradient(135deg,var(--purple-dark),var(--purple));color:#FFFFFF;font-size:.58rem;font-weight:700;letter-spacing:1px;padding:4px 36px;transform:rotate(45deg)}
 .pkg-card .pkg-name{font-size:1.35rem;font-weight:800;color:var(--text);margin-bottom:5px;letter-spacing:-.2px}
 .pkg-card.featured .pkg-name{color:var(--purple-dark)}
 .pkg-card .pkg-subtitle{font-size:.76rem;color:var(--text-dim);margin-bottom:14px;line-height:1.55;font-weight:400}
@@ -698,7 +698,7 @@ function loadFallbackData(){
   DEV_PACKAGES = [
     { name: "Core", hours: 7, wholesale: 500, discount: 0, subtitle: "Essential maintenance & small optimizations", features: ["7 dev hours / month","Bug fixes & minor tweaks","Monthly performance review","Email support","No rollover"] },
     { name: "Plus", hours: 16, wholesale: 1500, discount: 0.05, subtitle: "Active development & growth — best for scaling teams", features: ["16 dev hours / month","New feature builds","Workflow optimization","Priority Slack support","Weekly check-in call","No rollover"] },
-    { name: "Elite", hours: 24, wholesale: 2000, discount: 0.10, subtitle: "Best value — maximum dev capacity without custom scoping", features: ["24 dev hours / month","Priority feature builds","Advanced optimization","Priority Slack + phone support","Weekly strategy call","No rollover"], featured: true },
+    { name: "Elite", hours: 24, wholesale: 2000, discount: 0.10, subtitle: "Top rated — maximum dev capacity without custom scoping", features: ["24 dev hours / month","Priority feature builds","Advanced optimization","Priority Slack + phone support","Weekly strategy call","No rollover"], featured: true },
     { name: "Custom", hours: 0, wholesale: 2500, subtitle: "Enterprise-grade — dedicated dev resources for complex needs", features: ["Custom hour allocation","Dedicated dev resource","Strategic planning sessions","Priority Slack + phone support","Custom SLA","Contact us to scope"] },
   ];
   bundleTiers = [];
