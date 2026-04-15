@@ -625,10 +625,19 @@ function loadFallbackData(){
       { name: "Professional Web Package", wsMin: 5250, wsMax: 6500, rtMin: 9000, rtMax: 15000, maintHrs: 3.5, desc: "Homepage + 5 pages + chat + voice + integrations" },
       { name: "Full AI Web Presence", wsMin: 7500, wsMax: 8500, rtMin: 12000, rtMax: 20000, maintHrs: 4.5, desc: "Homepage + 8 pages + chat + voice + analytics — the complete web build" },
     ]},
-    { cat: "Voice AI (Licensed Platform)", type: "flat", items: [
-      { name: "AI Vaunt — 1 Agent Deployment", contactUs: true, maintHrs: 0, desc: "Licensed AI voice platform — priced by platform, not dev hours. Contact us for deployment pricing." },
-      { name: "AI Vaunt — Multi-Agent Deployment (2-5 agents)", contactUs: true, maintHrs: 0, desc: "Licensed voice platform with multiple agents. Pricing scales with agent count — contact us to scope." },
-      { name: "AI Vaunt — Enterprise Deployment (5+ agents)", contactUs: true, maintHrs: 0, desc: "Full enterprise voice platform deployment. Contact us for custom enterprise pricing." },
+    { cat: "ScaleLogix AI Premium Agents", type: "flat", items: [
+      { name: "Premium Agent — 1 Agent Deployment", contactUs: true, maintHrs: 0, desc: "Flat-fee licensed premium voice agent. No retainer. Contact us for deployment pricing." },
+      { name: "Premium Agent — Multi-Agent (2-5 agents)", contactUs: true, maintHrs: 0, desc: "Flat-fee licensed premium voice agents, scales with deployment. Contact us to scope." },
+      { name: "Premium Agent — Enterprise (5+ agents)", contactUs: true, maintHrs: 0, desc: "Enterprise flat-fee premium voice agents. Contact us for volume pricing." },
+    ]},
+    { cat: "ScaleLogix AI Custom Agents", type: "both", items: [
+      { name: "1 Custom AI Agent + CRM + Setup", wsMin: 3000, wsMax: 3000, rtMin: 5000, rtMax: 12000, moWsMin: 500, moWsMax: 500, moRtMin: 800, moRtMax: 2500, maintHrs: 3.5, desc: "Custom-built AI voice agent with full CRM integration. Includes monthly retainer." },
+      { name: "Texting/SMS Add-On (per agent)", wsMin: 500, wsMax: 500, rtMin: 750, rtMax: 2000, maintHrs: 1.5, desc: "SMS follow-up and outreach sequences per custom agent" },
+      { name: "Additional Custom Agent (agents 2-3)", wsMin: 1000, wsMax: 1000, rtMin: 1500, rtMax: 3500, moWsMin: 500, moWsMax: 500, moRtMin: 800, moRtMax: 2500, maintHrs: 2.5, desc: "Additional custom agent deployment with monthly retainer" },
+      { name: "Additional Custom Agent (volume, 4+)", wsMin: 750, wsMax: 750, rtMin: 1500, rtMax: 3500, moWsMin: 400, moWsMax: 400, moRtMin: 800, moRtMax: 2500, maintHrs: 2.5, desc: "Volume-priced custom agent at 4+ deployments with monthly retainer" },
+      { name: "Custom Agents — Starter (1 agent + CRM + texting)", wsMin: 3500, wsMax: 3500, rtMin: 5000, rtMax: 7500, moWsMin: 500, moWsMax: 500, moRtMin: 800, moRtMax: 1200, maintHrs: 3.5, desc: "Complete starter custom voice system with retainer" },
+      { name: "Custom Agents — Growth (2 agents + CRM + texting)", wsMin: 5000, wsMax: 5000, rtMin: 8500, rtMax: 12000, moWsMin: 1000, moWsMax: 1000, moRtMin: 1500, moRtMax: 2000, maintHrs: 4.5, desc: "Multi-agent custom system with retainer" },
+      { name: "Custom Agents — Enterprise (5 agents + full CRM)", wsMin: 8250, wsMax: 8250, rtMin: 12000, rtMax: 20000, moWsMin: 2500, moWsMax: 2500, moRtMin: 2500, moRtMax: 4000, maintHrs: 4.5, desc: "Full enterprise custom voice deployment with retainer" },
     ]},
     { cat: "AI Automation", type: "setup", items: [
       { name: "AI-Driven CRM Configuration + Pipelines", wsMin: 1500, wsMax: 2500, rtMin: 5000, rtMax: 12000, maintHrs: 3.5, desc: "Full CRM buildout with AI-powered pipelines and automation rules" },
@@ -1168,20 +1177,20 @@ const OFFER_TIERS = {
     name: 'Starter',
     services: [
       { cat: 'Website & Funnel', items: [0] },
-      { cat: 'Voice AI (Licensed Platform)', items: [0] },
+      { cat: 'ScaleLogix AI Premium Agents', items: [0] },
     ],
     discount: 0.05,
     suggestedPkg: 'Core',
     suggestedHrs: 7,
     badge: 'BEST FOR: Solo operators &amp; small teams',
     badgeColor: 'green',
-    subtitle: 'Website + AI Vaunt Voice — the essential AI foundation'
+    subtitle: 'Website + Premium AI Agent — the essential AI foundation'
   },
   pro: {
     name: 'Pro',
     services: [
       { cat: 'Website & Funnel', items: [4] },
-      { cat: 'Voice AI (Licensed Platform)', items: [1] },
+      { cat: 'ScaleLogix AI Premium Agents', items: [1] },
       { cat: 'AI Automation', items: [0] },
     ],
     discount: 0.075,
@@ -1189,13 +1198,13 @@ const OFFER_TIERS = {
     suggestedHrs: 16,
     badge: 'MOST POPULAR: Growing businesses',
     badgeColor: 'purple',
-    subtitle: 'Website + Voice + CRM — the complete operational stack'
+    subtitle: 'Website + Premium Agents + CRM — the complete operational stack'
   },
   max: {
     name: 'Max',
     services: [
       { cat: 'Website & Funnel', items: [5] },
-      { cat: 'Voice AI (Licensed Platform)', items: [2] },
+      { cat: 'ScaleLogix AI Custom Agents', items: [6] },
       { cat: 'AI Automation', items: [0, 1, 3] },
       { cat: 'Marketing & Outreach', items: [0, 1] },
     ],
@@ -1204,7 +1213,7 @@ const OFFER_TIERS = {
     suggestedHrs: 0,
     badge: 'BEST VALUE: Agencies scaling fast',
     badgeColor: 'purple',
-    subtitle: 'Full AI infrastructure — website, voice, CRM, ads, analytics'
+    subtitle: 'Full AI infrastructure — website, custom agents, CRM, ads, analytics'
   }
 };
 
