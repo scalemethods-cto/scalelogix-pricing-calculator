@@ -98,12 +98,16 @@ header p{color:var(--text-dim);font-size:.82rem;margin-top:6px;letter-spacing:.5
 .pkg-card .price-row .pval.strike{text-decoration:line-through;color:var(--text-dim);font-weight:400}
 .pkg-card .price-row .pval.gold{color:var(--purple)}
 .pkg-card .price-row .pval.green{color:var(--green)}
-.pkg-items{max-height:220px;overflow-y:auto;margin-top:14px;padding-right:4px}
+.pkg-items{max-height:280px;overflow-y:auto;margin-top:14px;padding-right:4px}
 .pkg-items::-webkit-scrollbar{width:4px}
 .pkg-items::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 .pkg-items li{font-size:.76rem;color:var(--text-dim);padding:3px 0;list-style:none;transition:color .15s}
 .pkg-items li::before{content:''; display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--purple);margin-right:8px;vertical-align:middle}
 .pkg-items li:hover{color:var(--text)}
+.pkg-features{margin-top:16px;padding:0}
+.pkg-features li{font-size:.88rem;color:var(--text);padding:8px 12px;list-style:none;border-bottom:1px solid rgba(42,42,52,.3);font-weight:500;letter-spacing:.2px}
+.pkg-features li:last-child{border-bottom:none}
+.pkg-features li::before{content:'✓';display:inline-block;color:var(--green);font-weight:700;margin-right:10px;font-size:.9rem}
 
 /* Pricing flow diagram */
 .pricing-flow{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(92,74,133,.06),rgba(121,102,162,.04));border:1px solid rgba(121,102,162,.15);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;flex-wrap:wrap}
@@ -1170,7 +1174,7 @@ function buildTab3(){
         <div class="price-row"><span class="plabel">Pricing</span><span class="pval" style="color:var(--accent-dark)">Contact us</span></div>
         `}
       </div>
-      <ul class="pkg-items">${featuresHtml}</ul>
+      <ul class="pkg-features">${featuresHtml}</ul>
     </div>`;
   }).join('');
   renderTab3Summary();
@@ -1305,12 +1309,12 @@ function buildTab4(){
       <div class="pkg-subtitle">${tier.subtitle}</div>
       <div class="pkg-discount">${preview.n} services included</div>
       <div class="pkg-prices">
-        <div class="price-row sales-only"><span class="plabel">Min. Price</span><span class="pval" id="offer-ws-${tierKey}">${fmt(preview.wsSetup)}</span></div>
         ${preview.ds > 0 ? `<div class="price-row"><span class="plabel">List Price</span><span class="pval" style="font-size:.8rem;color:var(--text-dim);text-decoration:line-through">${fmt(preview.rtBeforeDiscount)}</span></div>` : ''}
-        <div class="price-row"><span class="plabel">Total Price</span><span class="pval gold" id="offer-rt-${tierKey}">${fmt(preview.rtSetup)}${preview.hasContactUs ? '+' : ''}</span></div>
+        <div class="price-row"><span class="plabel" style="font-size:.9rem;font-weight:600">Total Price</span><span class="pval gold" style="font-size:1.05rem" id="offer-rt-${tierKey}">${fmt(preview.rtSetup)}${preview.hasContactUs ? '+' : ''}</span></div>
         ${preview.ds > 0 ? `<div class="price-row"><span class="plabel" style="color:var(--green)">${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}% bundle discount</span><span class="pval" style="color:var(--green);font-size:.8rem">Save ${fmt(preview.dsSavingsSetup)}</span></div>` : ''}
         ${preview.hasContactUs ? `<div class="price-row"><span class="plabel" style="font-size:.65rem;color:var(--text-dim)">Includes custom-scope items</span><span class="pval" style="font-size:.65rem;color:var(--accent-dark)">+ Contact Us</span></div>` : ''}
         <div class="price-row"><span class="plabel">Est. Maintenance</span><span class="pval">${preview.maintHrs} hrs/mo</span></div>
+        <div class="price-row sales-only"><span class="plabel" style="font-size:.72rem">Min. Price</span><span class="pval" style="font-size:.78rem" id="offer-ws-${tierKey}">${fmt(preview.wsSetup)}</span></div>
       </div>
       ${tierItems.length > 0 ? itemListHtml : ''}
       ${isSelected ? '<div style="text-align:center;margin-top:10px;font-size:.7rem;color:var(--purple);font-weight:600">SELECTED</div>' : ''}
