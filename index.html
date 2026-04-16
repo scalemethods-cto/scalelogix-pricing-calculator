@@ -1030,7 +1030,7 @@ function buildTab2Table(){
       html += `<tr>
         <td class="cb"><input type="checkbox" data-idx="${idx}" class="t2-cb"></td>
         <td>${item.name}${descHtml}</td>
-        <td style="font-size:.78rem;text-align:center;white-space:nowrap"><span class="sales-only" style="display:inline"><input type="number" class="maint-hrs-input" data-idx="${idx}" value="${mh}" step="0.5" min="0" max="10" style="width:48px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center;background:var(--surface);color:var(--text)"> hrs/mo</span><span class="client-only">${mh > 0 ? mh + ' hrs/mo' : '—'}</span></td>
+        <td style="font-size:.78rem;text-align:center;white-space:nowrap">${(item.moRtMin && mh === 0) ? `<span style="color:var(--purple);font-weight:600">${fmt(item.moRtMin)}/mo</span>` : `<span class="sales-only" style="display:inline"><input type="number" class="maint-hrs-input" data-idx="${idx}" value="${mh}" step="0.5" min="0" max="10" style="width:48px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center;background:var(--surface);color:var(--text)"> hrs/mo</span><span class="client-only">${mh > 0 ? mh + ' hrs/mo' : '—'}</span>`}</td>
         <td class="sales-only" style="font-size:.78rem;white-space:nowrap">${wsDisplay}</td>
         <td style="font-size:.78rem;white-space:nowrap">${rtDisplay}</td>
       </tr>`;
