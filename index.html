@@ -809,7 +809,9 @@ function contactLabel(item){ return item.contactDevTeam ? 'Contact Dev Team' : '
 function fmtWsRange(item){
   if(isContactItem(item)) return contactLabel(item);
   const v = getWholesale(item);
-  return v > 0 ? fmt(v) : '—';
+  if(v > 0) return fmt(v);
+  const mv = getMonthlyWs(item);
+  return mv > 0 ? fmt(mv) + '/mo' : '—';
 }
 
 function fmtRtRange(item){
@@ -819,7 +821,9 @@ function fmtRtRange(item){
     return contactLabel(item);
   }
   const v = getRetail(item);
-  return v > 0 ? fmt(v) : '—';
+  if(v > 0) return fmt(v);
+  const mv = getMonthlyRt(item);
+  return mv > 0 ? fmt(mv) + '/mo' : '—';
 }
 
 function fmtMoWsRange(item){
