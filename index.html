@@ -419,6 +419,48 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
   <div class="pkg-grid" id="t4-grid"></div>
   <div id="t4-detail" style="display:none"></div>
 </div>
+
+<div class="card sales-only" style="margin-top:20px;background:rgba(187,133,117,.04);border-color:rgba(187,133,117,.2)">
+  <h3 style="color:var(--accent-dark)">Scope, Pricing & Compliance — Internal Reference</h3>
+  <div style="font-size:.76rem;color:var(--text);line-height:1.65">
+    <div style="font-size:.72rem;font-weight:700;color:var(--accent-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Scoped & Priced Separately Per Project</div>
+    <ul style="padding-left:16px;margin-bottom:14px;color:var(--text-dim)">
+      <li>Custom integrations, API builds, or connections beyond standard CRM</li>
+      <li>Multi-location deployments with separate configurations per location</li>
+      <li>Complex call routing, branching workflows, or custom automation logic</li>
+      <li>Industry-specific compliance builds (healthcare, financial services, legal)</li>
+      <li>Proprietary knowledge base builds requiring extensive training data</li>
+      <li>Enterprise white-label or SaaS configurations</li>
+      <li>Any request outside the standard deliverable description for any line item</li>
+    </ul>
+    <p style="margin-bottom:12px;color:var(--text-dim)"><strong style="color:var(--text)">Flag non-standard requirements before quoting.</strong> We scope and price custom work together — no surprises. Custom project pricing is confirmed in writing before any work begins.</p>
+
+    <div style="font-size:.72rem;font-weight:700;color:var(--accent-dark);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px">Confidentiality & Pricing Rules</div>
+    <ul style="padding-left:16px;color:var(--text-dim)">
+      <li>Internal use only — do not distribute to operators, clients, or third parties</li>
+      <li>Wholesale pricing is confidential and may not be shared with end clients</li>
+      <li>Market retail ranges are from published third-party sources; subject to market conditions</li>
+      <li>All pricing, margins, and ranges subject to change with 30 days written notice</li>
+      <li>Current pricing is locked for any project already scoped and approved</li>
+      <li>Margin ranges reflect low-end cost at low-end retail through high-end cost at high-end retail</li>
+      <li>Operators pricing at the midpoint typically land 50-65% gross margin across most categories</li>
+      <li>Reserve operators receive up to 15-25% preferred discount (at company discretion)</li>
+      <li>Every project is individually scoped and priced — operator sets their own final retail price</li>
+      <li>Nothing here constitutes an earnings representation, income projection, or guaranteed financial outcome</li>
+    </ul>
+
+    <div style="font-size:.72rem;font-weight:700;color:var(--accent-dark);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px">Language Rules</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;color:var(--text-dim)">
+      <div><strong style="color:var(--red)">Never say:</strong> Lead gen</div><div><strong style="color:var(--green)">Always say:</strong> AI Outreach Services</div>
+      <div><strong style="color:var(--red)">Never say:</strong> Done for you</div><div><strong style="color:var(--green)">Always say:</strong> Delivered under your brand</div>
+      <div><strong style="color:var(--red)">Never say:</strong> Guaranteed margins</div><div><strong style="color:var(--green)">Always say:</strong> Minimum margin floor on every scoped project</div>
+      <div><strong style="color:var(--red)">Never say:</strong> Revenue share</div><div><strong style="color:var(--green)">Always say:</strong> Wholesale fulfillment partnership</div>
+      <div><strong style="color:var(--red)">Never say:</strong> Passive income</div><div><strong style="color:var(--green)">Always say:</strong> Automation-driven, operator-managed</div>
+    </div>
+
+    <p style="margin-top:14px;font-size:.68rem;color:var(--text-dim);opacity:.7">Confidential and proprietary to ScaleMethods Partners LLC d/b/a ScaleLogix AI Consulting. Market retail sources: Clutch.co, G2 AI Software Pricing Index, Forrester AI Services Report, HubSpot Agency Pricing Survey, Gartner AI Implementation Cost Study, Grand View Research, InfluenceFlow, WebFX, AudienceLab.io.</p>
+  </div>
+</div>
 </div>
 
 <script>
@@ -664,9 +706,9 @@ function loadFallbackData(){
       { name: "AI Analytics Dashboard", wsMin: 1500, wsMax: 2500, rtMin: 4000, rtMax: 8000, maintHrs: 2.5, desc: "See what's working — custom dashboard with AI-powered insights and reporting" },
       { name: "Full AI Infrastructure Build", contactDevTeam: true, rtFrom: 15000, maintHrs: 4.5, desc: "The complete stack — CRM + agents + website + automations. Every build is different — contact dev team to scope." },
     ]},
-    { cat: "Lead Generation & Data", type: "both", items: [
-      { name: "AI Outreach System", wsMin: 2500, wsMax: 4000, rtMin: 8000, rtMax: 20000, maintHrs: 3.5, desc: "Fill your pipeline — cold email, sequences, appointment setting, all AI-powered" },
-      { name: "AI Lead Gen & Distribution", contactDevTeam: true, rtFrom: 10000, maintHrs: 4.5, desc: "Full lead generation and distribution system. Every setup is unique — contact dev team to scope." },
+    { cat: "AI Outreach & Data", type: "both", items: [
+      { name: "AI Outreach System", wsMin: 2500, wsMax: 4000, rtMin: 8000, rtMax: 20000, maintHrs: 3.5, desc: "Fill your pipeline — cold email, sequences, and appointment setting, all AI-powered" },
+      { name: "AI Distribution & Routing System", wsMin: 3000, wsMax: 5000, rtMin: 10000, rtMax: 25000, maintHrs: 4.5, desc: "Full AI-powered prospect distribution and intelligent routing system" },
       { name: "Apex Data Setup", wsMin: 750, wsMax: 1000, rtMin: 2000, rtMax: 5000, maintHrs: 1.5, desc: "One-time setup for AI-enriched audience data platform" },
       { name: "Apex Data — Starter (1K records/mo)", moWsMin: 197, moWsMax: 197, moRtMin: 500, moRtMax: 800, maintHrs: 1.5, desc: "Entry-level AI data enrichment for smaller lists" },
       { name: "Apex Data — Growth (2.5K records/mo)", moWsMin: 397, moWsMax: 397, moRtMin: 800, moRtMax: 1500, maintHrs: 1.5, desc: "Growing businesses — more records, deeper enrichment" },
