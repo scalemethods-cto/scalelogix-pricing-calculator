@@ -789,9 +789,9 @@ function debouncedSaveConfig(){
 // ========== PRICING HELPERS ==========
 function isContactItem(item){ return item.contactUs || item.contactDevTeam }
 function getWholesale(item){ return isContactItem(item) ? 0 : (item.rtMin || item.wsMin || 0) }
-function getRetail(item){ if(isContactItem(item)) return 0; if(item.rtMin && item.rtMax && item.rtMax > item.rtMin) return Math.round((item.rtMin + item.rtMax) / 2); return item.rtMin || 0; }
+function getRetail(item){ return isContactItem(item) ? 0 : (item.rtMax || item.rtMin || 0) }
 function getMonthlyWs(item){ return isContactItem(item) ? 0 : (item.moRtMin || item.moWsMin || 0) }
-function getMonthlyRt(item){ if(isContactItem(item)) return 0; if(item.moRtMin && item.moRtMax && item.moRtMax > item.moRtMin) return Math.round((item.moRtMin + item.moRtMax) / 2); return item.moRtMin || 0; }
+function getMonthlyRt(item){ return isContactItem(item) ? 0 : (item.moRtMax || item.moRtMin || 0) }
 function getMaintHrs(item){ return item.maintHrs || 0 }
 function getMaintCost(item){ return getMaintHrs(item) * CFG.devRate }
 function marginPct(retail, wholesale){ return wholesale === 0 ? 0 : ((retail - wholesale) / retail * 100) }
