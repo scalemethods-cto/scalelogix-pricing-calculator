@@ -935,7 +935,7 @@ function showT1Services(ci){
     ${cat.items.map((item, ii) => {
       const isActive = t1SelectedService === ii;
       const isCu = isContactItem(item);
-      const setupPrice = isCu ? `<span style="color:var(--accent-dark);font-weight:600;font-size:.72rem">${contactLabel(item)}</span>` : (item.rtMin ? `<span style="color:var(--purple);font-weight:700;font-size:.8rem">${fmt(item.rtMin)}${item.rtMax > item.rtMin ? ' – ' + fmt(item.rtMax) : ''}</span>` : `<span style="color:var(--text-dim);font-size:.75rem">—</span>`);
+      const setupPrice = isCu ? `<span style="color:var(--accent-dark);font-weight:600;font-size:.72rem">${contactLabel(item)}</span>` : (item.rtMin ? `<span style="color:var(--purple);font-weight:700;font-size:.8rem">${fmt(item.rtMin)}</span>` : `<span style="color:var(--text-dim);font-size:.75rem">—</span>`);
       const mh = item.maintHrs || 0;
       const monthlyHrs = mh > 0 ? `<span style="font-size:.75rem;color:var(--text-dim)">${mh} hrs/mo</span>` : `<span style="color:var(--text-dim);font-size:.75rem">—</span>`;
       const moMin = item.moRtMin || 0;
@@ -993,8 +993,8 @@ function renderTab1(){
   summaryEl.innerHTML = `
     <div class="summary-item"><div class="label">Service</div><div class="value">${item.name.length > 25 ? item.name.substring(0,25) + '...' : item.name}</div></div>
     <div class="summary-item sales-only"><div class="label">Wholesale Price</div><div class="value">${ws > 0 ? fmt(ws) : '—'}</div></div>
-    <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${rt > 0 ? fmt(rt) : '—'}</div></div>
-    <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${moRt > 0 ? fmt(moRt) + '/mo' : '—'}</div></div>
+    <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${item.rtMin > 0 ? fmt(item.rtMin) : '—'}</div></div>
+    <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${(item.moRtMin||0) > 0 ? fmt(item.moRtMin) + '/mo' : '—'}</div></div>
   `;
 
   let detailHtml = `
@@ -1009,7 +1009,7 @@ function renderTab1(){
     detailHtml += `<div style="font-size:.76rem;font-weight:600;color:var(--text);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Setup Pricing</div>`;
     detailHtml += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px">`;
     detailHtml += `<div class="result-box sales-only"><div class="rlabel">Wholesale Price</div><div class="rvalue">${fmtWsRange(item)}</div></div>`;
-    detailHtml += `<div class="result-box"><div class="rlabel">Total Price</div><div class="rvalue" style="color:var(--purple)">${fmtRtRange(item)}</div></div>`;
+    detailHtml += `<div class="result-box"><div class="rlabel">Total Price</div><div class="rvalue" style="color:var(--purple)">${item.rtMin > 0 ? fmt(item.rtMin) : '—'}</div></div>`;
     detailHtml += `</div>`;
   }
 
@@ -1017,7 +1017,7 @@ function renderTab1(){
     detailHtml += `<div style="font-size:.76rem;font-weight:600;color:var(--text);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Monthly Pricing</div>`;
     detailHtml += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">`;
     detailHtml += `<div class="result-box sales-only"><div class="rlabel">Monthly Wholesale</div><div class="rvalue">${fmtMoWsRange(item)}</div></div>`;
-    detailHtml += `<div class="result-box"><div class="rlabel">Monthly Total</div><div class="rvalue" style="color:var(--purple)">${fmtMoRtRange(item)}</div></div>`;
+    detailHtml += `<div class="result-box"><div class="rlabel">Monthly Total</div><div class="rvalue" style="color:var(--purple)">${(item.moRtMin||0) > 0 ? fmt(item.moRtMin) + '/mo' : '—'}</div></div>`;
     detailHtml += `</div>`;
   }
 
