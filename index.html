@@ -689,15 +689,13 @@ function loadFallbackData(){
       { name: "Custom Enterprise Package (5 agents + full CRM)", wsMin: 8250, wsMax: 8250, rtMin: 12000, rtMax: 20000, moWsMin: 2500, moWsMax: 2500, moRtMin: 2500, moRtMax: 4000, maintHrs: 4.5, desc: "Full enterprise custom voice deployment with dedicated support" },
     ]},
     { cat: "Speed to Lead & Follow-Up", type: "setup", items: [
-      { name: "Missed-Call Text-Back", contactUs: true, maintHrs: 1.5, desc: "Stop losing leads — auto-text and email anyone who calls when you can't answer" },
-      { name: "AI Call Handler", contactUs: true, maintHrs: 2.5, desc: "AI answers inbound calls 24/7, qualifies leads, and books appointments — like a virtual employee" },
-      { name: "After-Hours Call Coverage", contactUs: true, maintHrs: 2.5, desc: "Never miss an after-hours lead — AI handles calls outside business hours" },
-      { name: "Speed-to-Lead System", contactUs: true, maintHrs: 2.5, desc: "Respond to new leads in seconds, not hours — automated multi-channel instant follow-up" },
-      { name: "Lead Qualification & Scoring", contactUs: true, maintHrs: 2.5, desc: "Automatically score and qualify leads so your sales team only talks to the best ones" },
-      { name: "Lead Routing", contactUs: true, maintHrs: 1.5, desc: "Route qualified leads to the right rep based on rules, territory, or availability" },
-      { name: "Quote / Estimate Follow-Up", contactUs: true, maintHrs: 1.5, desc: "Recover stale deals — automated follow-up on every quote and estimate until they close or say no" },
-      { name: "Lead Nurturing Sequences", contactUs: true, maintHrs: 2.5, desc: "Keep cold leads warm with multi-step email/SMS nurture until they're ready to buy" },
-      { name: "Appointment Booking + Reminders", contactUs: true, maintHrs: 2.5, desc: "Automated booking with calendar sync, confirmations, and no-show-reducing reminders" },
+      { name: "Missed-Call Text-Back", wsMin: 1200, wsMax: 1200, rtMin: 2400, rtMax: 3120, moWsMin: 500, moWsMax: 500, moRtMin: 1000, moRtMax: 1300, maintHrs: 1.5, desc: "Stop losing leads — auto-text and email anyone who calls when you can't answer" },
+      { name: "AI Call Handler", wsMin: 2000, wsMax: 2000, rtMin: 4000, rtMax: 5200, moWsMin: 500, moWsMax: 500, moRtMin: 1000, moRtMax: 1300, maintHrs: 2.5, desc: "AI answers inbound calls 24/7, qualifies leads, and books appointments — like a virtual employee" },
+      { name: "Speed-to-Lead System", contactUs: true, maintHrs: 2.5, desc: "Convert organic traffic to paying clients with instant engagement within seconds" },
+      { name: "Lead Qualification & Routing", contactUs: true, maintHrs: 3, desc: "AI qualifies, scores, and routes leads to the right rep — bundled with call handling" },
+      { name: "Quote / Estimate Follow-Up", wsMin: 500, wsMax: 500, rtMin: 1000, rtMax: 1300, maintHrs: 1.5, desc: "Recover stale deals — automated follow-up on every quote and estimate until they close or say no" },
+      { name: "Lead Nurturing Sequences", wsMin: 1000, wsMax: 1000, rtMin: 2000, rtMax: 2600, maintHrs: 2.5, desc: "Keep cold leads warm with multi-step email/SMS nurture until they're ready to buy" },
+      { name: "Appointment Booking + Reminders", wsMin: 750, wsMax: 750, rtMin: 1500, rtMax: 1950, maintHrs: 2.5, desc: "Automated booking with calendar sync, confirmations, and no-show-reducing reminders" },
     ]},
     { cat: "AI Automation & CRM", type: "setup", items: [
       { name: "CRM Setup + AI Pipelines", wsMin: 1500, wsMax: 2500, rtMin: 5000, rtMax: 12000, maintHrs: 3.5, desc: "Turn your CRM into a revenue machine — AI-powered pipelines, automations, and deal tracking" },
@@ -736,7 +734,7 @@ function loadFallbackData(){
       { name: "Technical Maintenance (per client)", moWsMin: 500, moWsMax: 1000, moRtMin: 2000, moRtMax: 5000, maintHrs: 3.5, desc: "Monthly technical maintenance and support retainer" },
     ]},
     { cat: "Reactivation & Revenue Recovery", type: "setup", items: [
-      { name: "Past Customer Reactivation", contactUs: true, maintHrs: 2.5, desc: "Turn your existing database into revenue — win back customers who've gone quiet" },
+      { name: "Past Customer Reactivation", wsMin: 750, wsMax: 750, rtMin: 1500, rtMax: 1950, maintHrs: 2.5, desc: "Turn your existing database into revenue — win back customers who've gone quiet" },
       { name: "Dead Lead Reactivation", contactUs: true, maintHrs: 2.5, desc: "Monetize your dead leads — reignite dormant contacts with automated outreach" },
       { name: "Lapsed Policy Win-Back", contactUs: true, maintHrs: 2.5, desc: "Insurance-specific — win back lapsed policyholders with renewal campaigns" },
       { name: "Patient Reactivation", contactUs: true, maintHrs: 2.5, desc: "Healthcare-specific — bring inactive patients back with booking and reminder campaigns" },
@@ -746,7 +744,7 @@ function loadFallbackData(){
       { name: "Renewal Campaign Automation", contactUs: true, maintHrs: 2.5, desc: "Keep customers from churning — automated renewal campaigns at the right time" },
       { name: "Client Check-In Automation", contactUs: true, maintHrs: 1.5, desc: "Maintain relationships at scale — scheduled automated check-ins that feel personal" },
       { name: "Cross-Sell / Upsell Campaigns", contactUs: true, maintHrs: 2.5, desc: "Grow revenue per customer — trigger cross-sell and upsell offers based on their history" },
-      { name: "Referral Generation System", contactUs: true, maintHrs: 1.5, desc: "Turn happy customers into referral machines — automated ask at the perfect moment" },
+      { name: "Referral Generation System", wsMin: 500, wsMax: 500, rtMin: 1000, rtMax: 1300, maintHrs: 1.5, desc: "Turn happy customers into referral machines — automated ask at the perfect moment" },
     ]},
   ];
   INSURANCE_CORE = [];
@@ -1087,7 +1085,7 @@ function buildTab2Table(){
       html += `<tr>
         <td class="cb"><input type="checkbox" data-idx="${idx}" class="t2-cb"></td>
         <td>${item.name}${descHtml}</td>
-        <td style="font-size:.78rem;text-align:center;white-space:nowrap">${getMonthlyRt(item) > 0 ? `<span style="color:var(--purple);font-weight:600">${fmt(getMonthlyRt(item))}/mo</span>${mh > 0 ? `<span class="sales-only" style="display:inline-block;margin-left:6px;color:var(--text-dim);font-size:.7rem">+ <input type="number" class="maint-hrs-input" data-idx="${idx}" value="${mh}" step="0.5" min="0" max="10" style="width:44px;padding:1px 3px;border:1px solid var(--border);border-radius:3px;font-size:.7rem;text-align:center;background:var(--surface);color:var(--text)"> hrs</span><span class="client-only" style="color:var(--text-dim);font-size:.7rem;display:inline-block;margin-left:6px">+ ${mh} hrs</span>` : ''}` : `<span class="sales-only" style="display:inline"><input type="number" class="maint-hrs-input" data-idx="${idx}" value="${mh}" step="0.5" min="0" max="10" style="width:48px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center;background:var(--surface);color:var(--text)"> hrs/mo</span><span class="client-only">${mh > 0 ? mh + ' hrs/mo' : '—'}</span>`}</td>
+        <td style="font-size:.78rem;text-align:center;white-space:nowrap"><span class="sales-only" style="display:inline"><input type="number" class="maint-hrs-input" data-idx="${idx}" value="${mh}" step="0.5" min="0" max="10" style="width:48px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center;background:var(--surface);color:var(--text)"> hrs/mo</span><span class="client-only">${mh > 0 ? mh + ' hrs/mo' : '—'}</span></td>
         <td class="sales-only" style="font-size:.78rem;white-space:nowrap">${wsDisplay}</td>
         <td style="font-size:.78rem;white-space:nowrap">${rtDisplay}</td>
       </tr>`;
