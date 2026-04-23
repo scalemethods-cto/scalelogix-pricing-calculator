@@ -420,8 +420,8 @@ function tierDiscount(n){
 // ========== CAPABILITY DATA ==========
 const CAPABILITIES = [
   { cat: "Lead Capture & Instant Response", items: [
-    { name: "AI voice agent inbound calls 24/7", tier: "complex", hb: 16, hm: 6 },
-    { name: "Missed-call text-back", tier: "simple", hb: 5, hm: 3 },
+    { name: "AI voice agent inbound calls 24/7", tier: "complex", hb: 8, hm: 3 },
+    { name: "Missed-call text-back", tier: "simple", hb: 2.5, hm: 1.5 },
     { name: "Website chat widget with SMS follow-up", tier: "medium", hb: 10, hm: 4 },
     { name: "AI chatbot for websites and listings", tier: "medium", hb: 10, hm: 4 },
     { name: "Instant lead response <2 min", tier: "simple", hb: 5, hm: 3 },
@@ -437,7 +437,7 @@ const CAPABILITIES = [
     { name: "Outreach performance analytics", tier: "medium", hb: 10, hm: 4 },
   ]},
   { cat: "Appointment Booking & Scheduling", items: [
-    { name: "Automated appointment booking system", tier: "complex", hb: 16, hm: 6 },
+    { name: "Automated appointment booking system", tier: "medium", hb: 5, hm: 0 },
     { name: "Calendar + CRM integration", tier: "medium", hb: 10, hm: 4 },
     { name: "Smart appointment confirmations", tier: "simple", hb: 5, hm: 3 },
     { name: "AI scheduling optimization", tier: "medium", hb: 10, hm: 4 },
@@ -453,18 +453,18 @@ const CAPABILITIES = [
     { name: "White-label client portal setup", tier: "complex", hb: 16, hm: 6 },
   ]},
   { cat: "Lead Qualification & Routing", items: [
-    { name: "AI lead qualification workflows", tier: "medium", hb: 10, hm: 4 },
+    { name: "AI lead qualification workflows", tier: "medium", hb: 8, hm: 3 },
     { name: "Paid-ad lead filtering", tier: "medium", hb: 10, hm: 4 },
     { name: "Lead scoring and prioritization", tier: "medium", hb: 10, hm: 4 },
     { name: "Client segmentation logic", tier: "medium", hb: 10, hm: 4 },
     { name: "Client health scoring", tier: "complex", hb: 16, hm: 6 },
   ]},
   { cat: "Follow-Up Nurture & Conversion", items: [
-    { name: "Email nurture sequences", tier: "simple", hb: 5, hm: 3 },
-    { name: "SMS nurture sequences", tier: "simple", hb: 5, hm: 3 },
+    { name: "Email nurture sequences", tier: "simple", hb: 5, hm: 0 },
+    { name: "SMS nurture sequences", tier: "simple", hb: 5, hm: 0 },
     { name: "Voice + SMS + email multi-channel campaigns", tier: "complex", hb: 16, hm: 6 },
-    { name: "Smart estimate follow-up", tier: "medium", hb: 10, hm: 4 },
-    { name: "Quote follow-up sequences", tier: "medium", hb: 10, hm: 4 },
+    { name: "Smart estimate follow-up", tier: "simple", hb: 2.5, hm: 0 },
+    { name: "Quote follow-up sequences", tier: "simple", hb: 2.5, hm: 0 },
     { name: "Lost quote recovery", tier: "medium", hb: 10, hm: 4 },
     { name: "No-show prevention", tier: "simple", hb: 5, hm: 3 },
     { name: "Appointment reminder automation", tier: "simple", hb: 5, hm: 3 },
@@ -472,7 +472,7 @@ const CAPABILITIES = [
   { cat: "Reviews Referrals & Reputation", items: [
     { name: "Review request automation", tier: "simple", hb: 5, hm: 3 },
     { name: "Review generation workflows", tier: "simple", hb: 5, hm: 3 },
-    { name: "Referral request automation", tier: "simple", hb: 5, hm: 3 },
+    { name: "Referral request automation", tier: "simple", hb: 2.5, hm: 0 },
     { name: "Systematic referral engines", tier: "medium", hb: 10, hm: 4 },
   ]},
   { cat: "Client & Customer Operations", items: [
@@ -483,7 +483,7 @@ const CAPABILITIES = [
     { name: "Pre-consultation education sequences", tier: "simple", hb: 5, hm: 3 },
   ]},
   { cat: "Retention Reactivation & LTV", items: [
-    { name: "Customer reactivation campaigns", tier: "medium", hb: 10, hm: 4 },
+    { name: "Customer reactivation campaigns", tier: "simple", hb: 2.5, hm: 0 },
     { name: "Renewal reminder automation", tier: "simple", hb: 5, hm: 3 },
     { name: "Churn prediction systems", tier: "complex", hb: 16, hm: 6 },
     { name: "Churn prevention automation", tier: "medium", hb: 10, hm: 4 },
