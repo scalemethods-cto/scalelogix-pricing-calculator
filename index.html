@@ -388,7 +388,8 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
             <tr>
               <th class="cb"></th>
               <th>Service</th>
-              <th>Monthly</th>
+              <th>Monthly Hrs</th>
+              <th>Monthly Price</th>
               <th class="sales-only">Wholesale Price</th>
               <th>Total Price</th>
             </tr>
@@ -674,7 +675,7 @@ function loadFallbackData(){
       { name: "Professional Web Package", wsMin: 5250, wsMax: 6500, rtMin: 9000, rtMax: 15000, maintHrs: 3.5, desc: "Homepage + 5 pages + chat + voice + integrations — full digital presence" },
       { name: "Complete AI Web Presence", wsMin: 7500, wsMax: 8500, rtMin: 12000, rtMax: 20000, maintHrs: 4.5, desc: "Homepage + 8 pages + chat + voice + analytics — the whole package" },
     ]},
-    { cat: "ScaleLogix AI Premium Agents", type: "both", showMonthlyPrice: true, items: [
+    { cat: "ScaleLogix AI Premium Agents", type: "both", items: [
       { name: "Premium Starter — 1 Agent + CRM + Texting", wsMin: 3500, wsMax: 3500, rtMin: 5000, rtMax: 7500, moWsMin: 500, moWsMax: 500, moRtMin: 800, moRtMax: 1200, maintHrs: 0, desc: "AI voice agent that answers calls, books appointments, and follows up — 24/7, deployed under your brand" },
       { name: "Premium Growth — 2 Agents + CRM + Texting", wsMin: 5000, wsMax: 5000, rtMin: 8500, rtMax: 12000, moWsMin: 1000, moWsMax: 1000, moRtMin: 1500, moRtMax: 2000, maintHrs: 0, desc: "Multi-agent system — cover more lines, departments, or workflows" },
       { name: "Premium Enterprise — 3+ Agents + Full CRM", wsMin: 8250, wsMax: 8250, rtMin: 12000, rtMax: 20000, moWsMin: 2500, moWsMax: 2500, moRtMin: 2500, moRtMax: 4000, maintHrs: 0, desc: "Full enterprise AI voice deployment — unlimited scale, full CRM integration" },
@@ -1073,9 +1074,8 @@ function buildTab2Table(){
   let idx = 0;
   let catIdx = 0;
   SERVICES.forEach(cat => {
-    html += `<tr class="cat-header" id="cat-hdr-${catIdx}"><td colspan="6">${cat.cat}</td></tr>`;
+    html += `<tr class="cat-header" id="cat-hdr-${catIdx}"><td colspan="7">${cat.cat}</td></tr>`;
     catIdx++;
-    const showMoPrice = cat.showMonthlyPrice || false;
     cat.items.forEach(item => {
       const descHtml = item.desc ? `<div style="font-size:.68rem;color:var(--text-dim);margin-top:2px;line-height:1.4;font-weight:300">${item.desc}</div>` : '';
       const mh = getMaintHrs(item);
@@ -1086,17 +1086,21 @@ function buildTab2Table(){
       // Retail display (setup only)
       const rtDisplay = fmtRtRange(item);
 
-      // Monthly cell: Premium Agent categories show the monthly price range; all others show adjustable dev hours
+      // Monthly hrs — always shows adjustable dev hours input
+      const monthlyHrsCell = `<span class="sales-only" style="display:inline"><input type="number" class="maint-hrs-input" data-idx="${idx}" value="${mh}" step="0.5" min="0" max="10" style="width:48px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center;background:var(--surface);color:var(--text)"> hrs/mo</span><span class="client-only">${mh > 0 ? mh + ' hrs/mo' : '—'}</span>`;
+
+      // Monthly price — fixed retainer price if the item has one, otherwise —
       const moMin = item.moRtMin || 0;
       const moMax = item.moRtMax || moMin;
-      const monthlyCell = showMoPrice && moMin > 0
+      const monthlyPriceCell = moMin > 0
         ? `<span style="color:var(--purple);font-weight:600">${moMin === moMax ? fmt(moMin) : fmt(moMin) + ' – ' + fmt(moMax)}/mo</span>`
-        : `<span class="sales-only" style="display:inline"><input type="number" class="maint-hrs-input" data-idx="${idx}" value="${mh}" step="0.5" min="0" max="10" style="width:48px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center;background:var(--surface);color:var(--text)"> hrs/mo</span><span class="client-only">${mh > 0 ? mh + ' hrs/mo' : '—'}</span>`;
+        : `<span style="color:var(--text-dim)">—</span>`;
 
       html += `<tr>
         <td class="cb"><input type="checkbox" data-idx="${idx}" class="t2-cb"></td>
         <td>${item.name}${descHtml}</td>
-        <td style="font-size:.78rem;text-align:center;white-space:nowrap">${monthlyCell}</td>
+        <td style="font-size:.78rem;text-align:center;white-space:nowrap">${monthlyHrsCell}</td>
+        <td style="font-size:.78rem;text-align:center;white-space:nowrap">${monthlyPriceCell}</td>
         <td class="sales-only" style="font-size:.78rem;white-space:nowrap">${wsDisplay}</td>
         <td style="font-size:.78rem;white-space:nowrap">${rtDisplay}</td>
       </tr>`;
