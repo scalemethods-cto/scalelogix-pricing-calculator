@@ -940,7 +940,7 @@ function showT1Services(ci){
       const monthlyHrs = mh > 0 ? `<span style="font-size:.75rem;color:var(--text-dim)">${mh} hrs/mo</span>` : `<span style="color:var(--text-dim);font-size:.75rem">—</span>`;
       const moMin = item.moRtMin || 0;
       const moMax = item.moRtMax || moMin;
-      const monthlyPrice = moMin > 0 ? `<span style="color:var(--purple);font-weight:600;font-size:.75rem">${moMin === moMax ? fmt(moMin) : fmt(moMin) + ' – ' + fmt(moMax)}/mo</span>` : `<span style="color:var(--text-dim);font-size:.75rem">—</span>`;
+      const monthlyPrice = moMin > 0 ? `<span style="color:var(--purple);font-weight:600;font-size:.75rem">${fmt(moMin)}/mo</span>` : `<span style="color:var(--text-dim);font-size:.75rem">—</span>`;
       return `
       <div class="t1-svc-card${isActive?' active':''}" onclick="selectT1Service(${ci},${ii})" style="display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:0">
         <div>
@@ -1098,7 +1098,7 @@ function buildTab2Table(){
       const moMin = item.moRtMin || 0;
       const moMax = item.moRtMax || moMin;
       const monthlyPriceCell = moMin > 0
-        ? `<span style="color:var(--purple);font-weight:600">${moMin === moMax ? fmt(moMin) : fmt(moMin) + ' – ' + fmt(moMax)}/mo</span>`
+        ? `<span style="color:var(--purple);font-weight:600">${fmt(moMin)}/mo</span>`
         : `<span style="color:var(--text-dim)">—</span>`;
 
       html += `<tr>
