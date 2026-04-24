@@ -1151,11 +1151,12 @@ function renderTab2(){
   const n = selected.length;
 
   // Sum wholesale and retail totals
-  let totalWsSetup = 0, totalRtSetup = 0, totalMaintHrs = 0;
+  let totalWsSetup = 0, totalRtSetup = 0, totalMaintHrs = 0, totalMonthlyRt = 0;
   selected.forEach(item => {
     totalWsSetup += getWholesale(item);
     totalRtSetup += getRetail(item);
     totalMaintHrs += getMaintHrs(item);
+    totalMonthlyRt += getMonthlyPrice(item);
   });
 
   // Bundle discount — tiered: 5% at 3+, 7.5% at 6+, 10% at 9+
@@ -1176,6 +1177,7 @@ function renderTab2(){
     <div class="summary-item sales-only"><div class="label">Total Wholesale</div><div class="value">${fmt(finalWsSetup)}</div></div>
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(finalRtSetup)}</div></div>
     <div class="summary-item"><div class="label">Est. Dev Hours</div><div class="value">${totalMaintHrs > 0 ? totalMaintHrs + ' hrs/mo' : '—'}</div></div>
+    <div class="summary-item"><div class="label">Monthly Retainer</div><div class="value gold">${totalMonthlyRt > 0 ? fmt(totalMonthlyRt) + '/mo' : '—'}</div></div>
     ${dsApplies ? `<div class="summary-item"><div class="label">Savings</div><div class="value green">${fmt(totalSavings)}</div></div>` : ''}
   `;
 
