@@ -387,7 +387,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
               <th>Service</th>
               <th>Dev Hours</th>
               <th>Monthly Price</th>
-              <th class="sales-only">Wholesale Price</th>
+              <th>Wholesale Price</th>
               <th>Total Price</th>
             </tr>
           </thead>
@@ -994,7 +994,7 @@ function renderTab1(){
   const moPrice = getMonthlyPrice(item);
   summaryEl.innerHTML = `
     <div class="summary-item"><div class="label">Service</div><div class="value">${item.name.length > 25 ? item.name.substring(0,25) + '...' : item.name}</div></div>
-    <div class="summary-item sales-only"><div class="label">Wholesale Price</div><div class="value">${ws > 0 ? fmt(ws) : '—'}</div></div>
+    <div class="summary-item"><div class="label">Wholesale Price</div><div class="value">${ws > 0 ? fmt(ws) : '—'}</div></div>
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${item.rtMin > 0 ? fmt(item.rtMin) : '—'}</div></div>
     <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${moPrice > 0 ? fmt(moPrice) + '/mo' : '—'}</div></div>
   `;
@@ -1010,7 +1010,7 @@ function renderTab1(){
   if(ws > 0 || rt > 0){
     detailHtml += `<div style="font-size:.76rem;font-weight:600;color:var(--text);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Setup Pricing</div>`;
     detailHtml += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px">`;
-    detailHtml += `<div class="result-box sales-only"><div class="rlabel">Wholesale Price</div><div class="rvalue">${fmtWsRange(item)}</div></div>`;
+    detailHtml += `<div class="result-box"><div class="rlabel">Wholesale Price</div><div class="rvalue">${fmtWsRange(item)}</div></div>`;
     detailHtml += `<div class="result-box"><div class="rlabel">Total Price</div><div class="rvalue" style="color:var(--purple)">${item.rtMin > 0 ? fmt(item.rtMin) : '—'}</div></div>`;
     detailHtml += `</div>`;
   }
@@ -1093,12 +1093,12 @@ function buildTab2Table(){
       const descHtml = item.desc ? `<div style="font-size:.68rem;color:var(--text-dim);margin-top:2px;line-height:1.4;font-weight:300">${item.desc}</div>` : '';
       const mh = getMaintHrs(item);
 
-      // Wholesale display — setup only (no monthly fallback so row matches summary sum)
+      // Wholesale display — true wholesale (wsMin), setup only
       const wsDisplay = isContactItem(item)
         ? contactLabel(item)
-        : (getWholesale(item) > 0 ? fmt(getWholesale(item)) : '—');
+        : ((item.wsMin || 0) > 0 ? fmt(item.wsMin) : '—');
 
-      // Retail display — setup only (no monthly fallback so row matches summary sum)
+      // Retail display — rtMin, setup only (no monthly fallback so row matches summary sum)
       const rtDisplay = isContactItem(item)
         ? (item.rtFrom ? 'From ' + fmt(item.rtFrom) : contactLabel(item))
         : (item.rtMin > 0 ? fmt(item.rtMin) : '—');
@@ -1119,7 +1119,7 @@ function buildTab2Table(){
         <td>${item.name}${descHtml}</td>
         <td style="font-size:.78rem;text-align:center;white-space:nowrap">${monthlyHrsCell}</td>
         <td style="font-size:.78rem;text-align:center;white-space:nowrap" class="mo-price-cell" data-idx="${idx}">${monthlyPriceCell}</td>
-        <td class="sales-only" style="font-size:.78rem;white-space:nowrap">${wsDisplay}</td>
+        <td style="font-size:.78rem;white-space:nowrap">${wsDisplay}</td>
         <td style="font-size:.78rem;white-space:nowrap">${rtDisplay}</td>
       </tr>`;
       idx++;
@@ -1154,12 +1154,13 @@ function renderTab2(){
 
   const n = selected.length;
 
-  // Sum wholesale and retail totals — use the same values the rows display
-  // (getWholesale returns rtMin fallback, and we display rtMin for retail total)
+  // Sum wholesale (wsMin — true wholesale) and retail (rtMin) totals — match what rows display
   let totalWsSetup = 0, totalRtSetup = 0, totalMaintHrs = 0, totalMonthlyRt = 0;
   selected.forEach(item => {
-    totalWsSetup += getWholesale(item);
-    totalRtSetup += (isContactItem(item) ? 0 : (item.rtMin || 0));
+    if(!isContactItem(item)){
+      totalWsSetup += (item.wsMin || 0);
+      totalRtSetup += (item.rtMin || 0);
+    }
     totalMaintHrs += getMaintHrs(item);
     totalMonthlyRt += getMonthlyPrice(item);
   });
@@ -1179,7 +1180,7 @@ function renderTab2(){
 
   document.getElementById('t2-summary').innerHTML = `
     <div class="summary-item"><div class="label">Items Selected</div><div class="value">${n}</div></div>
-    <div class="summary-item sales-only"><div class="label">Total Wholesale</div><div class="value">${fmt(finalWsSetup)}</div></div>
+    <div class="summary-item"><div class="label">Total Wholesale</div><div class="value">${fmt(finalWsSetup)}</div></div>
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(finalRtSetup)}</div></div>
     <div class="summary-item"><div class="label">Est. Dev Hours</div><div class="value">${totalMaintHrs > 0 ? totalMaintHrs + ' hrs/mo' : '—'}</div></div>
     <div class="summary-item"><div class="label">Monthly Retainer</div><div class="value gold">${totalMonthlyRt > 0 ? fmt(totalMonthlyRt) + '/mo' : '—'}</div></div>
@@ -1403,7 +1404,7 @@ function buildTab4(){
         ${preview.ds > 0 ? `<div class="price-row"><span class="plabel" style="color:var(--green)">${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}% bundle discount</span><span class="pval" style="color:var(--green);font-size:.8rem">Save ${fmt(preview.dsSavingsSetup)}</span></div>` : ''}
         ${preview.hasContactUs ? `<div class="price-row"><span class="plabel" style="font-size:.65rem;color:var(--text-dim)">Includes custom-scope items</span><span class="pval" style="font-size:.65rem;color:var(--accent-dark)">+ Contact Us</span></div>` : ''}
         <div class="price-row"><span class="plabel">Est. Dev Hours</span><span class="pval">${preview.maintHrs} hrs/mo</span></div>
-        <div class="price-row sales-only"><span class="plabel" style="font-size:.72rem">Wholesale Price</span><span class="pval" style="font-size:.78rem" id="offer-ws-${tierKey}">${fmt(preview.wsSetup)}</span></div>
+        <div class="price-row"><span class="plabel" style="font-size:.72rem">Wholesale Price</span><span class="pval" style="font-size:.78rem" id="offer-ws-${tierKey}">${fmt(preview.wsSetup)}</span></div>
       </div>
       ${tierItems.length > 0 ? itemListHtml : ''}
       ${isSelected ? '<div style="text-align:center;margin-top:10px;font-size:.7rem;color:var(--purple);font-weight:600">SELECTED</div>' : ''}
@@ -1452,7 +1453,7 @@ function buildTab4(){
     itemsHtml += `
     <div class="ins-item">
       <span class="iname">${e.item.name}</span>
-      <span class="ihours sales-only" style="white-space:nowrap">${isCu ? '—' : (ws > 0 ? fmt(ws) : '—')}</span>
+      <span class="ihours" style="white-space:nowrap">${isCu ? '—' : (ws > 0 ? fmt(ws) : '—')}</span>
       <span style="white-space:nowrap;font-size:.72rem;color:${isCu ? 'var(--accent-dark)' : 'var(--purple)'};font-weight:600">${rtDisplay}</span>
       <span style="white-space:nowrap;font-size:.68rem;color:var(--text-dim)">${mh > 0 ? mh + ' hr' + (mh > 1 ? 's' : '') + '/mo' : ''}</span>
       ${getMonthlyPrice(e.item) > 0 ? `<span style="white-space:nowrap;font-size:.68rem;color:var(--purple);font-weight:600">${fmt(getMonthlyPrice(e.item))}/mo</span>` : ''}
@@ -1468,7 +1469,7 @@ function buildTab4(){
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;padding:14px;background:var(--bg);border-radius:var(--radius)">
           <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Total Price</div><div style="font-size:1.1rem;font-weight:700;color:var(--purple)">${fmt(preview.rtSetup)}${preview.hasContactUs ? '+' : ''}</div>${preview.dsSavingsSetup > 0 ? `<div style="font-size:.65rem;color:var(--green);margin-top:2px">${tier.name} Discount (${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}%): -${fmt(preview.dsSavingsSetup)}</div>` : ''}</div>
           <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Est. Dev Hours</div><div style="font-size:1.1rem;font-weight:700;color:var(--text)">${preview.maintHrs} hrs/mo</div><div style="font-size:.68rem;color:var(--purple);cursor:pointer;text-decoration:underline;margin-top:2px" onclick="document.querySelector('[data-tab=\\'tab3\\']').click()">See Dev Packages</div></div>
-          <div class="sales-only" style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Wholesale Price</div><div style="font-size:1rem;font-weight:700;color:var(--text)">${fmt(preview.wsSetup)}</div></div>
+          <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Wholesale Price</div><div style="font-size:1rem;font-weight:700;color:var(--text)">${fmt(preview.wsSetup)}</div></div>
         </div>
       </div>
     </div>
@@ -1503,9 +1504,9 @@ function renderTab4(){
       <div class="summary-item"><div class="label">Starter Total</div><div class="value">${fmt(starterP.rtSetup)}</div></div>
       <div class="summary-item"><div class="label">Pro Total</div><div class="value gold">${fmt(proP.rtSetup)}</div></div>
       <div class="summary-item"><div class="label">Max Total</div><div class="value gold">${fmt(maxP.rtSetup)}</div></div>
-      <div class="summary-item sales-only"><div class="label">Starter Wholesale</div><div class="value">${fmt(starterP.wsSetup)}</div></div>
-      <div class="summary-item sales-only"><div class="label">Pro Wholesale</div><div class="value">${fmt(proP.wsSetup)}</div></div>
-      <div class="summary-item sales-only"><div class="label">Max Wholesale</div><div class="value">${fmt(maxP.wsSetup)}</div></div>
+      <div class="summary-item"><div class="label">Starter Wholesale</div><div class="value">${fmt(starterP.wsSetup)}</div></div>
+      <div class="summary-item"><div class="label">Pro Wholesale</div><div class="value">${fmt(proP.wsSetup)}</div></div>
+      <div class="summary-item"><div class="label">Max Wholesale</div><div class="value">${fmt(maxP.wsSetup)}</div></div>
     `;
 
     const recEl = document.getElementById('t4-pkg-rec');
@@ -1533,7 +1534,7 @@ function renderTab4(){
 
   document.getElementById('t4-summary').innerHTML = `
     <div class="summary-item"><div class="label">${tierConfig.name} Services</div><div class="value">${preview.n}</div></div>
-    <div class="summary-item sales-only"><div class="label">Wholesale Price</div><div class="value">${fmt(preview.wsSetup)}</div></div>
+    <div class="summary-item"><div class="label">Wholesale Price</div><div class="value">${fmt(preview.wsSetup)}</div></div>
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(preview.rtSetup)}${preview.hasContactUs ? '+' : ''}</div></div>
     ${preview.dsSavingsSetup > 0 ? `<div class="summary-item"><div class="label">${tierConfig.name} Discount (${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}%)</div><div class="value green">-${fmt(preview.dsSavingsSetup)}</div></div>` : ''}
     <div class="summary-item"><div class="label">Est. Dev Hours</div><div class="value">${preview.maintHrs} hrs/mo</div></div>
