@@ -388,7 +388,7 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
             <tr>
               <th class="cb"></th>
               <th>Service</th>
-              <th>Monthly Hrs</th>
+              <th>Dev Hours</th>
               <th>Monthly Price</th>
               <th class="sales-only">Wholesale Price</th>
               <th>Total Price</th>
@@ -684,13 +684,13 @@ function loadFallbackData(){
       { name: "Premium Add-On: Texting/SMS (per agent)", wsMin: 500, wsMax: 500, rtMin: 750, rtMax: 2000, maintHrs: 0, desc: "Add SMS follow-up and outreach sequences to any agent" },
     ]},
     { cat: "ScaleLogix AI Custom Agents", type: "both", items: [
-      { name: "Custom Agent Build + CRM Setup", wsMin: 3000, wsMax: 3000, rtMin: 5000, rtMax: 12000, moRtMin: 800, moRtMax: 2500, maintHrs: 5.5, desc: "Fully custom AI voice agent tailored to your business. Includes monthly management retainer." },
+      { name: "Custom Agent Build + CRM Setup", wsMin: 3000, wsMax: 3000, rtMin: 5000, rtMax: 12000, maintHrs: 5.5, desc: "Fully custom AI voice agent tailored to your business. Includes monthly dev hours for ongoing optimization." },
       { name: "Texting/SMS Add-On (per agent)", wsMin: 500, wsMax: 500, rtMin: 750, rtMax: 2000, maintHrs: 1.5, desc: "Add automated SMS follow-up to any custom agent" },
-      { name: "Additional Custom Agent (2-3)", wsMin: 1000, wsMax: 1000, rtMin: 1500, rtMax: 3500, moRtMin: 800, moRtMax: 2500, maintHrs: 5.5, desc: "Add another custom agent with monthly management retainer" },
-      { name: "Additional Custom Agent (volume, 4+)", wsMin: 750, wsMax: 750, rtMin: 1500, rtMax: 3500, moRtMin: 800, moRtMax: 2500, maintHrs: 5.5, desc: "Volume-priced agents (4+) with monthly management retainer" },
-      { name: "Custom Starter Package (1 agent + CRM + texting)", wsMin: 3500, wsMax: 3500, rtMin: 5000, rtMax: 7500, moRtMin: 800, moRtMax: 1200, maintHrs: 5.5, desc: "Ready-to-deploy custom voice system with monthly retainer" },
-      { name: "Custom Growth Package (2 agents + CRM + texting)", wsMin: 5000, wsMax: 5000, rtMin: 8500, rtMax: 12000, moRtMin: 1500, moRtMax: 2000, maintHrs: 10, desc: "Multi-agent custom system for growing teams" },
-      { name: "Custom Enterprise Package (5 agents + full CRM)", wsMin: 8250, wsMax: 8250, rtMin: 12000, rtMax: 20000, moRtMin: 2500, moRtMax: 4000, maintHrs: 16.5, desc: "Full enterprise custom voice deployment with dedicated support" },
+      { name: "Additional Custom Agent (2-3)", wsMin: 1000, wsMax: 1000, rtMin: 1500, rtMax: 3500, maintHrs: 5.5, desc: "Add another custom agent with monthly dev hours" },
+      { name: "Additional Custom Agent (volume, 4+)", wsMin: 750, wsMax: 750, rtMin: 1500, rtMax: 3500, maintHrs: 5.5, desc: "Volume-priced agents (4+) with monthly dev hours" },
+      { name: "Custom Starter Package (1 agent + CRM + texting)", wsMin: 3500, wsMax: 3500, rtMin: 5000, rtMax: 7500, maintHrs: 5.5, desc: "Ready-to-deploy custom voice system with monthly dev hours" },
+      { name: "Custom Growth Package (2 agents + CRM + texting)", wsMin: 5000, wsMax: 5000, rtMin: 8500, rtMax: 12000, maintHrs: 10, desc: "Multi-agent custom system for growing teams" },
+      { name: "Custom Enterprise Package (5 agents + full CRM)", wsMin: 8250, wsMax: 8250, rtMin: 12000, rtMax: 20000, maintHrs: 16.5, desc: "Full enterprise custom voice deployment with dedicated support" },
     ]},
     { cat: "Speed to Lead & Follow-Up", type: "setup", items: [
       { name: "Missed-Call Text-Back", wsMin: 1200, wsMax: 1200, rtMin: 2400, rtMax: 3120, maintHrs: 6.5, desc: "Stop losing leads — auto-text and email anyone who calls when you can't answer" },
@@ -712,30 +712,30 @@ function loadFallbackData(){
       { name: "AI Outreach System", wsMin: 2500, wsMax: 4000, rtMin: 8000, rtMax: 20000, maintHrs: 3.5, desc: "Fill your pipeline — cold email, sequences, and appointment setting, all AI-powered" },
       { name: "AI Distribution & Routing System", wsMin: 3000, wsMax: 5000, rtMin: 10000, rtMax: 25000, maintHrs: 4.5, desc: "Full AI-powered prospect distribution and intelligent routing system" },
       { name: "Apex Data Setup", wsMin: 750, wsMax: 1000, rtMin: 2000, rtMax: 5000, maintHrs: 1.5, desc: "One-time setup for AI-enriched audience data platform" },
-      { name: "Apex Data — Starter (1K records/mo)", moRtMin: 500, moRtMax: 800, maintHrs: 3.5, desc: "Entry-level AI data enrichment for smaller lists" },
-      { name: "Apex Data — Growth (2.5K records/mo)", moRtMin: 800, moRtMax: 1500, maintHrs: 5.5, desc: "Growing businesses — more records, deeper enrichment" },
-      { name: "Apex Data — Professional (5K records/mo)", moRtMin: 1200, moRtMax: 2000, maintHrs: 8, desc: "Professional-grade data enrichment at scale" },
-      { name: "Apex Data — Scale (10K records/mo)", moRtMin: 1800, moRtMax: 3000, maintHrs: 12, desc: "Scale data enrichment for high-volume operations" },
-      { name: "Apex Data — Enterprise (25K records/mo)", moRtMin: 3000, moRtMax: 5000, maintHrs: 20, desc: "Enterprise data enrichment for large databases" },
-      { name: "Apex Data — Unlimited (50K records/mo)", moRtMin: 4000, moRtMax: 7500, maintHrs: 26.5, desc: "Maximum-scale data enrichment up to 50K records per month" },
+      { name: "Apex Data — Starter (1K records/mo)", moRtMin: 500, moRtMax: 800, maintHrs: 0, desc: "Entry-level AI data enrichment for smaller lists" },
+      { name: "Apex Data — Growth (2.5K records/mo)", moRtMin: 800, moRtMax: 1500, maintHrs: 0, desc: "Growing businesses — more records, deeper enrichment" },
+      { name: "Apex Data — Professional (5K records/mo)", moRtMin: 1200, moRtMax: 2000, maintHrs: 0, desc: "Professional-grade data enrichment at scale" },
+      { name: "Apex Data — Scale (10K records/mo)", moRtMin: 1800, moRtMax: 3000, maintHrs: 0, desc: "Scale data enrichment for high-volume operations" },
+      { name: "Apex Data — Enterprise (25K records/mo)", moRtMin: 3000, moRtMax: 5000, maintHrs: 0, desc: "Enterprise data enrichment for large databases" },
+      { name: "Apex Data — Unlimited (50K records/mo)", moRtMin: 4000, moRtMax: 7500, maintHrs: 0, desc: "Maximum-scale data enrichment up to 50K records per month" },
     ]},
     { cat: "Marketing & Outreach", type: "monthly", items: [
       { name: "Ad Management Setup", wsMin: 500, wsMax: 500, rtMin: 1000, rtMax: 2500, maintHrs: 1.5, desc: "Get your ad accounts set up right — one-time configuration" },
-      { name: "Ad Management — Tier 1 (up to $6k/mo spend)", moRtMin: 1500, moRtMax: 3000, maintHrs: 10, desc: "Monthly ad management and optimization for smaller budgets" },
-      { name: "Ad Management — Tier 2 ($6k-$11k/mo spend)", moRtMin: 2000, moRtMax: 5000, maintHrs: 13.5, desc: "Mid-tier ad management with advanced optimization" },
-      { name: "Ad Management — Tier 3 ($11k-$30k/mo spend)", moRtMin: 2500, moRtMax: 7500, maintHrs: 16.5, desc: "High-spend ad management with full optimization and strategy" },
-      { name: "Additional Ad Platform Add-On (T1)", moRtMin: 800, moRtMax: 1500, maintHrs: 5.5, desc: "Add another ad platform to T1 management" },
-      { name: "Additional Ad Platform Add-On (T2)", moRtMin: 900, moRtMax: 1500, maintHrs: 6, desc: "Add another ad platform to T2 management" },
-      { name: "Additional Ad Platform Add-On (T3)", moRtMin: 1000, moRtMax: 2000, maintHrs: 6.5, desc: "Add another ad platform to T3 management" },
-      { name: "Extra Social Platform (LinkedIn, Pinterest, YouTube, X)", moRtMin: 150, moRtMax: 350, maintHrs: 1, desc: "Add another social platform to management" },
-      { name: "Social Media — Starter (10 posts/mo)", moRtMin: 800, moRtMax: 1500, maintHrs: 5.5, desc: "Stay visible — 10 static posts per month on FB + IG" },
-      { name: "Social Media — Growth (6 static + 4 video/mo)", moRtMin: 1200, moRtMax: 2000, maintHrs: 8, desc: "Level up — mixed content with professional video production" },
-      { name: "Social Media — Pro (16 static + 4 video/mo)", moRtMin: 1500, moRtMax: 2500, maintHrs: 10, desc: "High-volume content to dominate your feeds" },
-      { name: "Social Media — Premium (12 static + 8 video/mo)", moRtMin: 1800, moRtMax: 3000, maintHrs: 12, desc: "Maximum impact — premium content package with heavy video" },
+      { name: "Ad Management — Tier 1 (up to $6k/mo spend)", moRtMin: 1500, moRtMax: 3000, maintHrs: 0, desc: "Monthly ad management and optimization for smaller budgets" },
+      { name: "Ad Management — Tier 2 ($6k-$11k/mo spend)", moRtMin: 2000, moRtMax: 5000, maintHrs: 0, desc: "Mid-tier ad management with advanced optimization" },
+      { name: "Ad Management — Tier 3 ($11k-$30k/mo spend)", moRtMin: 2500, moRtMax: 7500, maintHrs: 0, desc: "High-spend ad management with full optimization and strategy" },
+      { name: "Additional Ad Platform Add-On (T1)", moRtMin: 800, moRtMax: 1500, maintHrs: 0, desc: "Add another ad platform to T1 management" },
+      { name: "Additional Ad Platform Add-On (T2)", moRtMin: 900, moRtMax: 1500, maintHrs: 0, desc: "Add another ad platform to T2 management" },
+      { name: "Additional Ad Platform Add-On (T3)", moRtMin: 1000, moRtMax: 2000, maintHrs: 0, desc: "Add another ad platform to T3 management" },
+      { name: "Extra Social Platform (LinkedIn, Pinterest, YouTube, X)", moRtMin: 150, moRtMax: 350, maintHrs: 0, desc: "Add another social platform to management" },
+      { name: "Social Media — Starter (10 posts/mo)", moRtMin: 800, moRtMax: 1500, maintHrs: 0, desc: "Stay visible — 10 static posts per month on FB + IG" },
+      { name: "Social Media — Growth (6 static + 4 video/mo)", moRtMin: 1200, moRtMax: 2000, maintHrs: 0, desc: "Level up — mixed content with professional video production" },
+      { name: "Social Media — Pro (16 static + 4 video/mo)", moRtMin: 1500, moRtMax: 2500, maintHrs: 0, desc: "High-volume content to dominate your feeds" },
+      { name: "Social Media — Premium (12 static + 8 video/mo)", moRtMin: 1800, moRtMax: 3000, maintHrs: 0, desc: "Maximum impact — premium content package with heavy video" },
       { name: "LinkedIn Outreach Setup", wsMin: 500, wsMax: 500, rtMin: 1000, rtMax: 2500, maintHrs: 1.5, desc: "Set up your outreach machine — one-time LinkedIn configuration" },
-      { name: "LinkedIn Outreach — Managed Profile", moRtMin: 1200, moRtMax: 2500, maintHrs: 8, desc: "Ongoing LinkedIn outreach on a dedicated profile — we run it, you close deals" },
-      { name: "AI Marketing Management (per platform)", moRtMin: 2500, moRtMax: 5000, maintHrs: 16.5, desc: "Ongoing AI marketing management per platform — strategy + execution" },
-      { name: "Technical Maintenance (per client)", moRtMin: 2000, moRtMax: 5000, maintHrs: 13.5, desc: "Monthly technical maintenance and support retainer" },
+      { name: "LinkedIn Outreach — Managed Profile", moRtMin: 1200, moRtMax: 2500, maintHrs: 0, desc: "Ongoing LinkedIn outreach on a dedicated profile — we run it, you close deals" },
+      { name: "AI Marketing Management (per platform)", moRtMin: 2500, moRtMax: 5000, maintHrs: 0, desc: "Ongoing AI marketing management per platform — strategy + execution" },
+      { name: "Technical Maintenance (per client)", moRtMin: 2000, moRtMax: 5000, maintHrs: 0, desc: "Monthly technical maintenance and support" },
     ]},
     { cat: "Reactivation & Revenue Recovery", type: "setup", items: [
       { name: "Past Customer Reactivation", wsMin: 750, wsMax: 750, rtMin: 1500, rtMax: 1950, maintHrs: 2.5, desc: "Turn your existing database into revenue — win back customers who've gone quiet" },
@@ -933,7 +933,7 @@ function showT1Services(ci){
   listEl.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:0;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);padding:0 12px 6px;border-bottom:1px solid var(--border);margin-bottom:4px">
       <span>${cat.cat}</span>
-      <span style="text-align:right;min-width:80px">Monthly Hrs</span>
+      <span style="text-align:right;min-width:80px">Dev Hours</span>
       <span style="text-align:right;min-width:100px;margin-left:12px">Monthly Price</span>
       <span style="text-align:right;min-width:90px;margin-left:12px">Total Price</span>
     </div>
@@ -1019,14 +1019,17 @@ function renderTab1(){
     detailHtml += `</div>`;
   }
 
-  if(moPrice > 0){
+  {
     const mh = getMaintHrs(item);
     const catLocked = cat.lockMaintHrs || false;
-    detailHtml += `<div style="font-size:.76rem;font-weight:600;color:var(--text);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Monthly Pricing</div>`;
-    detailHtml += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">`;
-    detailHtml += `<div class="result-box"><div class="rlabel">Monthly Hrs</div><div class="rvalue">${catLocked ? '—' : (mh > 0 ? mh + ' hrs/mo' : '—')}</div></div>`;
-    detailHtml += `<div class="result-box"><div class="rlabel">Monthly Total</div><div class="rvalue" style="color:var(--purple)">${fmt(moPrice)}/mo</div></div>`;
-    detailHtml += `</div>`;
+    const showHrs = !catLocked && mh > 0;
+    if(showHrs || moPrice > 0){
+      detailHtml += `<div style="font-size:.76rem;font-weight:600;color:var(--text);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Monthly</div>`;
+      detailHtml += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">`;
+      detailHtml += `<div class="result-box"><div class="rlabel">Dev Hours</div><div class="rvalue">${showHrs ? mh + ' hrs/mo' : '—'}</div></div>`;
+      detailHtml += `<div class="result-box"><div class="rlabel">Monthly Retainer</div><div class="rvalue" style="color:var(--purple)">${moPrice > 0 ? fmt(moPrice) + '/mo' : '—'}</div></div>`;
+      detailHtml += `</div>`;
+    }
   }
 
   detailEl.innerHTML = detailHtml;
@@ -1176,7 +1179,7 @@ function renderTab2(){
     <div class="summary-item"><div class="label">Items Selected</div><div class="value">${n}</div></div>
     <div class="summary-item sales-only"><div class="label">Total Wholesale</div><div class="value">${fmt(finalWsSetup)}</div></div>
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(finalRtSetup)}</div></div>
-    <div class="summary-item"><div class="label">Est. Maint.</div><div class="value">${totalMaintHrs > 0 ? totalMaintHrs + ' hrs/mo' : '—'}</div></div>
+    <div class="summary-item"><div class="label">Est. Dev Hours</div><div class="value">${totalMaintHrs > 0 ? totalMaintHrs + ' hrs/mo' : '—'}</div></div>
     ${dsApplies ? `<div class="summary-item"><div class="label">Savings</div><div class="value green">${fmt(totalSavings)}</div></div>` : ''}
   `;
 
@@ -1205,7 +1208,7 @@ function renderTab2(){
       recEl.style.display = 'block';
       recEl.innerHTML = `
         <div style="background:linear-gradient(135deg,rgba(92,74,133,.08),rgba(121,102,162,.04));border:1.5px solid rgba(121,102,162,.25);border-radius:var(--radius-lg);padding:16px 22px;margin-top:14px;text-align:center">
-          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;color:var(--purple);font-weight:600;margin-bottom:4px">Estimated Maintenance: ${totalMaintHrs} hrs/mo</div>
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;color:var(--purple);font-weight:600;margin-bottom:4px">Estimated Dev Hours: ${totalMaintHrs} hrs/mo</div>
           <div style="font-size:.82rem;color:var(--text-dim)">Pick a
             <span style="cursor:pointer;color:var(--purple);text-decoration:underline;font-weight:600" onclick="document.querySelector('[data-tab=\\'tab3\\']').click()">Dev Hour Package</span>
             to cover your monthly maintenance hours
@@ -1395,7 +1398,7 @@ function buildTab4(){
         <div class="price-row"><span class="plabel" style="font-size:.9rem;font-weight:600">Total Price</span><span class="pval gold" style="font-size:1.05rem" id="offer-rt-${tierKey}">${fmt(preview.rtSetup)}${preview.hasContactUs ? '+' : ''}</span></div>
         ${preview.ds > 0 ? `<div class="price-row"><span class="plabel" style="color:var(--green)">${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}% bundle discount</span><span class="pval" style="color:var(--green);font-size:.8rem">Save ${fmt(preview.dsSavingsSetup)}</span></div>` : ''}
         ${preview.hasContactUs ? `<div class="price-row"><span class="plabel" style="font-size:.65rem;color:var(--text-dim)">Includes custom-scope items</span><span class="pval" style="font-size:.65rem;color:var(--accent-dark)">+ Contact Us</span></div>` : ''}
-        <div class="price-row"><span class="plabel">Est. Maintenance</span><span class="pval">${preview.maintHrs} hrs/mo</span></div>
+        <div class="price-row"><span class="plabel">Est. Dev Hours</span><span class="pval">${preview.maintHrs} hrs/mo</span></div>
         <div class="price-row sales-only"><span class="plabel" style="font-size:.72rem">Wholesale Price</span><span class="pval" style="font-size:.78rem" id="offer-ws-${tierKey}">${fmt(preview.wsSetup)}</span></div>
       </div>
       ${tierItems.length > 0 ? itemListHtml : ''}
@@ -1460,7 +1463,7 @@ function buildTab4(){
       <div id="offer-detail-totals" style="margin-top:14px">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;padding:14px;background:var(--bg);border-radius:var(--radius)">
           <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Total Price</div><div style="font-size:1.1rem;font-weight:700;color:var(--purple)">${fmt(preview.rtSetup)}${preview.hasContactUs ? '+' : ''}</div>${preview.dsSavingsSetup > 0 ? `<div style="font-size:.65rem;color:var(--green);margin-top:2px">${tier.name} Discount (${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}%): -${fmt(preview.dsSavingsSetup)}</div>` : ''}</div>
-          <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Est. Maintenance</div><div style="font-size:1.1rem;font-weight:700;color:var(--text)">${preview.maintHrs} hrs/mo</div><div style="font-size:.68rem;color:var(--purple);cursor:pointer;text-decoration:underline;margin-top:2px" onclick="document.querySelector('[data-tab=\\'tab3\\']').click()">See Dev Packages</div></div>
+          <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Est. Dev Hours</div><div style="font-size:1.1rem;font-weight:700;color:var(--text)">${preview.maintHrs} hrs/mo</div><div style="font-size:.68rem;color:var(--purple);cursor:pointer;text-decoration:underline;margin-top:2px" onclick="document.querySelector('[data-tab=\\'tab3\\']').click()">See Dev Packages</div></div>
           <div class="sales-only" style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Wholesale Price</div><div style="font-size:1rem;font-weight:700;color:var(--text)">${fmt(preview.wsSetup)}</div></div>
         </div>
       </div>
@@ -1529,7 +1532,7 @@ function renderTab4(){
     <div class="summary-item sales-only"><div class="label">Wholesale Price</div><div class="value">${fmt(preview.wsSetup)}</div></div>
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(preview.rtSetup)}${preview.hasContactUs ? '+' : ''}</div></div>
     ${preview.dsSavingsSetup > 0 ? `<div class="summary-item"><div class="label">${tierConfig.name} Discount (${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}%)</div><div class="value green">-${fmt(preview.dsSavingsSetup)}</div></div>` : ''}
-    <div class="summary-item"><div class="label">Est. Maint.</div><div class="value">${preview.maintHrs} hrs/mo</div></div>
+    <div class="summary-item"><div class="label">Est. Dev Hours</div><div class="value">${preview.maintHrs} hrs/mo</div></div>
   `;
 
   const recEl = document.getElementById('t4-pkg-rec');
