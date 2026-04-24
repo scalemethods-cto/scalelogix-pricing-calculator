@@ -983,19 +983,16 @@ function renderTab1(){
   const ii = t1SelectedService;
   const cat = SERVICES[ci];
   const item = cat.items[ii];
-  const ws = getWholesale(item);
-  const rt = getRetail(item);
-  const moWs = getMonthlyWs(item);
-  const moRt = getMonthlyRt(item);
-  const mgn = rt > 0 ? marginPct(rt, ws) : 0;
-  const moMgn = moRt > 0 ? marginPct(moRt, moWs) : 0;
+  // Wholesale uses wsMin (true wholesale), Total uses rtMin (matches Custom Build).
+  const ws = isContactItem(item) ? 0 : (item.wsMin || 0);
+  const rt = isContactItem(item) ? 0 : (item.rtMin || 0);
   const svcType = getServiceType(item);
 
   const moPrice = getMonthlyPrice(item);
   summaryEl.innerHTML = `
     <div class="summary-item"><div class="label">Service</div><div class="value">${item.name.length > 25 ? item.name.substring(0,25) + '...' : item.name}</div></div>
     <div class="summary-item"><div class="label">Wholesale Price</div><div class="value">${ws > 0 ? fmt(ws) : '—'}</div></div>
-    <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${item.rtMin > 0 ? fmt(item.rtMin) : '—'}</div></div>
+    <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${rt > 0 ? fmt(rt) : '—'}</div></div>
     <div class="summary-item"><div class="label">Monthly Price</div><div class="value gold">${moPrice > 0 ? fmt(moPrice) + '/mo' : '—'}</div></div>
   `;
 
@@ -1007,11 +1004,13 @@ function renderTab1(){
       <div style="display:inline-block;margin-top:8px;padding:3px 10px;border-radius:12px;font-size:.63rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px;background:rgba(121,102,162,.1);color:var(--purple)">${isContactItem(item) ? contactLabel(item) : (svcType === 'both' ? 'Setup + Monthly' : svcType === 'monthly' ? 'Monthly' : 'Setup')}</div>
     </div>`;
 
-  if(ws > 0 || rt > 0){
+  if(ws > 0 || rt > 0 || isContactItem(item)){
     detailHtml += `<div style="font-size:.76rem;font-weight:600;color:var(--text);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Setup Pricing</div>`;
     detailHtml += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px">`;
-    detailHtml += `<div class="result-box"><div class="rlabel">Wholesale Price</div><div class="rvalue">${fmtWsRange(item)}</div></div>`;
-    detailHtml += `<div class="result-box"><div class="rlabel">Total Price</div><div class="rvalue" style="color:var(--purple)">${item.rtMin > 0 ? fmt(item.rtMin) : '—'}</div></div>`;
+    const wsCell = isContactItem(item) ? contactLabel(item) : (ws > 0 ? fmt(ws) : '—');
+    const rtCell = isContactItem(item) ? (item.rtFrom ? 'From ' + fmt(item.rtFrom) : contactLabel(item)) : (rt > 0 ? fmt(rt) : '—');
+    detailHtml += `<div class="result-box"><div class="rlabel">Wholesale Price</div><div class="rvalue">${wsCell}</div></div>`;
+    detailHtml += `<div class="result-box"><div class="rlabel">Total Price</div><div class="rvalue" style="color:var(--purple)">${rtCell}</div></div>`;
     detailHtml += `</div>`;
   }
 
@@ -1354,21 +1353,27 @@ function getOfferTierItems(tierKey){
 function getOfferTierPreview(tierKey){
   const tier = OFFER_TIERS[tierKey];
   const items = getOfferTierItems(tierKey);
-  let wsSetup = 0, rtSum = 0, maintHrs = 0, hasContactUs = false;
+  // Setup totals use wsMin / rtMin (matches row displays). Monthly retainer rolled up separately.
+  let wsSetup = 0, rtSum = 0, maintHrs = 0, monthlyRt = 0, hasContactUs = false;
   items.forEach(e => {
-    wsSetup += getWholesale(e.item);
-    rtSum += getRetail(e.item);
+    if(!isContactItem(e.item)){
+      wsSetup += (e.item.wsMin || 0);
+      rtSum += (e.item.rtMin || 0);
+    } else {
+      hasContactUs = true;
+    }
     maintHrs += getMaintHrs(e.item);
-    if(isContactItem(e.item)) hasContactUs = true;
+    monthlyRt += getMonthlyPrice(e.item);
   });
   const n = items.length;
   const ds = tier ? (tier.discount || 0) : 0;
   const rtBeforeDiscount = rtSum;
   const finalRtSetup = ds > 0 ? Math.round(rtSum * (1 - ds)) : rtSum;
+  const finalWsSetup = ds > 0 ? Math.round(wsSetup * (1 - ds)) : wsSetup;
   const dsSavingsSetup = rtBeforeDiscount - finalRtSetup;
   const finalMaintHrs = tier && tier.fixedMaintHrs != null ? tier.fixedMaintHrs : maintHrs;
-  const mgn = finalRtSetup > 0 ? marginPct(finalRtSetup, wsSetup) : 0;
-  return { n, wsSetup, rtSetup: finalRtSetup, rtBeforeDiscount, maintHrs: finalMaintHrs, dsSavingsSetup, mgn, ds, hasContactUs };
+  const mgn = finalRtSetup > 0 ? marginPct(finalRtSetup, finalWsSetup) : 0;
+  return { n, wsSetup: finalWsSetup, rtSetup: finalRtSetup, rtBeforeDiscount, maintHrs: finalMaintHrs, monthlyRt, dsSavingsSetup, mgn, ds, hasContactUs };
 }
 
 function buildTab4(){
@@ -1404,6 +1409,7 @@ function buildTab4(){
         ${preview.ds > 0 ? `<div class="price-row"><span class="plabel" style="color:var(--green)">${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}% bundle discount</span><span class="pval" style="color:var(--green);font-size:.8rem">Save ${fmt(preview.dsSavingsSetup)}</span></div>` : ''}
         ${preview.hasContactUs ? `<div class="price-row"><span class="plabel" style="font-size:.65rem;color:var(--text-dim)">Includes custom-scope items</span><span class="pval" style="font-size:.65rem;color:var(--accent-dark)">+ Contact Us</span></div>` : ''}
         <div class="price-row"><span class="plabel">Est. Dev Hours</span><span class="pval">${preview.maintHrs} hrs/mo</span></div>
+        <div class="price-row"><span class="plabel">Monthly Retainer</span><span class="pval gold" id="offer-mo-${tierKey}">${preview.monthlyRt > 0 ? fmt(preview.monthlyRt) + '/mo' : '—'}</span></div>
         <div class="price-row"><span class="plabel" style="font-size:.72rem">Wholesale Price</span><span class="pval" style="font-size:.78rem" id="offer-ws-${tierKey}">${fmt(preview.wsSetup)}</span></div>
       </div>
       ${tierItems.length > 0 ? itemListHtml : ''}
@@ -1445,10 +1451,10 @@ function buildTab4(){
       lastCat = e.catName;
       itemsHtml += `<div style="font-size:.72rem;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.6px;padding:10px 0 4px;border-bottom:1px solid var(--border);margin-top:${i > 0 ? '10px' : '0'}">${e.catName}</div>`;
     }
-    const ws = getWholesale(e.item);
-    const rt = getRetail(e.item);
-    const mh = getMaintHrs(e.item);
     const isCu = isContactItem(e.item);
+    const ws = isCu ? 0 : (e.item.wsMin || 0);
+    const rt = isCu ? 0 : (e.item.rtMin || 0);
+    const mh = getMaintHrs(e.item);
     const rtDisplay = isCu ? (e.item.rtFrom ? 'From ' + fmt(e.item.rtFrom) : contactLabel(e.item)) : (rt > 0 ? fmt(rt) : '—');
     itemsHtml += `
     <div class="ins-item">
@@ -1469,6 +1475,7 @@ function buildTab4(){
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;padding:14px;background:var(--bg);border-radius:var(--radius)">
           <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Total Price</div><div style="font-size:1.1rem;font-weight:700;color:var(--purple)">${fmt(preview.rtSetup)}${preview.hasContactUs ? '+' : ''}</div>${preview.dsSavingsSetup > 0 ? `<div style="font-size:.65rem;color:var(--green);margin-top:2px">${tier.name} Discount (${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}%): -${fmt(preview.dsSavingsSetup)}</div>` : ''}</div>
           <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Est. Dev Hours</div><div style="font-size:1.1rem;font-weight:700;color:var(--text)">${preview.maintHrs} hrs/mo</div><div style="font-size:.68rem;color:var(--purple);cursor:pointer;text-decoration:underline;margin-top:2px" onclick="document.querySelector('[data-tab=\\'tab3\\']').click()">See Dev Packages</div></div>
+          <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Monthly Retainer</div><div style="font-size:1.1rem;font-weight:700;color:var(--purple)">${preview.monthlyRt > 0 ? fmt(preview.monthlyRt) + '/mo' : '—'}</div></div>
           <div style="text-align:center"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:4px">Wholesale Price</div><div style="font-size:1rem;font-weight:700;color:var(--text)">${fmt(preview.wsSetup)}</div></div>
         </div>
       </div>
@@ -1488,8 +1495,10 @@ function renderTab4(){
     const p = getOfferTierPreview(tk);
     const wsEl = document.getElementById('offer-ws-'+tk);
     const rtEl = document.getElementById('offer-rt-'+tk);
+    const moEl = document.getElementById('offer-mo-'+tk);
     if(wsEl) wsEl.textContent = fmt(p.wsSetup);
     if(rtEl) rtEl.textContent = fmt(p.rtSetup) + (p.hasContactUs ? '+' : '');
+    if(moEl) moEl.textContent = p.monthlyRt > 0 ? fmt(p.monthlyRt) + '/mo' : '—';
   });
 
   if(!selectedOfferTier){
@@ -1538,6 +1547,7 @@ function renderTab4(){
     <div class="summary-item"><div class="label">Total Price</div><div class="value gold">${fmt(preview.rtSetup)}${preview.hasContactUs ? '+' : ''}</div></div>
     ${preview.dsSavingsSetup > 0 ? `<div class="summary-item"><div class="label">${tierConfig.name} Discount (${(preview.ds*100).toFixed(preview.ds*100 % 1 === 0 ? 0 : 1)}%)</div><div class="value green">-${fmt(preview.dsSavingsSetup)}</div></div>` : ''}
     <div class="summary-item"><div class="label">Est. Dev Hours</div><div class="value">${preview.maintHrs} hrs/mo</div></div>
+    <div class="summary-item"><div class="label">Monthly Retainer</div><div class="value gold">${preview.monthlyRt > 0 ? fmt(preview.monthlyRt) + '/mo' : '—'}</div></div>
   `;
 
   const recEl = document.getElementById('t4-pkg-rec');
