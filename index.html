@@ -338,10 +338,8 @@ input[type="number"]::-webkit-inner-spin-button{opacity:.5}
 <div class="card sales-only">
   <h3>Pricing Setup</h3>
   <div class="input-grid">
-    <div class="field">
-      <label>Bundle Discount %</label>
-      <input type="number" id="cfg-ds" value="15" step="1" min="0" max="50">
-      <span class="hint">Discount applied when 3+ services are bundled together</span>
+    <div class="field" style="display:none">
+      <input type="hidden" id="cfg-ds" value="15">
     </div>
     <div class="field">
       <label>Dev Rate ($/hr)</label>
@@ -1160,9 +1158,9 @@ function renderTab2(){
     totalMaintHrs += getMaintHrs(item);
   });
 
-  // Bundle discount (applies at 3+ items)
-  const dsApplies = n >= 3;
-  const ds = dsApplies ? CFG.ds : 0;
+  // Bundle discount — tiered: 5% at 3+, 7.5% at 6+, 10% at 9+
+  const ds = n >= 9 ? 0.10 : n >= 6 ? 0.075 : n >= 3 ? 0.05 : 0;
+  const dsApplies = ds > 0;
   const dsSavingsSetup = Math.round(totalRtSetup * ds);
   const dsSavingsWsSetup = Math.round(totalWsSetup * ds);
 
@@ -1186,10 +1184,11 @@ function renderTab2(){
   if(breakdownEl){
     if(dsApplies && ds > 0){
       breakdownEl.style.display = 'block';
+      const dsPct = (ds*100).toFixed(ds*100 % 1 === 0 ? 0 : 1);
       breakdownEl.innerHTML = `
         <div style="background:rgba(30,138,80,.04);border:1px solid rgba(30,138,80,.15);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:10px">
-          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--green);font-weight:600;margin-bottom:6px">Bundle Discount (${Math.round(ds*100)}%)</div>
-          <div style="font-size:.82rem;color:var(--text);line-height:1.6">Bundling ${n} services together qualifies for a ${Math.round(ds*100)}% discount on the combined price.</div>
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--green);font-weight:600;margin-bottom:6px">Bundle Discount (${dsPct}%)</div>
+          <div style="font-size:.82rem;color:var(--text);line-height:1.6">Bundling ${n} services together qualifies for a ${dsPct}% discount. Tiers: 5% at 3+, 7.5% at 6+, 10% at 9+.</div>
           <div style="display:flex;gap:16px;margin-top:8px">
             <div><span style="font-size:.95rem;font-weight:700;color:var(--green)">${fmt(dsSavingsSetup)}</span> <span style="font-size:.68rem;color:var(--text-dim)">saved</span></div>
           </div>
