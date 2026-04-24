@@ -1093,11 +1093,15 @@ function buildTab2Table(){
       const descHtml = item.desc ? `<div style="font-size:.68rem;color:var(--text-dim);margin-top:2px;line-height:1.4;font-weight:300">${item.desc}</div>` : '';
       const mh = getMaintHrs(item);
 
-      // Wholesale display (setup only)
-      const wsDisplay = fmtWsRange(item);
+      // Wholesale display — setup only (no monthly fallback so row matches summary sum)
+      const wsDisplay = isContactItem(item)
+        ? contactLabel(item)
+        : (getWholesale(item) > 0 ? fmt(getWholesale(item)) : '—');
 
-      // Retail display (setup only)
-      const rtDisplay = fmtRtRange(item);
+      // Retail display — setup only (no monthly fallback so row matches summary sum)
+      const rtDisplay = isContactItem(item)
+        ? (item.rtFrom ? 'From ' + fmt(item.rtFrom) : contactLabel(item))
+        : (item.rtMin > 0 ? fmt(item.rtMin) : '—');
 
       // Monthly hrs — locked categories show — (no dev hours); others show adjustable input
       const monthlyHrsCell = lockMaintHrs
@@ -1150,11 +1154,12 @@ function renderTab2(){
 
   const n = selected.length;
 
-  // Sum wholesale and retail totals
+  // Sum wholesale and retail totals — use the same values the rows display
+  // (getWholesale returns rtMin fallback, and we display rtMin for retail total)
   let totalWsSetup = 0, totalRtSetup = 0, totalMaintHrs = 0, totalMonthlyRt = 0;
   selected.forEach(item => {
     totalWsSetup += getWholesale(item);
-    totalRtSetup += getRetail(item);
+    totalRtSetup += (isContactItem(item) ? 0 : (item.rtMin || 0));
     totalMaintHrs += getMaintHrs(item);
     totalMonthlyRt += getMonthlyPrice(item);
   });
